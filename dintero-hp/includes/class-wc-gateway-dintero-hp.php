@@ -42,8 +42,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 		$this->client_id             = $this->test_mode ? $this->get_option( 'test_client_id' ) : $this->get_option( 'production_client_id' );
 		$this->client_secret         = $this->test_mode ? $this->get_option( 'test_client_secret' ) : $this->get_option( 'production_client_secret' );
 		$this->profile_id            = $this->test_mode ? $this->get_option( 'test_profile_id' ) : $this->get_option( 'production_profile_id' );
-		$this->api_endpoint          = 'https://test.dintero.com/v1';
-		$this->checkout_endpoint     = 'https://checkout.test.dintero.com/v1';
+		$this->api_endpoint          = 'https://api.dintero.com/v1';
+		$this->checkout_endpoint     = 'https://checkout.dintero.com/v1';
 		$environment_character       = $this->test_mode ? 'T' : 'P';
 		$this->oid                   = $environment_character . $this->get_option( 'account_id' );
 
