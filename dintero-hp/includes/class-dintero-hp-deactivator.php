@@ -17,18 +17,18 @@
  */
 class Dintero_HP_Deactivator {
 
-	/**
-	 * Deactivate plugin.
-	 */
-	public static function deactivate() {
-		if ( ! current_user_can( 'activate_plugins' ) ) {
-			return;
-		}
-		// Unregister plugin settings on deactivation.
-		unregister_setting(
-			'dintero_hp',
-			'dintero_hp_option'
-		);
-	}
+    /**
+     * Deactivate plugin.
+     */
+    public static function deactivate() {
+        if ( ! current_user_can( 'activate_plugins' ) ) {
+            return;
+        }
+        // Unregister plugin settings on deactivation.
+        unregister_setting(
+            'dintero_hp',
+            'dintero_hp_option'
+        );
+    }
 
 }
