@@ -1,6 +1,6 @@
 # Dintero.Checkout.WooCommerce
 
-Testet with WooCommerce 3.6 & 3.7
+Tested with WooCommerce 3.6 & 3.7
 
 ## What can you do from WooCommerce
 
