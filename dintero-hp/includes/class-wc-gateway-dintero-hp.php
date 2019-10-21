@@ -60,8 +60,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			add_action( 'woocommerce_thankyou', array( $this, 'callback' ), 1, 1 );
 		}
 
-		add_action( 'woocommerce_order_status_on-hold_to_processing', array( $this, 'capture_check' ) );
-		add_action( 'woocommerce_order_status_on-hold_to_completed', array( $this, 'capture_check' ) );
+		add_action( 'woocommerce_order_status_on-hold_to_processing', array( $this, 'check' ) );
+		add_action( 'woocommerce_order_status_on-hold_to_completed', array( $this, 'check' ) );
 
 		add_action( 'woocommerce_order_status_on-hold_to_cancelled', array( $this, 'cancel' ) );
 		add_action( 'woocommerce_order_status_on-hold_to_failed', array( $this, 'cancel' ) );
@@ -514,7 +514,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 * @param  int  $order_id  Order ID.
 	 */
 	public function cancel( $order_id ) {
-
 		$order = wc_get_order( $order_id );
 		if ( ! empty( $order ) AND
 		     $order instanceof WC_Order AND
@@ -659,13 +658,12 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 *
 	 * @param  int  $order_id  Order ID.
 	 */
-	public function capture_check( $order_id ) {
+	public function check( $order_id ) {
 		$order = wc_get_order( $order_id );
 		if ( ! empty( $order ) AND
 		     $order instanceof WC_Order AND
 		     $order->get_transaction_id() AND
 		     'dintero-hp' === $order->get_payment_method() ) {
-
 
 			$transaction_id = $order->get_transaction_id();
 			$transaction    = $this->get_transaction( $transaction_id );
@@ -713,6 +711,34 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 						'id'          => 'item_' . $counter,
 						'description' => $order_item->get_name(),
 						'quantity'    => $order_item->get_quantity(),
+						'amount'      => $item_amount,
+						'line_id'     => $line_id
+					);
+					array_push( $items, $item );
+				}
+
+				if ( $order->get_shipping_total() > 0 ) {
+					$counter ++;
+					$line_id     = strval( $counter );
+					$item_amount = intval( floatval( $order->get_shipping_total() ) * 100 );
+					$item        = array(
+						'id'          => 'item_' . $counter,
+						'description' => 'Shipping',
+						'quantity'    => 1,
+						'amount'      => $item_amount,
+						'line_id'     => $line_id
+					);
+					array_push( $items, $item );
+				}
+
+				if ( $order->get_total_tax() > 0 ) {
+					$counter ++;
+					$line_id     = strval( $counter );
+					$item_amount = intval( floatval( $order->get_total_tax() ) * 100 );
+					$item        = array(
+						'id'          => 'item_' . $counter,
+						'description' => 'Tax',
+						'quantity'    => 1,
 						'amount'      => $item_amount,
 						'line_id'     => $line_id
 					);
