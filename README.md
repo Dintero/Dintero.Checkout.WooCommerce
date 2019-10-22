@@ -10,6 +10,6 @@ Tested with WooCommerce 3.6 & 3.7
 
 ## Order status
 
-Authorized --> On Hold
-Captured --> Processing
+- Authorized --> On Hold
+- Captured --> Processing
 
