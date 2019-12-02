@@ -208,8 +208,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'type'        => 'select',
 				'options'     => array(
 				    'wc-processing' => _x( 'Processing', 'Order status' ),
-                    'wc-on-hold'    => _x( 'On hold', 'Order status' ),
-                ),
+                                    'wc-on-hold'    => _x( 'On hold', 'Order status' ),
+                                ),
 				'default'     => 'wc-processing',
 				'description' => __( 'When payment Authorized.' ),
 				'desc_tip'    => true
