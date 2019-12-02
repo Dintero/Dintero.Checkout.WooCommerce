@@ -42,6 +42,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 		$this->client_secret                    = $this->test_mode ? $this->get_option( 'test_client_secret' ) : $this->get_option( 'production_client_secret' );
 		$this->profile_id                       = $this->test_mode ? $this->get_option( 'test_profile_id' ) : $this->get_option( 'production_profile_id' );
 		$this->checkout_logo_width              = $this->get_option( 'checkout_logo_width' ) ? $this->get_option( 'checkout_logo_width' ) : 600;
+		$this->default_order_status             = $this->get_option('default_order_status') ? $this->get_option('default_order_status') : 'wc-processing';
 		$this->manual_capture_status            = str_replace( 'wc-', '',
 			$this->get_option( 'manual_capture_status' ) );
 		$this->additional_manual_capture_status = str_replace( 'wc-', '',
@@ -202,8 +203,23 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'type'        => 'title',
 				'description' => __( 'Payment Capture settings.' )
 			),
+			'default_order_status' => array(
+				'title'       => __( 'Default Order Status' ),
+				'type'        => 'select',
+				'options'     => array(
+				    'wc-processing' => _x( 'Processing', 'Order status' ),
+                    'wc-on-hold'    => _x( 'On hold', 'Order status' ),
+                ),
+				'default'     => 'wc-processing',
+				'description' => __( 'When payment Authorized.' ),
+				'desc_tip'    => true
+			),
+			'manual_capture_settings' => array(
+                'title'       => __( 'Capture order when:' ),
+                'type'        => 'title',
+            ),
 			'manual_capture_status'            => array(
-				'title'       => __( 'Manual Capture Order Status' ),
+				'title'       => __( 'Order status is changed to: ' ),
 				'type'        => 'select',
 				'options'     => wc_get_order_statuses(),
 				'default'     => 'wc-processing',
@@ -211,7 +227,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'desc_tip'    => true
 			),
 			'additional_manual_capture_status' => array(
-				'title'       => __( 'Additional Manual Capture Order Status' ),
+				'title'       => __( 'Order status is changed to (additional): ' ),
 				'type'        => 'select',
 				'options'     => ( array(
 					                   - 1 => '--- Disable Additional Manual Capture Order Status ---'
@@ -220,8 +236,12 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'description' => __( 'Select an additional status which the payment will be manually captured if the order status changed to it.' ),
 				'desc_tip'    => true
 			),
+			'cancel_refund_settings'           => array(
+			    'title'       => __( 'Cancel or refund order when:' ),
+                'type'        => 'title'
+            ),
 			'additional_cancel_status'         => array(
-				'title'       => __( 'Additional Cancellation Order Status' ),
+				'title'       => __( 'Order status is changed to:' ),
 				'type'        => 'select',
 				'options'     => ( array(
 					                   - 1 => '--- Disable Additional Cancellation Order Status ---'
@@ -231,7 +251,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'desc_tip'    => true
 			),
 			'additional_refund_status'         => array(
-				'title'       => __( 'Additional Refund Order Status' ),
+				'title'       => __( 'Order status is changed to (additional): ' ),
 				'type'        => 'select',
 				'options'     => ( array(
 					                   - 1 => '--- Disable Additional Refund Order Status ---'
@@ -578,9 +598,9 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 * @param string $transaction_id Transaction ID.
 	 * @param string $reason Reason why the payment is on hold.
 	 */
-	private function payment_on_hold( $order, $transaction_id = '', $reason = '' ) {
+	private function process_authorization( $order, $transaction_id = '', $reason = '' ) {
 		$order->set_transaction_id( $transaction_id );
-		$order->update_status( 'on-hold', $reason );
+		$order->update_status( $this->get_option('default_order_status'), $reason );
 	}
 
 	/**
@@ -905,7 +925,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 					if ( $transaction['status'] === 'AUTHORIZED' ) {
 
 						$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
-						$this->payment_on_hold( $order, $transaction_id, $hold_reason );
+						$this->process_authorization( $order, $transaction_id, $hold_reason );
 					} elseif ( $transaction['status'] === 'CAPTURED' ) {
 
 						$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
