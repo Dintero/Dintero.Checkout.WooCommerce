@@ -12,7 +12,7 @@ When Authorized, you can choose if the Order status should be "Processing" or "O
 
 Capture orders:
 - Full Capture: Change the order status from "Processing" or "On-hold" --> "Complete". 
-- Partial Capture: Change the order status to "On-hold". Remove the items from list. Change from "On-hold" to "Complete". You cannot add items!
+- Partial Capture: Change the order status to "On-hold", then remove the items you want from list (You cannot add items!) Change from "On-hold" --> "Complete". 
 NB! Please verify in Dintero Backoffice when doing partial capture. 
 
 Cancel orders:
