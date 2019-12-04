@@ -207,17 +207,17 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'title'       => __( 'Default Order Status' ),
 				'type'        => 'select',
 				'options'     => array(
-				    'wc-processing' => _x( 'Processing', 'Order status' ),
-                                    'wc-on-hold'    => _x( 'On hold', 'Order status' ),
-                                ),
+					'wc-processing' => _x( 'Processing', 'Order status' ),
+					'wc-on-hold'    => _x( 'On hold', 'Order status' ),
+				),
 				'default'     => 'wc-processing',
 				'description' => __( 'When payment Authorized.' ),
 				'desc_tip'    => true
 			),
 			'manual_capture_settings' => array(
-                'title'       => __( 'Capture order when:' ),
-                'type'        => 'title',
-            ),
+				'title'       => __( 'Capture order when:' ),
+				'type'        => 'title',
+			),
 			'manual_capture_status'            => array(
 				'title'       => __( 'Order status is changed to: ' ),
 				'type'        => 'select',
@@ -237,9 +237,9 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'desc_tip'    => true
 			),
 			'cancel_refund_settings'           => array(
-			    'title'       => __( 'Cancel or refund order when:' ),
-                'type'        => 'title'
-            ),
+				'title'       => __( 'Cancel or refund order when:' ),
+				'type'        => 'title'
+			),
 			'additional_cancel_status'         => array(
 				'title'       => __( 'Order status is changed to:' ),
 				'type'        => 'select',
