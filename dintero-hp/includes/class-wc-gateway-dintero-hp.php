@@ -222,7 +222,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'title'       => __( 'Order status is changed to: ' ),
 				'type'        => 'select',
 				'options'     => wc_get_order_statuses(),
-				'default'     => 'wc-processing',
+				'default'     => 'wc-completed',
 				'description' => __( 'Select a status which the payment will be manually captured if the order status changed to it.' ),
 				'desc_tip'    => true
 			),
@@ -232,7 +232,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'options'     => ( array(
 					                   - 1 => '--- Disable Additional Manual Capture Order Status ---'
 				                   ) + wc_get_order_statuses() ),
-				'default'     => 'wc-completed',
+				'default'     => -1,
 				'description' => __( 'Select an additional status which the payment will be manually captured if the order status changed to it.' ),
 				'desc_tip'    => true
 			),
