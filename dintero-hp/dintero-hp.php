@@ -1,8 +1,8 @@
 <?php
 /**
-Plugin Name: Dintero Checkout - Hosted Page WooCommerce Payment Gateway
+Plugin Name: Dintero Checkout
 Description: Dintero Checkout - Hosted Page  payment gateway for WooCommerce
-Version:     1.1.0
+Version:     2019.12.04
 Author:      Dintero
 Author URI:  mailto:integration@dintero.com
 Text Domain: dintero-hp
@@ -13,7 +13,7 @@ Domain Path: /languages
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'DINTERO_HP_VERSION', '1.1.0' );
+define( 'DINTERO_HP_VERSION', '2019.12.04' );
 
 /**
  * The code that runs during plugin activation.
