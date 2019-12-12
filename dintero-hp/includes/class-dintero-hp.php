@@ -21,7 +21,8 @@
  * @package    dintero-hp
  * @subpackage dintero-hp/includes
  */
-class Dintero_HP {
+class Dintero_HP
+{
 
     /**
      * The loader that's responsible for maintaining and registering all hooks that power
@@ -65,9 +66,10 @@ class Dintero_HP {
      *
      * @param string $plugin_basename The basename of this plugin.
      */
-    public function __construct( $plugin_basename ) {
+    public function __construct($plugin_basename)
+    {
         $this->plugin_basename = $plugin_basename;
-        if ( defined( 'DINTERO_HP_VERSION' ) ) {
+        if (defined('DINTERO_HP_VERSION')) {
             $this->version = DINTERO_HP_VERSION;
         } else {
             $this->version = '1.0.0';
@@ -91,13 +93,14 @@ class Dintero_HP {
      *
      * @access   private
      */
-    private function load_dependencies() {
+    private function load_dependencies()
+    {
 
         /**
          * The class responsible for orchestrating the actions and filters of the
          * core plugin.
          */
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-dintero-hp-loader.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-dintero-hp-loader.php';
 
         $this->loader = new Dintero_HP_Loader();
     }
@@ -107,18 +110,20 @@ class Dintero_HP {
      *
      * @access   private
      */
-    private function define_hooks() {
-        $this->loader->add_action( 'woocommerce_after_register_post_type', $this, 'init_gateway_class' );
-        $this->loader->add_filter( 'woocommerce_payment_gateways', $this, 'add_payment_gateway_class' );
+    private function define_hooks()
+    {
+        $this->loader->add_action('woocommerce_after_register_post_type', $this, 'init_gateway_class');
+        $this->loader->add_filter('woocommerce_payment_gateways', $this, 'add_payment_gateway_class');
         //Redirect to order cancelled page if response has an error
-        $this->loader->add_action( 'template_redirect', $this, 'check_response', 1 );
+        $this->loader->add_action('template_redirect', $this, 'check_response', 1);
     }
 
 
     /**
      * Run the loader to execute all of the hooks with WordPress.
      */
-    public function run() {
+    public function run()
+    {
         $this->loader->run();
     }
 
@@ -126,11 +131,12 @@ class Dintero_HP {
      * Load the payment gateway class after post types are registered.
      *
      */
-    public function init_gateway_class() {
+    public function init_gateway_class()
+    {
         /**
          * The custom payment gateway class.
          */
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wc-gateway-dintero-hp.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-wc-gateway-dintero-hp.php';
     }
 
     /**
@@ -138,7 +144,8 @@ class Dintero_HP {
      *
      * @return    array     WooCommerce payment methods
      */
-    public function add_payment_gateway_class( $methods ) {
+    public function add_payment_gateway_class($methods)
+    {
         $methods[] = 'WC_Gateway_Dintero_HP';
 
         return $methods;
@@ -150,7 +157,8 @@ class Dintero_HP {
      *
      * @return    string    The name of the plugin.
      */
-    public function get_plugin_name() {
+    public function get_plugin_name()
+    {
         return $this->dintero_hp;
     }
 
@@ -159,7 +167,8 @@ class Dintero_HP {
      *
      * @return    string    The basename of the plugin.
      */
-    public function get_plugin_basename() {
+    public function get_plugin_basename()
+    {
         return $this->plugin_basename;
     }
 
@@ -169,7 +178,8 @@ class Dintero_HP {
      *
      * @return    string    The version number of the plugin.
      */
-    public function get_version() {
+    public function get_version()
+    {
         return $this->version;
     }
 
@@ -177,19 +187,19 @@ class Dintero_HP {
      * Check response on order received page.
      *
      */
-    public function check_response() {
+    public function check_response()
+    {
         global $wp;
-        if ( is_checkout() AND is_wc_endpoint_url( 'order-received' ) ) {
-
+        if (is_checkout() and is_wc_endpoint_url('order-received')) {
             // Get the order ID
-            $order_id = absint( $wp->query_vars['order-received'] );
-            $order    = wc_get_order( $order_id );
+            $order_id = absint($wp->query_vars['order-received']);
+            $order    = wc_get_order($order_id);
 
-            if ( ! empty( $order ) AND $order instanceof WC_Order ) {
-                if ( $order->get_payment_method() === 'dintero-hp' ) {
-                    if ( empty( $_GET['transaction_id'] ) ) {
+            if (! empty($order) and $order instanceof WC_Order) {
+                if ($order->get_payment_method() === 'dintero-hp') {
+                    if (empty($_GET['transaction_id'])) {
                         $order_cancelled_url = $order->get_cancel_order_url_raw();
-                        wp_redirect( $order_cancelled_url );
+                        wp_redirect($order_cancelled_url);
                         exit;
                     } else {
                         WC()->cart->empty_cart();
@@ -198,5 +208,4 @@ class Dintero_HP {
             }
         }
     }
-
 }

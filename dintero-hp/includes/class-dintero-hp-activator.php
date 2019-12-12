@@ -14,21 +14,20 @@
  * @package    dintero-hp
  * @subpackage dintero-hp/includes
  */
-class Dintero_HP_Activator {
+class Dintero_HP_Activator
+{
 
     /**
      * Activate Plugin.
      */
-    public static function activate() {
-        if ( ! current_user_can( 'activate_plugins' ) ) {
+    public static function activate()
+    {
+        if (! current_user_can('activate_plugins')) {
             return;
         }
         $default = [
             //options should be here
         ];
-        update_option( 'dintero_hp_option', $default );
-
+        update_option('dintero_hp_option', $default);
     }
-
-
 }
