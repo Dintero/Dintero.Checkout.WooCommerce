@@ -139,7 +139,7 @@ class Dintero_HP {
      * @return    array     WooCommerce payment methods
      */
     public function add_payment_gateway_class( $methods ) {
-        $methods[] = 'WC_Gateway_Dintero_HP';
+        //$methods[] = 'WC_Gateway_Dintero_HP';
 
         return $methods;
     }

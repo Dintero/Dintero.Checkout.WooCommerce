@@ -15,6 +15,10 @@ defined( 'ABSPATH' ) || exit;
 
 define( 'DINTERO_HP_VERSION', '2019.12.04' );
 
+if ( ! defined( 'DHP_PLUGIN_FILE' ) ) {
+	define( 'DHP_PLUGIN_FILE', __FILE__ );
+}
+
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-dintero-hp-activator.php
@@ -41,6 +45,7 @@ register_deactivation_hook( __FILE__, 'deactivate_dintero_hp' );
  * admin-specific hooks, and public-facing site hooks.
  */
 require plugin_dir_path( __FILE__ ) . 'includes/class-dintero-hp.php';
+require plugin_dir_path( __FILE__ ) . 'includes/class-wc-dintero-hp.php';
 
 /**
  * Begins execution of the plugin.
@@ -55,3 +60,13 @@ function run_dintero_hp() {
     $plugin->run();
 }
 run_dintero_hp();
+
+/**
+ * Get instance of WooCommerce Dintero Plugin
+ */
+function WCDHP() {
+	return WC_Dintero_HP::instance();
+}
+
+// Global for backwards compatibility.
+$GLOBALS['woocommerce-dintero'] = WCDHP();
