@@ -162,6 +162,8 @@ class WC_AJAX_HP {
 				if ( array_key_exists( 'status', $transaction ) AND
 				     array_key_exists( 'amount', $transaction ) AND
 				     $transaction['amount'] === $amount ) {
+
+					WC()->session->set( 'order_awaiting_payment', null );
 					
 					if ( $transaction['status'] === 'AUTHORIZED' ) {
 
@@ -243,15 +245,60 @@ class WC_AJAX_HP {
 					update_post_meta( $order_id, '_billing_email', $email );
 					update_post_meta( $order_id, '_billing_phone', $phone_number );
 
+					$order->calculate_taxes();
+					$order->calculate_totals();
+
+					$items = array();
+
+					$line_id = 0;
+					$counter = 0;
+					$total_amount = 0;
+					foreach ( $order->get_items() as $order_item ) {
+						$counter ++;
+						$line_id                = strval( $counter );
+						$item_total_amount      = absint( strval( floatval( $order_item->get_total() ) * 100 ) );
+						$item_tax_amount        = absint( strval( floatval( $order_item->get_total_tax() ) * 100 ) );
+						$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $order_item,
+								true ) ) * 100 ) );
+						$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
+								2 ) * 100 ) : 0;
+						$item                   = array(
+							'id'          => 'item_' . $counter,
+							'description' => $order_item->get_name(),
+							'quantity'    => $order_item->get_quantity(),
+							'vat_amount'  => $item_tax_amount,
+							'vat'         => $item_tax_percentage,
+							'amount'      => $item_line_total_amount,
+							'line_id'     => $line_id
+						);
+						array_push( $items, $item );
+
+						$total_amount += $item_line_total_amount;
+					}
+							
+					if ( count( $order->get_shipping_methods() ) > 0 ) {
+						$counter ++;
+						$line_id                = strval( $counter );
+					}
+
+					$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
+					$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
+
+					$item_line_total_amount = $item_total_amount + $item_tax_amount;
+					$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
+					$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
+						2 ) * 100 ) : 0;
+
 					$shipping_options = array(
 									0=>array(
 											"id"=>"shipping_express",
-											"line_id"=>"2",
-											"countries"=>array($country),
-											"amount"=>0,
-											"vat_amount"=>0,
-											"vat"=>0,
-											"title"=>'Shipping: Flat rate',
+											"line_id"=>$line_id,
+											//"countries"=>array($country),
+											"country"=>$order->get_shipping_country(),
+											"amount"=>$item_line_total_amount,
+											"vat_amount"=>$item_tax_amount,
+											"vat"=>$item_tax_percentage,
+											"title"=>'Shipping: '.$order->get_shipping_method(),
 											"description"=>"",
 											"delivery_method"=>"delivery",
 											"operator"=>"",
@@ -266,33 +313,32 @@ class WC_AJAX_HP {
 														"ends_at"=>""
 													)
 												),
+											/*
 											"time_slot"=>array(
 													"starts_at"=>"",
 													"ends_at"=>""
 												),
 											"pick_up_address"=>array(
-													"first_name"=>$first_name,
-													"last_name"=>$last_name,
-													"address_line"=>$addr1,
-													"address_line_2"=>$addr2,
+													"first_name"=>$order->get_shipping_first_name(),
+													"last_name"=>$order->get_shipping_last_name(),
+													"address_line"=>$order->get_shipping_address_1(),
+													"address_line_2"=>$order->get_shipping_address_2(),
 													"co_address"=>"",
-													"business_name"=>$company,
-													"postal_code"=>$postal,
-													"postal_place"=>$state,
-													"country"=>$country,
-													"phone_number"=>$phone_number,
-													"email"=>$email,
+													"business_name"=>"",
+													"postal_code"=>$order->get_shipping_postcode(),
+													"postal_place"=>$order->get_shipping_city(),
+													"country"=>$order->get_shipping_country(),
+													"phone_number"=>$order->get_billing_phone(),
+													"email"=>$order->get_billing_email(),
 													"latitude"=>0,
 													"longitude"=>0,
 													"comment"=>""
 													//"distance"=>0
-												)
+												)*/
 										)
 								);
 
 					$shipping_arr = array("shipping_options"=>$shipping_options);
-
-					$text = json_encode($shipping_arr, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 					wp_send_json($shipping_arr);
 				}else{

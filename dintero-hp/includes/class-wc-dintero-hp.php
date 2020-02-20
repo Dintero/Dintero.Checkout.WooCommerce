@@ -67,6 +67,9 @@ final class WC_Dintero_HP {
         add_action( 'woocommerce_cancelled_order', array( $this, 'cancel_order' ) );
         add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
         add_action( 'wp_footer', array( $this, 'init_footer') );
+
+        add_action( 'woocommerce_applied_coupon', array( $this, 'applied_coupon' ), 10, 3 ); 
+        add_action( 'woocommerce_removed_coupon', array( $this, 'removed_coupon' ), 10, 3 ); 
     }
 
     private function define( $name, $value ) {
@@ -164,4 +167,40 @@ final class WC_Dintero_HP {
 	public function setting() {
 		return WC_Dintero_HP_Setting::instance();
 	}
+
+	public function applied_coupon() {
+		$order_id = WC()->session->get( 'order_awaiting_payment' );
+
+		$order = wc_get_order( $order_id );
+		if ( ! empty( $order ) AND $order instanceof WC_Order ) {
+			$used_coupons = $order->get_used_coupons();
+	    
+			$coupons = WC()->cart->get_coupons();
+
+			foreach($coupons as $coupon_code=>$cdata){
+				if(!in_array($coupon_code, $used_coupons)){
+					$order->apply_coupon($coupon_code);
+				}
+			}
+			$order->calculate_totals();
+		}
+	}
+
+	public function removed_coupon() {
+		$order_id = WC()->session->get( 'order_awaiting_payment' );
+		$order = wc_get_order( $order_id );
+		if ( ! empty( $order ) AND $order instanceof WC_Order ) {
+			$used_coupons = $order->get_used_coupons();
+
+			$coupons = WC()->cart->get_coupons();
+
+			foreach($used_coupons as $coupon_code){
+				if(!isset($coupons[$coupon_code])){
+					//remove
+					$order->remove_coupon($coupon_code);
+				}
+			}
+			$order->calculate_totals();
+		}		
+	}	
 }

@@ -110,6 +110,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	}
 
 	public function init_checkout(){
+		WC()->session->set( 'order_awaiting_payment', null );
+
 		//check if parameters are ready
 		if($this->account_id && $this->client_id && $this->client_secret){
 	    	$embed_enable = WCDHP()->setting()->get('embed_enable');
@@ -181,6 +183,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
     }
 
     public function init_pay(){
+    	WC()->session->set( 'order_awaiting_payment', null );
+
 		//check if parameters are ready
 		if($this->account_id && $this->client_id && $this->client_secret){
 	    	$embed_enable = WCDHP()->setting()->get('embed_enable');
@@ -257,6 +261,24 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 			$posted_data['payment_method'] = $this->payment_method;
 
+			$shipping_methods = WC()->shipping->get_shipping_methods();
+
+			$br = false;
+			foreach($shipping_methods as $shipping_method){				     
+		       foreach($shipping_method->rates as $key=>$val){		 
+		            $posted_data['shipping_method'] = array($key);
+		            $br = true;
+		            break;
+		       }
+
+		       if($br) break;
+			}
+
+			$user_id = get_current_user_id();
+
+			$posted_data['billing_country'] = WC()->customer->get_billing_country();
+			$posted_data['shipping_country'] = WC()->customer->get_shipping_country();
+
 			// Update session for customer and totals.
 			$this->update_session( $posted_data );
 
@@ -283,6 +305,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				}
 
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
+
+				WC()->session->set( 'order_awaiting_payment', $order_id );
 
 				$this->process_payment_embed( $order_id, $express );
 			}
@@ -581,7 +605,15 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$order->set_total( WC()->cart->get_total( 'edit' ) );
 			$this->create_order_line_items( $order, WC()->cart );
 			$this->create_order_fee_lines( $order, WC()->cart );
-			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
+
+			$shipping_method = WC()->session->get( 'chosen_shipping_methods' );
+			if(!is_array($shipping_method)){				
+				if(isset($data['shipping_method']) && is_array($data['shipping_method'])){
+					$shipping_method = $data['shipping_method'];
+				}
+			}
+
+			$this->create_order_shipping_lines( $order, $shipping_method, WC()->shipping()->get_packages() );
 			$this->create_order_tax_lines( $order, WC()->cart );
 			$this->create_order_coupon_lines( $order, WC()->cart );
 
@@ -754,16 +786,46 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				$this->insertPaymentTypeFlag($express);
 				echo("<div id=\"dintero-checkout-iframe\"></div>");
 				echo("</div>");
-				echo("<script src=\"https://unpkg.com/@dintero/checkout-web-sdk@0.0.11/dist/checkout-web-sdk.umd.js\"></script>");
+				echo("<script src=\"https://assets.dintero.com/js/checkout-web-sdk@0.0.11/dist/checkout-web-sdk.umd.js\"></script>");
 				echo("<script type=\"text/javascript\">
 					    const container = document.getElementById(\"dintero-checkout-iframe\");
-					    dintero
+					    if(typeof(dintero) != \"undefined\"){
+					    	dintero
 					        .embed({
 					            container,
 					            sid: \"".$id."\",
+					            onSession: function(event, checkout) {
+					                //console.log(\"session\", event.session);
+					                var ss = event.session;
+					                if(typeof(ss.order) != 'undefined' && typeof(ss.order.shipping_address) != 'undefined' && typeof(ss.order.shipping_address.country) != 'undefined'){
+										var a = jQuery('#ship-to-different-address-checkbox').is(':checked');
+										var bc = document.getElementById(\"billing_country\");
+										var sc = document.getElementById(\"shipping_country\");
+
+										if(a){
+											if(sc){
+								        		sc.value = ss.order.shipping_address.country;
+								        		sc.dispatchEvent(new Event(\"change\"));
+												jQuery('body').trigger('update_checkout' );
+											}
+										}else{
+							        		if(bc){
+								        		bc.value = ss.order.shipping_address.country;
+								        		bc.dispatchEvent(new Event(\"change\"));
+												jQuery('body').trigger('update_checkout' );
+											}
+
+							        	}
+					                }
+					            }
 					        });
+						}
 					</script>");
+			}else{
+				echo("Error! ".$msg);
 			}
+		}else{
+			echo("Test: invalid order");
 		}
 	}
 
@@ -876,16 +938,18 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				$shipping_option = array(
 						"id"				=> "shipping",
 						"line_id"			=> $line_id,
-						"countries"			=> array($order->get_shipping_country()),
+						//"countries"			=> array($order->get_shipping_country()),
+						"country"			=> $order->get_shipping_country(),
 						"amount"			=> $item_line_total_amount,
 						"vat_amount"		=> $item_tax_amount,
 						"vat"				=> $item_tax_percentage,
 						"title"				=> 'Shipping: ' . $order->get_shipping_method(),
 						"description"		=> "",
-						"delivery_method"	=> "delivery",
+						"delivery_method"	=> "delivery",						
 						"operator"			=> "",
 						"operator_product_id" => "",
 						"eta"				=> array(),
+						/*
 						"time_slot"			=> array(),
 						"pick_up_address"	=> array(
 								"first_name"=>$order->get_shipping_first_name(),
@@ -903,7 +967,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 								"longitude"=>0,
 								"comment"=>"",
 								"distance"=>0
-							)
+							)*/
 					);
 
 				if($express){
@@ -915,7 +979,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 								0=>array(
 										"id"=>"shipping_express",
 										"line_id"=>$line_id,
-										"countries"=>array($order->get_shipping_country()),
+										//"countries"=>array($order->get_shipping_country()),
+										"country"=>$order->get_shipping_country(),
 										"amount"=>$item_line_total_amount,
 										"vat_amount"=>$item_tax_amount,
 										"vat"=>$item_tax_percentage,
@@ -934,6 +999,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 													"ends_at"=>""
 												)
 											),
+										/*
 										"time_slot"=>array(
 												"starts_at"=>"2020-10-14T19:00:00Z",
 												"ends_at"=>"2020-10-14T20:00:00Z"
@@ -954,7 +1020,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 												"longitude"=>0,
 												"comment"=>""
 												//"distance"=>0
-											)
+											)*/
 									)
 							)
 					);
@@ -1100,7 +1166,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	public function cancel( $order_id ) {
 		$order = wc_get_order( $order_id );
 		if ( ! empty( $order ) AND
-		     //$order instanceof WC_Order AND
+		     $order instanceof WC_Order AND
 		     $order->get_transaction_id() AND
 		     'dintero-hp' === $order->get_payment_method() ) {
 
@@ -1160,7 +1226,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );
 		if ( ! empty( $order ) AND
-		     //$order instanceof WC_Order AND
+		     $order instanceof WC_Order AND
 		     $order->get_transaction_id() AND
 		     'dintero-hp' === $order->get_payment_method() ) {
 
@@ -1246,7 +1312,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	private function check_capture( $order_id ) {
 		$order = wc_get_order( $order_id );
 		if ( ! empty( $order ) AND
-		     //$order instanceof WC_Order AND
+		     $order instanceof WC_Order AND
 		     $order->get_transaction_id() AND
 		     'dintero-hp' === $order->get_payment_method() ) {
 
@@ -1267,7 +1333,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	 */
 	public function capture( $order, $transaction = null ) {
 		if ( ! empty( $order ) AND
-		     //$order instanceof WC_Order AND
+		     $order instanceof WC_Order AND
 		     $order->get_transaction_id() ) {
 
 			$order_id = $order->get_id();
@@ -1477,3 +1543,4 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		}
 	}
 }
+?>
