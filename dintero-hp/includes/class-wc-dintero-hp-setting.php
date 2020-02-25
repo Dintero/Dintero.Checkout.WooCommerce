@@ -8,7 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-include_once ABSPATH .'wp-content/plugins/woocommerce/includes/abstracts/abstract-wc-settings-api.php';
+require_once WP_PLUGIN_DIR .'/woocommerce/includes/abstracts/abstract-wc-settings-api.php';
 
 class WC_Dintero_HP_Setting extends WC_Settings_API {
 

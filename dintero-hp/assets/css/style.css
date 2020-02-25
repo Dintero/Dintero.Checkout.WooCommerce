@@ -11,6 +11,10 @@
 	margin-top: 100px;
 }
 
+#payment.woocommerce-checkout-payment {
+	display: none;
+}
+
 .dhp_container>label {
 	position: absolute;
 	top: -12px;

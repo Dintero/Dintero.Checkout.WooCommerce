@@ -220,23 +220,23 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 				'desc_tip'    => true,
 			),
 			'express_settings'                => array(
-				'title'       => __( 'Express Checkout' ),
+				'title'       => __( 'Checkout Express' ),
 				'type'        => 'title',
 				'description' => __( '' )
 			),
 			'express_enable'                        => array(
 				'title'       => __( 'Enable:' ),
-				'label'       => __( 'Enable Express Checkout' ),
+				'label'       => __( 'Enable Checkout Express' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Enable or disable Dintero Express Checkout on Checkout page' ),
+				'description' => __( 'Enable or disable Dintero Checkout Express on Checkout page' ),
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
 			'express_rewards'                        => array(
 				'title'       => __( 'Enable Rewards:' ),
-				'label'       => __( 'Enable Express Checkout Rewards' ),
+				'label'       => __( 'Enable Checkout Express Rewards' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Enable or disable Dintero Express Checkout Rewards' ),
+				'description' => __( 'Enable or disable Dintero Checkout Express Rewards' ),
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),

@@ -8,7 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-include_once ABSPATH .'wp-content/plugins/woocommerce/includes/class-wc-checkout.php';
+require_once WP_PLUGIN_DIR .'/woocommerce/includes/class-wc-checkout.php';
 
 class WC_Dintero_HP_Checkout extends WC_Checkout {
 
@@ -282,7 +282,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			// Update session for customer and totals.
 			$this->update_session( $posted_data );
 
-			if(!$express){
+			if(false && !$express){
 				// Validate posted data and cart items before proceeding.
 				$this->validate_checkout_hp( $posted_data, $errors );
 
@@ -788,6 +788,10 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				echo("</div>");
 				echo("<script src=\"https://assets.dintero.com/js/checkout-web-sdk@0.0.11/dist/checkout-web-sdk.umd.js\"></script>");
 				echo("<script type=\"text/javascript\">
+						var emb = document.getElementById('dhp-embed');
+						var order_review = document.getElementById('order_review');
+						order_review.appendChild(emb);
+
 					    const container = document.getElementById(\"dintero-checkout-iframe\");
 					    if(typeof(dintero) != \"undefined\"){
 					    	dintero
