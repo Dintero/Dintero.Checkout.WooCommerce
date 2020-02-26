@@ -160,7 +160,6 @@ jQuery( function( $ ) {
 						data:		$form.serialize(),
 						dataType:   'json',
 						success:	function( result ) {
-							console.log(result);
 							dhpCheckout.$checkout_form.removeClass( 'processing' ).unblock();
 							try {
 								if ( 'success' === result.result ) {

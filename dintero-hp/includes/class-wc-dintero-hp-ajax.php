@@ -350,6 +350,7 @@ class WC_AJAX_HP {
 		}else{
 			echo("Invalid post back format");
 		}
+		exit();
 	}
 
 	public static function dhp_update_ship2(){

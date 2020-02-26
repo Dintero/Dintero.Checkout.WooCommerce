@@ -123,7 +123,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	    			$this->start_embed(true);
 	    		}else{
 					$this->insertPaymentTypeFlag(true);
-			    	echo("<div class=\"dhp_container\">");
+			    	echo("<div id=\"dhp_container\" class=\"dhp_container\">");
 			    		echo("<label>Dintero Checkout</label>");
 			    		
 			    		$icon = WCDHP()->checkout()->get_icon_checkout();
@@ -137,14 +137,15 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				            echo("</div>");
 				        echo("</div>");
 			        echo("</div>");
+			        $this->writeContainerScript();
 			    }
 
 	    	}else{ //normal payment
-	    		if($embed_enable == 'yes'){
+	    		if(false && $embed_enable == 'yes'){
 	    			$this->start_embed();
 	    		}else{
 	    			$this->insertPaymentTypeFlag(false);
-			    	echo("<div class=\"dhp_container\">");
+			    	echo("<div id=\"dhp_container\" class=\"dhp_container\">");
 			    		echo("<label>Dintero Checkout</label>");
 			    		
 			    		$icon = WCDHP()->checkout()->get_icon_checkout();
@@ -158,6 +159,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				            echo("</div>");
 				        echo("</div>");
 			        echo("</div>");
+			        $this->writeContainerScript();
 			    }
 	    	}	    	
 
@@ -195,7 +197,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	    			$this->start_embed(true);
 	    		}else{
 	    			$this->insertPaymentTypeFlag(true);
-			    	echo("<div class=\"dhp_container\">");
+			    	echo("<div id=\"dhp_container\" class=\"dhp_container\">");
 			    		echo("<label>Dintero Checkout</label>");
 			    		
 			    		$icon = WCDHP()->checkout()->get_icon_checkout();
@@ -209,14 +211,15 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				            echo("</div>");
 				        echo("</div>");
 			        echo("</div>");
+			        $this->writeContainerScript();
 			    }
 
 	    	}else{ //normal payment
-	    		if($embed_enable == 'yes'){
+	    		if(false && $embed_enable == 'yes'){
 	    			$this->start_embed();
 	    		}else{
 	    			$this->insertPaymentTypeFlag(false);
-			    	echo("<div class=\"dhp_container\">");
+			    	echo("<div id=\"dhp_container\" class=\"dhp_container\">");
 			    		echo("<label>Dintero Checkout</label>");
 			    		
 			    		$icon = WCDHP()->checkout()->get_icon_checkout();
@@ -230,6 +233,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				            echo("</div>");
 				        echo("</div>");
 			        echo("</div>");
+			        $this->writeContainerScript();
 			    }
 	    	}
 
@@ -829,7 +833,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				echo("Error! ".$msg);
 			}
 		}else{
-			echo("Test: invalid order");
+			echo("Invalid order");
 		}
 	}
 
@@ -1545,6 +1549,14 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 			return false;
 		}
+	}
+
+	private function writeContainerScript(){
+		echo("<script type=\"text/javascript\">
+	        	var dhpc = document.getElementById('dhp_container');
+				var order_review = document.getElementById('order_review');
+				order_review.appendChild(dhpc);
+				</script>");
 	}
 }
 ?>
