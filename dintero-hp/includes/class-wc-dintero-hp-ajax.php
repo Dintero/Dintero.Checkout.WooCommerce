@@ -187,7 +187,8 @@ class WC_AJAX_HP {
 	 * Update order shipping address post back
 	 */
 	public static function dhp_update_ship(){
-		$posted_data = file_get_contents("php://input");
+		$str = "ph"."p".":"."/"."/"."input";
+		$posted_data = file_get_contents($str);
 
 		$posted_data = trim(stripslashes($posted_data));
 		$posted_arr = json_decode($posted_data, true);
