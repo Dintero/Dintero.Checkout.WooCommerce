@@ -1,11 +1,8 @@
 <?php
 /**
- * WooCommerce Settings Page/Tab
+ * WooCommerce Dintero HP Settings Page/Tab
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin
- * @version     2.1.0
+ * @package     WDHP/Admin
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -59,7 +56,7 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 			add_action( 'woocommerce_update_options_' . $this->id, array( $this, 'process_admin_options' ) );
 		}
 
-		private function add_scripts(){
+		private function add_scripts() {
 			$suffix       = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 			wp_register_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION );
@@ -135,7 +132,7 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 
 			$sections = $this->get_sections();
 
-			if ( empty( $sections ) || 1 === sizeof( $sections ) ) {
+			if ( empty( $sections ) || 1 === count( $sections ) ) {
 				return;
 			}
 
@@ -144,7 +141,7 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 			$array_keys = array_keys( $sections );
 
 			foreach ( $sections as $id => $label ) {
-				echo '<li><a href="' . admin_url( 'admin.php?page=wc-dintero-settings&tab=' . $this->id . '&section=' . sanitize_title( $id ) ) . '" class="' . ( $current_section == $id ? 'current' : '' ) . '">' . $label . '</a> ' . ( end( $array_keys ) == $id ? '' : '|' ) . ' </li>';
+				echo '<li><a href="' . esc_url( admin_url( 'admin.php?page=wc-dintero-settings&tab=' . $this->id . '&section=' . sanitize_title( $id ) ) . '" class="' . ( $current_section == $id ? 'current' : '' ) . '">' . $label . '</a> ' . ( end( $array_keys ) == $id ? '' : '|' ) ) . ' </li>';
 			}
 
 			echo '</ul><br class="clear" />';
@@ -200,7 +197,12 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 		 * Output the admin options table.
 		 */
 		public function admin_options() {
-			echo '<table class="form-table">' . $this->generate_settings_html( $this->get_form_fields(), false ) . '</table>'; // WPCS: XSS ok.
+			echo( '<table class="form-table">' );
+			$this->generate_settings_html( $this->get_form_fields() );
+			echo( '</table>' );
+
+			$nonce = wp_create_nonce( 'dhp-nonce' );
+			echo( '<input type="hidden" id="_dhp_setting_nonce" name="_dhp_setting_nonce" value="' . esc_attr( $nonce ) . '" />' );
 		}
 
 		/**
@@ -251,27 +253,39 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 		 * @return string
 		 */
 		public function get_field_value( $key, $field, $post_data = array() ) {
-			$type      = $this->get_field_type( $field );
-			$field_key = $this->get_field_key( $key );
-			$post_data = empty( $post_data ) ? $_POST : $post_data; // WPCS: CSRF ok, input var ok.
-			$value     = isset( $post_data[ $field_key ] ) ? $post_data[ $field_key ] : null;
+			try {
+				$type      = $this->get_field_type( $field );
+				$field_key = $this->get_field_key( $key );
 
-			if ( isset( $field['sanitize_callback'] ) && is_callable( $field['sanitize_callback'] ) ) {
-				return call_user_func( $field['sanitize_callback'], $value );
+				if ( isset( $_REQUEST['_dhp_setting_nonce'] ) ) {
+					$nonce = sanitize_text_field( wp_unslash( $_REQUEST['_dhp_setting_nonce'] ) );
+					if ( ! wp_verify_nonce( $nonce, 'dhp-nonce' ) ) {
+						echo( 'We were unable to process your request' );
+					} else {
+						$post_data = empty( $post_data ) ? $_POST : $post_data; // WPCS: CSRF ok, input var ok.
+						$value     = isset( $post_data[ $field_key ] ) ? $post_data[ $field_key ] : null;
+
+						if ( isset( $field['sanitize_callback'] ) && is_callable( $field['sanitize_callback'] ) ) {
+							return call_user_func( $field['sanitize_callback'], $value );
+						}
+
+						// Look for a validate_FIELDID_field method for special handling.
+						if ( is_callable( array( $this, 'validate_' . $key . '_field' ) ) ) {
+							return $this->{'validate_' . $key . '_field'}( $key, $value );
+						}
+
+						// Look for a validate_FIELDTYPE_field method.
+						if ( is_callable( array( $this, 'validate_' . $type . '_field' ) ) ) {
+							return $this->{'validate_' . $type . '_field'}( $key, $value );
+						}
+
+						// Fallback to text.
+						return $this->validate_text_field( $key, $value );
+					}
+				}
+			} catch ( Exception $e ) {
+				wc_add_notice( $e->getMessage(), 'error' );
 			}
-
-			// Look for a validate_FIELDID_field method for special handling.
-			if ( is_callable( array( $this, 'validate_' . $key . '_field' ) ) ) {
-				return $this->{'validate_' . $key . '_field'}( $key, $value );
-			}
-
-			// Look for a validate_FIELDTYPE_field method.
-			if ( is_callable( array( $this, 'validate_' . $type . '_field' ) ) ) {
-				return $this->{'validate_' . $type . '_field'}( $key, $value );
-			}
-
-			// Fallback to text.
-			return $this->validate_text_field( $key, $value );
 		}
 
 		/**
@@ -289,10 +303,21 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 		 * @return array
 		 */
 		public function get_post_data() {
-			if ( ! empty( $this->data ) && is_array( $this->data ) ) {
-				return $this->data;
+			try {
+				if ( isset( $_REQUEST['_dhp_setting_nonce'] ) ) {
+					$nonce = sanitize_text_field( wp_unslash( $_REQUEST['_dhp_setting_nonce'] ) );
+					if ( ! wp_verify_nonce( $nonce, 'dhp-nonce' ) ) {
+						echo( 'We were unable to process your request' );
+					} else {
+						if ( ! empty( $this->data ) && is_array( $this->data ) ) {
+							return $this->data;
+						}
+						return $_POST; // WPCS: CSRF ok, input var ok.
+					}
+				}
+			} catch ( Exception $e ) {
+				wc_add_notice( $e->getMessage(), 'error' );
 			}
-			return $_POST; // WPCS: CSRF ok, input var ok.
 		}
 
 		/**
@@ -434,7 +459,7 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 		 * @since  1.0.0
 		 * @uses   method_exists()
 		 */
-		public function generate_settings_html( $form_fields = array(), $echo = true ) {
+		public function generate_settings_html( $form_fields = array() ) {
 			if ( empty( $form_fields ) ) {
 				$form_fields = $this->get_form_fields();
 			}
@@ -450,11 +475,7 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 				}
 			}
 
-			if ( $echo ) {
-				echo $html; // WPCS: XSS ok.
-			} else {
-				return $html;
-			}
+			return $html;
 		}
 
 		/**
@@ -582,23 +603,18 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 
 			$data = wp_parse_args( $data, $defaults );
 
-			ob_start();
-			?>
+			echo( '
 			<tr valign="top">
 				<th scope="row" class="titledesc">
-					<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+					<label for="<?php echo esc_attr( $field_key ); ?>">' . esc_html( $data['title'] ) . wp_kses_post( $this->get_tooltip_html( $data ) ) . '</label>
 				</th>
 				<td class="forminp">
 					<fieldset>
-						<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-						<input class="input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="<?php echo esc_attr( $data['type'] ); ?>" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( $this->get_option( $key ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); // WPCS: XSS ok. ?> />
-						<?php echo $this->get_description_html( $data ); // WPCS: XSS ok. ?>
+						<legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>
+						<input class="input-text regular-input ' . esc_attr( $data['class'] ) . '" type="' . esc_attr( $data['type'] ) . '" name="' . esc_attr( $field_key ) . '" id="' . esc_attr( $field_key ) . '" style="' . esc_attr( $data['css'] ) . '" value="' . esc_attr( $this->get_option( $key ) ) . '" placeholder="' . esc_attr( $data['placeholder'] ) . '" ' . disabled( $data['disabled'], true ) . ' ' . wp_kses_post( $this->get_custom_attribute_html( $data ) ) . ' />' . wp_kses_post( $this->get_description_html( $data ) ) . '
 					</fieldset>
 				</td>
-			</tr>
-			<?php
-
-			return ob_get_clean();
+			</tr>' );
 		}
 
 		/**
@@ -625,23 +641,18 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 
 			$data = wp_parse_args( $data, $defaults );
 
-			ob_start();
-			?>
+			echo( '
 			<tr valign="top">
 				<th scope="row" class="titledesc">
-					<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+					<label for="' . esc_attr( $field_key ) . '">' . wp_kses_post( $data['title'] ) . wp_kses_post( $this->get_tooltip_html( $data ) ) . '</label>
 				</th>
 				<td class="forminp">
 					<fieldset>
-						<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-						<input class="wc_input_price input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $this->get_option( $key ) ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); // WPCS: XSS ok. ?> />
-						<?php echo $this->get_description_html( $data ); // WPCS: XSS ok. ?>
+						<legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>
+						<input class="wc_input_price input-text regular-input ' . esc_attr( $data['class'] ) . '" type="text" name="' . esc_attr( $field_key ) . '" id="' . esc_attr( $field_key ) . '" style="' . esc_attr( $data['css'] ) . '" value="' . esc_attr( wc_format_localized_price( $this->get_option( $key ) ) ) . '" placeholder="' . esc_attr( $data['placeholder'] ) . '" ' . disabled( $data['disabled'], true ) . ' ' . wp_kses_post( $this->get_custom_attribute_html( $data ) ) . ' />' . wp_kses_post( $this->get_description_html( $data ) ) . '
 					</fieldset>
 				</td>
-			</tr>
-			<?php
-
-			return ob_get_clean();
+			</tr>' );
 		}
 
 		/**
@@ -668,23 +679,18 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 
 			$data = wp_parse_args( $data, $defaults );
 
-			ob_start();
-			?>
+			echo( '
 			<tr valign="top">
 				<th scope="row" class="titledesc">
-					<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+					<label for="' . esc_attr( $field_key ) . '">' . wp_kses_post( $data['title'] ) . wp_kses_post( $this->get_tooltip_html( $data ) ) . '</label>
 				</th>
 				<td class="forminp">
 					<fieldset>
-						<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-						<input class="wc_input_decimal input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( wc_format_localized_decimal( $this->get_option( $key ) ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); // WPCS: XSS ok. ?> />
-						<?php echo $this->get_description_html( $data ); // WPCS: XSS ok. ?>
+						<legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>
+						<input class="wc_input_decimal input-text regular-input ' . esc_attr( $data['class'] ) . '" type="text" name="' . esc_attr( $field_key ) . '" id="' . esc_attr( $field_key ) . '" style="' . esc_attr( $data['css'] ) . '" value="' . esc_attr( wc_format_localized_decimal( $this->get_option( $key ) ) ) . '" placeholder="' . esc_attr( $data['placeholder'] ) . '" ' . disabled( $data['disabled'], true ) . ' ' . wp_kses_post( $this->get_custom_attribute_html( $data ) ) . ' />' . wp_kses_post( $this->get_description_html( $data ) ) . '
 					</fieldset>
 				</td>
-			</tr>
-			<?php
-
-			return ob_get_clean();
+			</tr>' );			
 		}
 
 		/**
@@ -697,7 +703,7 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 		 */
 		public function generate_password_html( $key, $data ) {
 			$data['type'] = 'password';
-			return $this->generate_text_html( $key, $data );
+			$this->generate_text_html( $key, $data );
 		}
 
 		/**
@@ -723,25 +729,20 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 
 			$data = wp_parse_args( $data, $defaults );
 
-			ob_start();
-			?>
+			echo( '
 			<tr valign="top">
 				<th scope="row" class="titledesc">
-					<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+					<label for="' . esc_attr( $field_key ) . '">' . wp_kses_post( $data['title'] ) . wp_kses_post( $this->get_tooltip_html( $data ) ) . '</label>
 				</th>
 				<td class="forminp">
 					<fieldset>
-						<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-						<span class="colorpickpreview" style="background:<?php echo esc_attr( $this->get_option( $key ) ); ?>;">&nbsp;</span>
-						<input class="colorpick <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( $this->get_option( $key ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); // WPCS: XSS ok. ?> />
-						<div id="colorPickerDiv_<?php echo esc_attr( $field_key ); ?>" class="colorpickdiv" style="z-index: 100; background: #eee; border: 1px solid #ccc; position: absolute; display: none;"></div>
-						<?php echo $this->get_description_html( $data ); // WPCS: XSS ok. ?>
+						<legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>
+						<span class="colorpickpreview" style="background:' . esc_attr( $this->get_option( $key ) ) . ';">&nbsp;</span>
+						<input class="colorpick ' . esc_attr( $data['class'] ) . '" type="text" name="' . esc_attr( $field_key ) . '" id="' . esc_attr( $field_key ) . '" style="' . esc_attr( $data['css'] ) . '" value="' . esc_attr( $this->get_option( $key ) ) . '" placeholder="' . esc_attr( $data['placeholder'] ) . '" ' . disabled( $data['disabled'], true ) . ' ' . wp_kses_post( $this->get_custom_attribute_html( $data ) ) . '/>
+						<div id="colorPickerDiv_' . esc_attr( $field_key ) . '" class="colorpickdiv" style="z-index: 100; background: #eee; border: 1px solid #ccc; position: absolute; display: none;"></div>' . wp_kses_post( $this->get_description_html( $data ) ) . '
 					</fieldset>
 				</td>
-			</tr>
-			<?php
-
-			return ob_get_clean();
+			</tr>' );
 		}
 
 		/**
@@ -768,23 +769,18 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 
 			$data = wp_parse_args( $data, $defaults );
 
-			ob_start();
-			?>
+			echo( '
 			<tr valign="top">
 				<th scope="row" class="titledesc">
-					<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+					<label for="' . esc_attr( $field_key ) . '">' . wp_kses_post( $data['title'] ) . wp_kses_post( $this->get_tooltip_html( $data ) ) . '</label>
 				</th>
 				<td class="forminp">
 					<fieldset>
-						<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-						<textarea rows="3" cols="20" class="input-text wide-input <?php echo esc_attr( $data['class'] ); ?>" type="<?php echo esc_attr( $data['type'] ); ?>" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); // WPCS: XSS ok. ?>><?php echo esc_textarea( $this->get_option( $key ) ); ?></textarea>
-						<?php echo $this->get_description_html( $data ); // WPCS: XSS ok. ?>
+						<legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>
+						<textarea rows="3" cols="20" class="input-text wide-input ' . esc_attr( $data['class'] ) . '" type="' . esc_attr( $data['type'] ) . '" name="' . esc_attr( $field_key ) . '" id="' . esc_attr( $field_key ) . '" style="' . esc_attr( $data['css'] ) . '" placeholder="' . esc_attr( $data['placeholder'] ) . '" ' . disabled( $data['disabled'], true ) . ' ' . wp_kses_post( $this->get_custom_attribute_html( $data ) ) . '>' . esc_textarea( $this->get_option( $key ) ) . '</textarea>' . wp_kses_post( $this->get_description_html( $data ) ) . '
 					</fieldset>
 				</td>
-			</tr>
-			<?php
-
-			return ob_get_clean();
+			</tr>' );
 		}
 
 		/**
@@ -815,24 +811,21 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 				$data['label'] = $data['title'];
 			}
 
-			ob_start();
-			?>
+			echo( '
 			<tr valign="top">
 				<th scope="row" class="titledesc">
-					<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+					<label for="' . esc_attr( $field_key ) . '">' . wp_kses_post( $data['title'] ) . wp_kses_post( $this->get_tooltip_html( $data ) ) . '</label>
 				</th>
 				<td class="forminp">
 					<fieldset>
-						<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-						<label for="<?php echo esc_attr( $field_key ); ?>">
-						<input <?php disabled( $data['disabled'], true ); ?> class="<?php echo esc_attr( $data['class'] ); ?>" type="checkbox" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="1" <?php checked( $this->get_option( $key ), 'yes' ); ?> <?php echo $this->get_custom_attribute_html( $data ); // WPCS: XSS ok. ?> /> <?php echo wp_kses_post( $data['label'] ); ?></label><br/>
-						<?php echo $this->get_description_html( $data ); // WPCS: XSS ok. ?>
+						<legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>
+						<label for="' . esc_attr( $field_key ) . '">
+						<input ' . disabled( $data['disabled'], true ) . ' class="' . esc_attr( $data['class'] ) . '" type="checkbox" name="' . esc_attr( $field_key ) . '" id="' . esc_attr( $field_key ) . '" style="' . esc_attr( $data['css'] ) . '" value="1" ' );
+			checked( $this->get_option( $key ), 'yes' );
+			echo( ' ' . wp_kses_post( $this->get_custom_attribute_html( $data ) ) . ' /> ' . wp_kses_post( $data['label'] ) . '</label><br/>' . wp_kses_post( $this->get_description_html( $data ) ) . '
 					</fieldset>
 				</td>
-			</tr>
-			<?php
-
-			return ob_get_clean();
+			</tr>' );
 		}
 
 		/**
@@ -860,27 +853,24 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 
 			$data = wp_parse_args( $data, $defaults );
 
-			ob_start();
-			?>
+			echo( '
 			<tr valign="top">
 				<th scope="row" class="titledesc">
-					<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+					<label for="' . esc_attr( $field_key ) . '">' . wp_kses_post( $data['title'] ) . ' ' . wp_kses_post( $this->get_tooltip_html( $data ) ) . '</label>
 				</th>
 				<td class="forminp">
 					<fieldset>
-						<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-						<select class="select <?php echo esc_attr( $data['class'] ); ?>" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); // WPCS: XSS ok. ?>>
-							<?php foreach ( (array) $data['options'] as $option_key => $option_value ) : ?>
-								<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( (string) $option_key, esc_attr( $this->get_option( $key ) ) ); ?>><?php echo esc_attr( $option_value ); ?></option>
-							<?php endforeach; ?>
-						</select>
-						<?php echo $this->get_description_html( $data ); // WPCS: XSS ok. ?>
+						<legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>
+						<select class="select ' . esc_attr( $data['class'] ) . '" name="' . esc_attr( $field_key ) . '" id="' . esc_attr( $field_key ) . '" style="' . esc_attr( $data['css'] ) . '" ' . disabled( $data['disabled'], true ) . ' ' . wp_kses_post( $this->get_custom_attribute_html( $data ) ) . '>' );
+
+			foreach ( (array) $data['options'] as $option_key => $option_value ) {
+				echo( '<option value="' . esc_attr( $option_key ) . '" ' . selected( (string) $option_key, esc_attr( $this->get_option( $key ) ) ) . '>' . esc_attr( $option_value ) . '</option>' );
+			}
+						
+			echo( '</select>' . wp_kses_post( $this->get_description_html( $data ) ) . '
 					</fieldset>
 				</td>
-			</tr>
-			<?php
-
-			return ob_get_clean();
+			</tr>' );
 		}
 
 		/**
@@ -910,38 +900,41 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 			$data  = wp_parse_args( $data, $defaults );
 			$value = (array) $this->get_option( $key, array() );
 
-			ob_start();
-			?>
+			echo( '
 			<tr valign="top">
 				<th scope="row" class="titledesc">
-					<label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+					<label for="' . esc_attr( $field_key ) . '">' . wp_kses_post( $data['title'] ) . ' ' . wp_kses_post( $this->get_tooltip_html( $data ) ) . '</label>
 				</th>
 				<td class="forminp">
 					<fieldset>
-						<legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
-						<select multiple="multiple" class="multiselect <?php echo esc_attr( $data['class'] ); ?>" name="<?php echo esc_attr( $field_key ); ?>[]" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); // WPCS: XSS ok. ?>>
-							<?php foreach ( (array) $data['options'] as $option_key => $option_value ) : ?>
-								<?php if ( is_array( $option_value ) ) : ?>
-									<optgroup label="<?php echo esc_attr( $option_key ); ?>">
-										<?php foreach ( $option_value as $option_key_inner => $option_value_inner ) : ?>
-											<option value="<?php echo esc_attr( $option_key_inner ); ?>" <?php selected( in_array( (string) $option_key_inner, $value, true ), true ); ?>><?php echo esc_attr( $option_value_inner ); ?></option>
-										<?php endforeach; ?>
-									</optgroup>
-								<?php else : ?>
-									<option value="<?php echo esc_attr( $option_key ); ?>" <?php selected( in_array( (string) $option_key, $value, true ), true ); ?>><?php echo esc_attr( $option_value ); ?></option>
-								<?php endif; ?>
-							<?php endforeach; ?>
-						</select>
-						<?php echo $this->get_description_html( $data ); // WPCS: XSS ok. ?>
-						<?php if ( $data['select_buttons'] ) : ?>
-							<br/><a class="select_all button" href="#"><?php esc_html_e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php esc_html_e( 'Select none', 'woocommerce' ); ?></a>
-						<?php endif; ?>
-					</fieldset>
-				</td>
-			</tr>
-			<?php
+						<legend class="screen-reader-text"><span>' . wp_kses_post( $data['title'] ) . '</span></legend>
+						<select multiple="multiple" class="multiselect ' . esc_attr( $data['class'] ) . '" name="' . esc_attr( $field_key ) . '[]" id="' . esc_attr( $field_key ) . '" style="' . esc_attr( $data['css'] ) . '" ' . disabled( $data['disabled'], true ) . ' ' . wp_kses_post( $this->get_custom_attribute_html( $data ) ) . '>' );
 
-			return ob_get_clean();
+			foreach ( (array) $data['options'] as $option_key => $option_value ) {
+				if ( is_array( $option_value ) ) {
+					echo( '<optgroup label="' . esc_attr( $option_key ) . '">' );
+					foreach ( $option_value as $option_key_inner => $option_value_inner ) {
+						echo( '<option value="' . esc_attr( $option_key_inner ) . '" ' . selected( in_array( (string) $option_key_inner, $value, true ), true ) . '>' . esc_attr( $option_value_inner ) . '</option>' );
+					}
+					echo( '</optgroup>' );
+				} else {
+					echo( '<option value="' . esc_attr( $option_key ) . '" ' . selected( in_array( (string) $option_key, $value, true ), true ) . '>' . esc_attr( $option_value ) . '</option>' );
+				}
+			}
+
+			echo( '</select>' . wp_kses_post( $this->get_description_html( $data ) ) );
+
+			if ( $data['select_buttons'] ) {
+				echo( '<br/><a class="select_all button" href="#">' );
+				esc_html_e( 'Select all', 'woocommerce' );
+				echo( '</a> <a class="select_none button" href="#">' );
+				esc_html_e( 'Select none', 'woocommerce' );
+				echo( '</a>' );
+			}
+
+			echo( '</fieldset>
+				</td>
+			</tr>' );
 		}
 
 		/**
@@ -961,17 +954,15 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 
 			$data = wp_parse_args( $data, $defaults );
 
-			ob_start();
-			?>
+			echo( '
 				</table>
-				<h3 class="wc-settings-sub-title <?php echo esc_attr( $data['class'] ); ?>" id="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></h3>
-				<?php if ( ! empty( $data['description'] ) ) : ?>
-					<p><?php echo wp_kses_post( $data['description'] ); ?></p>
-				<?php endif; ?>
-				<table class="form-table">
-			<?php
+				<h3 class="wc-settings-sub-title ' . esc_attr( $data['class'] ) . '" id="' . esc_attr( $field_key ) . '">' . wp_kses_post( $data['title'] ) . '</h3>' );
 
-			return ob_get_clean();
+			if ( ! empty( $data['description'] ) ) {
+				echo( '<p>' . wp_kses_post( $data['description'] ) . '</p>' );
+			}
+
+			echo( '<table class="form-table">' );
 		}
 
 		/**
@@ -991,17 +982,15 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 
 			$data = wp_parse_args( $data, $defaults );
 
-			ob_start();
-			?>
+			echo( '
 				</table>
-				<h4 class="wc-settings-sub-title <?php echo esc_attr( $data['class'] ); ?>" id="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></h4>
-				<?php if ( ! empty( $data['description'] ) ) : ?>
-					<p><?php echo wp_kses_post( $data['description'] ); ?></p>
-				<?php endif; ?>
-				<table class="form-table">
-			<?php
+				<h4 class="wc-settings-sub-title ' . esc_attr( $data['class'] ) . '" id="' . esc_attr( $field_key ) . '">' . wp_kses_post( $data['title'] ) . '</h4>' );
 
-			return ob_get_clean();
+			if ( ! empty( $data['description'] ) ) {
+				echo( '<p>' . wp_kses_post( $data['description'] ) . '</p>' );
+			}
+
+			echo( '<table class="form-table">' );			
 		}
 
 		/**

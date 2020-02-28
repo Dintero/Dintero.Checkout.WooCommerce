@@ -11,7 +11,11 @@
 	margin-top: 100px;
 }
 
-#payment.woocommerce-checkout-payment {
+#order_review.no-payments .wc_payment_methods {
+	display: none;
+}
+
+#order_review.no-payments #place_order {
 	display: none;
 }
 
@@ -95,7 +99,7 @@
 }
 
 #order_review.dhp-exp #payment {
-	display: none;
+	/*display: none;*/
 }
 
 @media (max-width: 375px) {

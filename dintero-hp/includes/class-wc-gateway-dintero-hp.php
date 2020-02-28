@@ -230,8 +230,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'title'       => __( 'Order status is changed to (additional): ' ),
 				'type'        => 'select',
 				'options'     => ( array(
-					                   - 1 => '--- Disable Additional Manual Capture Order Status ---'
-				                   ) + wc_get_order_statuses() ),
+									   - 1 => '--- Disable Additional Manual Capture Order Status ---'
+								   ) + wc_get_order_statuses() ),
 				'default'     => -1,
 				'description' => __( 'Select an additional status which the payment will be manually captured if the order status changed to it.' ),
 				'desc_tip'    => true
@@ -244,8 +244,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'title'       => __( 'Order status is changed to:' ),
 				'type'        => 'select',
 				'options'     => ( array(
-					                   - 1 => '--- Disable Additional Cancellation Order Status ---'
-				                   ) + wc_get_order_statuses() ),
+									   - 1 => '--- Disable Additional Cancellation Order Status ---'
+								   ) + wc_get_order_statuses() ),
 				'default'     => - 1,
 				'description' => __( 'Select an additional status that will be used to cancel the order. Status "Cancelled" will be always used to cancel the order.' ),
 				'desc_tip'    => true
@@ -254,8 +254,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'title'       => __( 'Order status is changed to (additional): ' ),
 				'type'        => 'select',
 				'options'     => ( array(
-					                   - 1 => '--- Disable Additional Refund Order Status ---'
-				                   ) + wc_get_order_statuses() ),
+									   - 1 => '--- Disable Additional Refund Order Status ---'
+								   ) + wc_get_order_statuses() ),
 				'default'     => - 1,
 				'description' => __( 'Select an additional status that will be used to refund the order payment. Status "Refunded" will be always used to refund the order payment.' ),
 				'desc_tip'    => true
@@ -304,7 +304,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 * Creating checkout session and requesting payment page URL
 	 */
 	private function get_payment_page_url( $order ) {
-		if ( ! empty( $order ) AND $order instanceof WC_Order ) {
+		if ( ! empty( $order ) && $order instanceof WC_Order ) {
 			$order_id     = $order->get_id();
 			$access_token = $this->get_access_token();
 			$api_endpoint = $this->checkout_endpoint . '/sessions-profile';
@@ -429,7 +429,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( ! empty( $order ) AND $order instanceof WC_Order ) {
+		if ( ! empty( $order ) && $order instanceof WC_Order ) {
 			$payment_page_url = $this->get_payment_page_url( $order );
 
 			return array(
@@ -469,7 +469,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 * Creating order receipt.
 	 */
 	private function create_receipt( $order ) {
-		if ( ! empty( $order ) AND $order instanceof WC_Order ) {
+		if ( ! empty( $order ) && $order instanceof WC_Order ) {
 			$order_id     = $order->get_id();
 			$access_token = $this->get_access_token();
 			$api_endpoint = $this->api_endpoint . '/accounts';
@@ -559,9 +559,9 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			$response_body  = wp_remote_retrieve_body( $response );
 			$response_array = json_decode( $response_body, true );
 
-			if ( array_key_exists( 'receipts', $response_array ) AND
-			     count( $response_array['receipts'] ) AND
-			     array_key_exists( 'id', $response_array['receipts'][0] ) ) {
+			if ( array_key_exists( 'receipts', $response_array ) &&
+				 count( $response_array['receipts'] ) &&
+				 array_key_exists( 'id', $response_array['receipts'][0] ) ) {
 
 				$receipt_id = $response_array['receipts'][0]['id'];
 				$order->update_meta_data( 'receipt_id', $receipt_id );
@@ -610,19 +610,19 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 */
 	public function check_status( $order_id, $previous_status, $current_status ) {
 
-		if ( $current_status === $this->manual_capture_status OR
-		     $current_status === $this->additional_manual_capture_status ) {
+		if ( $current_status === $this->manual_capture_status ||
+			 $current_status === $this->additional_manual_capture_status ) {
 
 			$this->check_capture( $order_id );
 		} else {
-			if ( $current_status === 'cancelled' OR
-			     $current_status === $this->additional_cancel_status ) {
+			if ( 'cancelled' === $current_status ||
+				 $current_status === $this->additional_cancel_status ) {
 
 				$this->cancel( $order_id );
 			}
 
-			if ( $current_status === 'refunded' OR
-			     $current_status === $this->additional_refund_status ) {
+			if ( 'refunded' === $current_status ||
+				 $current_status === $this->additional_refund_status ) {
 
 				$this->process_refund( $order_id );
 			}
@@ -636,10 +636,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 */
 	private function cancel( $order_id ) {
 		$order = wc_get_order( $order_id );
-		if ( ! empty( $order ) AND
-		     $order instanceof WC_Order AND
-		     $order->get_transaction_id() AND
-		     'dintero-hp' === $order->get_payment_method() ) {
+		if ( ! empty( $order ) &&
+			 $order instanceof WC_Order &&
+			 $order->get_transaction_id() &&
+			 'dintero-hp' === $order->get_payment_method() ) {
 
 
 			$transaction_id = $order->get_transaction_id();
@@ -649,9 +649,9 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			}
 			$transaction_order_id = absint( strval( $transaction['merchant_reference'] ) );
 
-			if ( $transaction_order_id === $order_id AND
-			     array_key_exists( 'status', $transaction ) AND
-			     $transaction['status'] === 'AUTHORIZED' ) {
+			if ( $transaction_order_id === $order_id &&
+				 array_key_exists( 'status', $transaction ) &&
+				 'AUTHORIZED' === $transaction['status'] ) {
 
 				$access_token = $this->get_access_token();
 				$api_endpoint = $this->checkout_endpoint . '/transactions';
@@ -673,8 +673,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				$response_body  = wp_remote_retrieve_body( $response );
 				$response_array = json_decode( $response_body, true );
 
-				if ( array_key_exists( 'status', $response_array ) AND
-				     $response_array['status'] === 'AUTHORIZATION_VOIDED' ) {
+				if ( array_key_exists( 'status', $response_array ) &&
+					 'AUTHORIZATION_VOIDED' === $response_array['status'] ) {
 
 					$note = __( 'Transaction cancelled via Dintero. Transaction ID: ' ) . $transaction_id;
 					$order->add_order_note( $note );
@@ -695,10 +695,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );
-		if ( ! empty( $order ) AND
-		     $order instanceof WC_Order AND
-		     $order->get_transaction_id() AND
-		     'dintero-hp' === $order->get_payment_method() ) {
+		if ( ! empty( $order ) &&
+			 $order instanceof WC_Order &&
+			 $order->get_transaction_id() &&
+			 'dintero-hp' === $order->get_payment_method() ) {
 
 			$transaction_id = $order->get_transaction_id();
 			$transaction    = $this->get_transaction( $transaction_id );
@@ -707,10 +707,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			}
 			$transaction_order_id = absint( strval( $transaction['merchant_reference'] ) );
 
-			if ( $transaction_order_id === $order_id AND
-			     array_key_exists( 'status', $transaction ) AND
-			     array_key_exists( 'amount', $transaction ) AND
-			     ( $transaction['status'] === 'CAPTURED' OR $transaction['status'] === 'PARTIALLY_REFUNDED' ) ) {
+			if ( $transaction_order_id === $order_id &&
+				 array_key_exists( 'status', $transaction ) &&
+				 array_key_exists( 'amount', $transaction ) &&
+				 ( 'CAPTURED' === $transaction['status'] || 'PARTIALLY_REFUNDED' === $transaction['status'] ) ) {
 
 				$access_token = $this->get_access_token();
 				$api_endpoint = $this->checkout_endpoint . '/transactions';
@@ -757,10 +757,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				if ( array_key_exists( 'status', $response_array ) ) {
 
 					$note = '';
-					if ( $response_array['status'] === 'REFUNDED' ) {
+					if ( 'REFUNDED' === $response_array['status'] ) {
 						$note = __( 'Payment refunded via Dintero. Transaction ID: ' ) . $transaction_id;
 						wc_increase_stock_levels( $order_id );
-					} elseif ( $response_array['status'] === 'PARTIALLY_REFUNDED' ) {
+					} elseif ( 'PARTIALLY_REFUNDED' === $response_array['status'] ) {
 						$note = ( $amount / 100 ) . ' ' . __( $order->get_currency() . ' refunded via Dintero. Transaction ID: ' ) . $transaction_id;
 					}
 
@@ -775,16 +775,16 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * check if payment capture is possible when the order is changed from on-hold to complete or processing
+	 * Check if payment capture is possible when the order is changed from on-hold to complete or processing
 	 *
 	 * @param int $order_id Order ID.
 	 */
 	private function check_capture( $order_id ) {
 		$order = wc_get_order( $order_id );
-		if ( ! empty( $order ) AND
-		     $order instanceof WC_Order AND
-		     $order->get_transaction_id() AND
-		     'dintero-hp' === $order->get_payment_method() ) {
+		if ( ! empty( $order ) &&
+			 $order instanceof WC_Order &&
+			 $order->get_transaction_id() &&
+			 'dintero-hp' === $order->get_payment_method() ) {
 
 			$transaction_id = $order->get_transaction_id();
 			$transaction    = $this->get_transaction( $transaction_id );
@@ -802,9 +802,9 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 * Capture Payment.
 	 */
 	private function capture( $order, $transaction = null ) {
-		if ( ! empty( $order ) AND
-		     $order instanceof WC_Order AND
-		     $order->get_transaction_id() ) {
+		if ( ! empty( $order ) &&
+			 $order instanceof WC_Order &&
+			 $order->get_transaction_id() ) {
 
 			$order_id = $order->get_id();
 
@@ -815,10 +815,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 
 			$order_total_amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
 
-			if ( array_key_exists( 'status', $transaction ) AND
-			     array_key_exists( 'amount', $transaction ) AND
-			     $transaction['status'] === 'AUTHORIZED' AND
-			     $transaction['amount'] >= $order_total_amount ) {
+			if ( array_key_exists( 'status', $transaction ) &&
+				 array_key_exists( 'amount', $transaction ) &&
+				 'AUTHORIZED' === $transaction['status'] &&
+				 $transaction['amount'] >= $order_total_amount ) {
 				$access_token = $this->get_access_token();
 				$api_endpoint = $this->checkout_endpoint . '/transactions';
 
@@ -891,8 +891,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				$response_body  = wp_remote_retrieve_body( $response );
 				$response_array = json_decode( $response_body, true );
 
-				if ( array_key_exists( 'status', $response_array ) AND
-				     $response_array['status'] === 'CAPTURED' ) {
+				if ( array_key_exists( 'status', $response_array ) &&
+					 'CAPTURED' === $response_array['status'] ) {
 
 					$note = __( 'Payment captured via Dintero. Transaction ID: ' ) . $transaction_id;
 					$this->payment_complete( $order, $transaction_id, $note );
@@ -906,7 +906,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 */
 	public function callback( $return_page = false ) {
 		if ( ! empty( $_GET['transaction_id'] ) ) {
-			$transaction_id = $_GET['transaction_id'];
+			$transaction_id = sanitize_text_field( wp_unslash( $_GET['transaction_id'] ));
 
 			$transaction = $this->get_transaction( $transaction_id );
 			if ( ! array_key_exists( 'merchant_reference', $transaction ) ) {
@@ -916,17 +916,17 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			$transaction_order_id = $transaction['merchant_reference'];
 			$order                = wc_get_order( $transaction_order_id );
 
-			if ( ! empty( $order ) AND $order instanceof WC_Order ) {
+			if ( ! empty( $order ) && $order instanceof WC_Order ) {
 				$amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
-				if ( array_key_exists( 'status', $transaction ) AND
-				     array_key_exists( 'amount', $transaction ) AND
-				     $transaction['amount'] === $amount ) {
+				if ( array_key_exists( 'status', $transaction ) &&
+					 array_key_exists( 'amount', $transaction ) &&
+					 $transaction['amount'] === $amount ) {
 
-					if ( $transaction['status'] === 'AUTHORIZED' ) {
+					if ( 'AUTHORIZED' === $transaction['status'] ) {
 
 						$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
 						$this->process_authorization( $order, $transaction_id, $hold_reason );
-					} elseif ( $transaction['status'] === 'CAPTURED' ) {
+					} elseif ( 'CAPTURED' === $transaction['status'] ) {
 
 						$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
 						$this->payment_complete( $order, $transaction_id, $note );

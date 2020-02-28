@@ -2,7 +2,7 @@
 /**
  * WooCommerce Dintero HP Settings Checkout
  *
- * @package WooCommerce/Admin
+ * @package WDHP/Admin
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -176,8 +176,8 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 				'title'       => __( 'Order status is changed to (additional): ' ),
 				'type'        => 'select',
 				'options'     => ( array(
-					                   - 1 => '--- Disable Additional Manual Capture Order Status ---'
-				                   ) + wc_get_order_statuses() ),
+									   - 1 => '--- Disable Additional Manual Capture Order Status ---'
+								   ) + wc_get_order_statuses() ),
 				'default'     => -1,
 				'description' => __( 'Select an additional status which the payment will be manually captured if the order status changed to it.' ),
 				'desc_tip'    => true
@@ -190,8 +190,8 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 				'title'       => __( 'Order status is changed to:' ),
 				'type'        => 'select',
 				'options'     => ( array(
-					                   - 1 => '--- Disable Additional Cancellation Order Status ---'
-				                   ) + wc_get_order_statuses() ),
+									   - 1 => '--- Disable Additional Cancellation Order Status ---'
+								   ) + wc_get_order_statuses() ),
 				'default'     => - 1,
 				'description' => __( 'Select an additional status that will be used to cancel the order. Status "Cancelled" will be always used to cancel the order.' ),
 				'desc_tip'    => true
@@ -200,8 +200,8 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 				'title'       => __( 'Order status is changed to (additional): ' ),
 				'type'        => 'select',
 				'options'     => ( array(
-					                   - 1 => '--- Disable Additional Refund Order Status ---'
-				                   ) + wc_get_order_statuses() ),
+									   - 1 => '--- Disable Additional Refund Order Status ---'
+								   ) + wc_get_order_statuses() ),
 				'default'     => - 1,
 				'description' => __( 'Select an additional status that will be used to refund the order payment. Status "Refunded" will be always used to refund the order payment.' ),
 				'desc_tip'    => true
@@ -209,7 +209,7 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 			'embed_settings'                => array(
 				'title'       => __( 'Embedding Dintero Checkout:' ),
 				'type'        => 'title',
-				'description' => __( '' )
+				'description' => ''
 			),
 			'embed_enable'                        => array(
 				'title'       => __( 'Enable:' ),
@@ -222,7 +222,7 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 			'express_settings'                => array(
 				'title'       => __( 'Checkout Express' ),
 				'type'        => 'title',
-				'description' => __( '' )
+				'description' => ''
 			),
 			'express_enable'                        => array(
 				'title'       => __( 'Enable:' ),
@@ -251,29 +251,29 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 			'branding_title'                => array(
 				'title'       => __( 'Branding:' ),
 				'type'        => 'title',
-				'description' => __( '' )
+				'description' => ''
 			),
 			'branding_subtitle_footer'                => array(
 				'title'       => __( 'Footer:' ),
 				'type'        => 'subtitle',
-				'description' => __( '' )
+				'description' => ''
 			),
 			'branding_footer_url'            => array(
 				'title'       => __( 'URL:' ),
 				'type'        => 'text',
-				'description' => __( 'You can change color & size in Dintero Backoffice. Paste the new URL here:<br />Preview:<div>'.$this->get_icon_footer()."</div>"),
+				'description' => __( 'You can change color & size in Dintero Backoffice. Paste the new URL here:<br />Preview:<div>' . $this->get_icon_footer() . '</div>'),
 				'default'     => '',
 				'desc_tip'    => false,
 			),
 			'branding_subtitle_checkout'                => array(
 				'title'       => __( 'In Checkout:' ),
 				'type'        => 'subtitle',
-				'description' => __( '' )
+				'description' => ''
 			),
 			'branding_checkout_url'            => array(
 				'title'       => __( 'URL:' ),
 				'type'        => 'text',
-				'description' => __( 'You can change color & size in Dintero Backoffice. Paste the new URL here:<br />Preview:<div>'.$this->get_icon_checkout()."</div>" ),
+				'description' => __( 'You can change color & size in Dintero Backoffice. Paste the new URL here:<br />Preview:<div>' . $this->get_icon_checkout() . '</div>' ),
 				'default'     => '',
 				'desc_tip'    => false,
 			),
@@ -342,11 +342,11 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 		WC_Dintero_HP_Admin_Settings::save_fields( $settings );
 	}
 
-	private function get_icon_footer(){
+	private function get_icon_footer() {
 		return WCDHP()->checkout()->get_icon_footer(420);
 	}
 
-	private function get_icon_checkout(){
+	private function get_icon_checkout() {
 		return WCDHP()->checkout()->get_icon_checkout(420);
 	}
 }

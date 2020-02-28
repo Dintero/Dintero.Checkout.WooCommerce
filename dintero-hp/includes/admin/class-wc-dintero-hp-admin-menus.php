@@ -47,6 +47,9 @@ class WC_Dintero_HP_Admin_Menus {
 		// Include settings pages.
 		WC_Dintero_HP_Admin_Settings::get_settings_pages();
 
+		$nonce = wp_create_nonce( 'dhp-nonce' );
+			echo( '<input type="hidden" id="_dhp_setting_nonce" name="_dhp_setting_nonce" value="1a9c366a6c" />' );
+
 		// Add any posted messages.
 		if ( ! empty( $_GET['wc_error'] ) ) { // WPCS: input var okay, CSRF ok.
 			WC_Dintero_HP_Admin_Settings::add_error( wp_kses_post( wp_unslash( $_GET['wc_error'] ) ) ); // WPCS: input var okay, CSRF ok.
@@ -65,25 +68,36 @@ class WC_Dintero_HP_Admin_Menus {
 	 * @return void
 	 */
 	public function save_settings() {
-		global $current_tab, $current_section;
+		try {
+			if ( isset( $_REQUEST['_dhp_setting_nonce'] ) ) {
+				$nonce = sanitize_text_field( wp_unslash( $_REQUEST['_dhp_setting_nonce'] ) );
+				if ( ! wp_verify_nonce( $nonce, 'dhp-nonce' ) ) {
+					echo( 'We were unable to process your request' );
+				} else {
+					global $current_tab, $current_section;
 
-		// We should only save on the settings page.
-		if ( ! is_admin() || ! isset( $_GET['page'] ) || 'wc-dintero-settings' !== $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			return;
-		}
+					// We should only save on the settings page.
+					if ( ! is_admin() || ! isset( $_GET['page'] ) || 'wc-dintero-settings' !== $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+						return;
+					}
 
-		// Include settings pages.
-		WC_Dintero_HP_Admin_Settings::get_settings_pages();
+					// Include settings pages.
+					WC_Dintero_HP_Admin_Settings::get_settings_pages();
 
-		// Get current tab/section.
-		$current_tab     = empty( $_GET['tab'] ) ? 'dintero-hp' : sanitize_title( wp_unslash( $_GET['tab'] ) ); // WPCS: input var okay, CSRF ok.
-		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( wp_unslash( $_REQUEST['section'] ) ); // WPCS: input var okay, CSRF ok.
+					// Get current tab/section.
+					$current_tab     = empty( $_GET['tab'] ) ? 'dintero-hp' : sanitize_title( wp_unslash( $_GET['tab'] ) ); // WPCS: input var okay, CSRF ok.
+					$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( wp_unslash( $_REQUEST['section'] ) ); // WPCS: input var okay, CSRF ok.
 
-		// Save settings if data has been posted.
-		if ( '' !== $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}_{$current_section}", ! empty( $_POST['save'] ) ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Dintero_HP_Admin_Settings::save();
-		} elseif ( '' === $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}", ! empty( $_POST['save'] ) ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Dintero_HP_Admin_Settings::save();
+					// Save settings if data has been posted.
+					if ( '' !== $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}_{$current_section}", ! empty( $_POST['save'] ) ) ) { // WPCS: input var okay, CSRF ok.
+						WC_Dintero_HP_Admin_Settings::save();
+					} elseif ( '' === $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}", ! empty( $_POST['save'] ) ) ) { // WPCS: input var okay, CSRF ok.
+						WC_Dintero_HP_Admin_Settings::save();
+					}
+				}
+			}
+		} catch ( Exception $e ) {
+			wc_add_notice( $e->getMessage(), 'error' );
 		}
 	}
 

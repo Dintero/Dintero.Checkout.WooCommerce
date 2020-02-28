@@ -24,8 +24,8 @@ if ( ! defined( 'DHP_PLUGIN_FILE' ) ) {
  * This action is documented in includes/class-dintero-hp-activator.php
  */
 function activate_dintero_hp() {
-    require_once plugin_dir_path( __FILE__ ) . 'includes/class-dintero-hp-activator.php';
-    Dintero_HP_Activator::activate();
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-dintero-hp-activator.php';
+	Dintero_HP_Activator::activate();
 }
 
 /**
@@ -33,8 +33,8 @@ function activate_dintero_hp() {
  * This action is documented in includes/class-dintero-hp-deactivator.php
  */
 function deactivate_dintero_hp() {
-    require_once plugin_dir_path( __FILE__ ) . 'includes/class-dintero-hp-deactivator.php';
-    Dintero_HP_Deactivator::deactivate();
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-dintero-hp-deactivator.php';
+	Dintero_HP_Deactivator::deactivate();
 }
 
 register_activation_hook( __FILE__, 'activate_dintero_hp' );
@@ -56,9 +56,9 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-wc-dintero-hp.php';
  */
 /*
 function run_dintero_hp() {
-    $plugin_basename = plugin_basename( __FILE__ );
-    $plugin = new Dintero_HP($plugin_basename);
-    $plugin->run();
+	$plugin_basename = plugin_basename( __FILE__ );
+	$plugin = new Dintero_HP($plugin_basename);
+	$plugin->run();
 }
 run_dintero_hp();
 */

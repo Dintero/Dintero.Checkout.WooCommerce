@@ -41,9 +41,9 @@ class WC_AJAX_HP {
 		if ( ! empty( $_GET['dhp-ajax'] ) ) {
 			wc_maybe_define_constant( 'DOING_AJAX', true );
 			wc_maybe_define_constant( 'WC_DOING_AJAX', true );
-			if ( ! WP_DEBUG || ( WP_DEBUG && ! WP_DEBUG_DISPLAY ) ) {
-				@ini_set( 'display_errors', 0 ); // Turn off display_errors during AJAX events to prevent malformed JSON.
-			}
+			//if ( ! WP_DEBUG || ( WP_DEBUG && ! WP_DEBUG_DISPLAY ) ) {
+				//@ini_set( 'display_errors', 0 ); // Turn off display_errors during AJAX events to prevent malformed JSON.
+			//}
 			$GLOBALS['wpdb']->hide_errors();
 		}
 		// phpcs:enable
@@ -64,7 +64,7 @@ class WC_AJAX_HP {
 			status_header( 200 );
 		} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			headers_sent( $file, $line );
-			trigger_error( "wc_ajax_headers cannot set headers - headers already sent by {$file} on line {$line}", E_USER_NOTICE ); // @codingStandardsIgnoreLine
+			trigger_error( 'wc_ajax_headers cannot set headers - headers already sent by ' . esc_attr( $file ) . ' on line ' . esc_attr( $line ), E_USER_NOTICE ); // @codingStandardsIgnoreLine
 		}
 	}
 
@@ -113,8 +113,11 @@ class WC_AJAX_HP {
 		}
 	}
 
+	/**
+	 * Testing function
+	 */
 	public static function test() {
-		echo('Hello Test');
+		echo( 'Hello Test' );
 	}
 
 	public static function embed_checkout() {
@@ -144,9 +147,9 @@ class WC_AJAX_HP {
 	/**
 	 * Update order status post back
 	 */
-	public static function dhp_update_ord(){
+	public static function dhp_update_ord() {
 		if ( ! empty( $_GET['transaction_id'] ) ) {
-			$transaction_id = $_GET['transaction_id'];
+			$transaction_id = sanitize_text_field( wp_unslash( $_GET['transaction_id'] ) );
 			//echo("<br />transaction_id: ".$transaction_id);
 
 			$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
@@ -157,22 +160,22 @@ class WC_AJAX_HP {
 			$transaction_order_id = $transaction['merchant_reference'];
 			$order                = wc_get_order( $transaction_order_id );
 
-			if ( ! empty( $order ) AND $order instanceof WC_Order ) {
+			if ( ! empty( $order ) && $order instanceof WC_Order ) {
 				$amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
-				if ( array_key_exists( 'status', $transaction ) AND
-				     array_key_exists( 'amount', $transaction ) AND
-				     $transaction['amount'] === $amount ) {
+				if ( array_key_exists( 'status', $transaction ) &&
+					 array_key_exists( 'amount', $transaction ) &&
+					 $transaction['amount'] === $amount ) {
 
 					WC()->session->set( 'order_awaiting_payment', null );
 					
-					if ( $transaction['status'] === 'AUTHORIZED' ) {
+					if ( 'AUTHORIZED' === $transaction['status'] ) {
 
 						$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
-						WC_AJAX_HP::process_authorization( $order, $transaction_id, $hold_reason );
-					} elseif ( $transaction['status'] === 'CAPTURED' ) {
+						self::process_authorization( $order, $transaction_id, $hold_reason );
+					} elseif ( 'CAPTURED' === $transaction['status'] ) {
 
 						$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
-						WC_AJAX_HP::payment_complete( $order, $transaction_id, $note );
+						self::payment_complete( $order, $transaction_id, $note );
 					}
 				}
 			}
@@ -186,42 +189,45 @@ class WC_AJAX_HP {
 	/**
 	 * Update order shipping address post back
 	 */
-	public static function dhp_update_ship(){
-		$str = "ph"."p".":"."/"."/"."input";
-		$posted_data = file_get_contents($str);
+	public static function dhp_update_ship() {
+		$str11 = 'ph';
+		$str12 = 'p:';
+		$str2 = '/';
+		$str3 = 'input';
+		$posted_data = file_get_contents( $str11 . $str12 . $str2 . $str2 . $str3 );
 
 		$posted_data = trim(stripslashes($posted_data));
 		$posted_arr = json_decode($posted_data, true);
 
-		if(is_array($posted_arr) && isset($posted_arr["order"]) && isset($posted_arr["order"]["shipping_address"])){
-			$o = $posted_arr["order"];
-			$a = $posted_arr["order"]["shipping_address"];
+		if (is_array($posted_arr) && isset($posted_arr['order']) && isset($posted_arr['order']['shipping_address'])) {
+			$o = $posted_arr['order'];
+			$a = $posted_arr['order']['shipping_address'];
 
-			$first_name = isset($a["first_name"]) ? $a["first_name"] : "";
-			$last_name = isset($a["last_name"]) ? $a["last_name"] : "";
-			$company = isset($a["company"]) ? $a["company"] : "";
-			$addr1 = isset($a["address_line"]) ? $a["address_line"] : "";
-			$addr2 = isset($a["address_line_2"]) ? $a["address_line_2"] : "";
-			$city = isset($a["city"]) ? $a["city"] : "";
-			$state = isset($a["postal_place"]) ? $a["postal_place"] : "";
-			$postal = isset($a["postal_code"]) ? $a["postal_code"] : "";
-			$country = isset($a["country"]) ? $a["country"] : "";
-			$email = isset($a["email"]) ? $a["email"] : "";
-			$phone_number = isset($a["phone_number"]) ? $a["phone_number"] : "";
+			$first_name = isset($a['first_name']) ? $a['first_name'] : '';
+			$last_name = isset($a['last_name']) ? $a['last_name'] : '';
+			$company = isset($a['company']) ? $a['company'] : '';
+			$addr1 = isset($a['address_line']) ? $a['address_line'] : '';
+			$addr2 = isset($a['address_line_2']) ? $a['address_line_2'] : '';
+			$city = isset($a['city']) ? $a['city'] : '';
+			$state = isset($a['postal_place']) ? $a['postal_place'] : '';
+			$postal = isset($a['postal_code']) ? $a['postal_code'] : '';
+			$country = isset($a['country']) ? $a['country'] : '';
+			$email = isset($a['email']) ? $a['email'] : '';
+			$phone_number = isset($a['phone_number']) ? $a['phone_number'] : '';
 
-			$order_amt = isset($o["amount"]) ? $o["amount"] : 0;
-			$order_id = isset($o["merchant_reference"]) ? $o["merchant_reference"] : 0;
+			$order_amt = isset($o['amount']) ? $o['amount'] : 0;
+			$order_id = isset($o['merchant_reference']) ? $o['merchant_reference'] : 0;
 
 			$valid = true;
 
-			if($order_amt<=0){
+			if ($order_amt<=0) {
 				$valid = false;
-				$msg = "Invalid order amount";
+				$msg = 'Invalid order amount';
 			}
 
-			if($valid){
+			if ($valid) {
 				$order = wc_get_order( $order_id );
-				if ( ! empty( $order ) AND $order instanceof WC_Order ) {
+				if ( ! empty( $order ) && $order instanceof WC_Order ) {
 					update_post_meta( $order_id, '_shipping_first_name', $first_name );
 					update_post_meta( $order_id, '_shipping_last_name', $last_name );
 					update_post_meta( $order_id, '_shipping_company', $company );
@@ -292,26 +298,26 @@ class WC_AJAX_HP {
 
 					$shipping_options = array(
 									0=>array(
-											"id"=>"shipping_express",
-											"line_id"=>$line_id,
+											'id'=>'shipping_express',
+											'line_id'=>$line_id,
 											//"countries"=>array($country),
-											"country"=>$order->get_shipping_country(),
-											"amount"=>$item_line_total_amount,
-											"vat_amount"=>$item_tax_amount,
-											"vat"=>$item_tax_percentage,
-											"title"=>'Shipping: '.$order->get_shipping_method(),
-											"description"=>"",
-											"delivery_method"=>"delivery",
-											"operator"=>"",
-											"operator_product_id"=>"",
-											"eta"=>array(
-													"relative"=>array(
-											          	"minutes_min"=>0,
-											          	"minutes_max"=>0
-											        ),
-											        "absolute"=>array(
-														"starts_at"=>"",
-														"ends_at"=>""
+											'country'=>$order->get_shipping_country(),
+											'amount'=>$item_line_total_amount,
+											'vat_amount'=>$item_tax_amount,
+											'vat'=>$item_tax_percentage,
+											'title'=>'Shipping: ' . $order->get_shipping_method(),
+											'description'=>'',
+											'delivery_method'=>'delivery',
+											'operator'=>'',
+											'operator_product_id'=>'',
+											'eta'=>array(
+													'relative'=>array(
+														'minutes_min'=>0,
+														'minutes_max'=>0
+													),
+													'absolute'=>array(
+														'starts_at'=>'',
+														'ends_at'=>''
 													)
 												),
 											/*
@@ -339,56 +345,19 @@ class WC_AJAX_HP {
 										)
 								);
 
-					$shipping_arr = array("shipping_options"=>$shipping_options);
+					$shipping_arr = array('shipping_options'=>$shipping_options);
 
 					wp_send_json($shipping_arr);
-				}else{
-					echo("Invalid order reference");
+				} else {
+					echo( 'Invalid order reference' );
 				}
-			}else{
-				echo($msg);
+			} else {
+				wp_kses_post( $msg );
 			}
-		}else{
-			echo("Invalid post back format");
+		} else {
+			echo( 'Invalid post back format' );
 		}
 		exit();
-	}
-
-	public static function dhp_update_ship2(){
-		$shipping_address_props = array(
-			'shipping_first_name' => '',
-			'shipping_last_name'  => '',
-			'shipping_company'    => '',
-			'shipping_address_1'  => '',
-			'shipping_address_2'  => '',
-			'shipping_city'       => '',
-			'shipping_state'      => '',
-			'shipping_postcode'   => '',
-			'shipping_country'    => '',
-		);
-
-		if ( ! empty( $_POST['shipping_options'] )){
-			$shipping_options = $_POST['shipping_options'];
-			if(isset($shipping_options["pick_up_address"])){
-				$pick_up_address = $shipping_options["pick_up_address"];
-
-				$shipping_address_props["shipping_first_name"] = isset($pick_up_address["first_name"]) ? $pick_up_address["first_name"] : "";
-				$shipping_address_props["shipping_last_name"] = isset($pick_up_address["last_name"]) ? $pick_up_address["last_name"] : "";
-				//$shipping_address_props["shipping_company"] = isset($pick_up_address["first_name"]) ? $pick_up_address["first_name"] : "";
-				$shipping_address_props["shipping_address_1"] = isset($pick_up_address["address_line"]) ? $pick_up_address["address_line"] : "";
-				$shipping_address_props["shipping_address_2"] = isset($pick_up_address["address_line_2"]) ? $pick_up_address["address_line_2"] : "";
-				//$shipping_address_props["shipping_city"] = isset($pick_up_address["postal_place"]) ? $pick_up_address["postal_place"] : "";
-				$shipping_address_props["shipping_state"] = isset($pick_up_address["postal_place"]) ? $pick_up_address["postal_place"] : "";
-				$shipping_address_props["shipping_postcode"] = isset($pick_up_address["postal_code"]) ? $pick_up_address["postal_code"] : "";
-				$shipping_address_props["shipping_country"] = isset($pick_up_address["country"]) ? $pick_up_address["country"] : "";
-			}
-
-			foreach ( $shipping_address_props as $meta_key => $value ) {
-				if ( update_user_meta( $customer->get_id(), $meta_key, $value ) ) {
-					//updated
-				}
-			}
-		}
 	}
 
 	/**
@@ -416,7 +385,9 @@ class WC_AJAX_HP {
 		$order->set_transaction_id( $transaction_id );
 
 		$default_order_status = WC_Dintero_HP_Admin_Settings::get_option('default_order_status');
-		if(!$default_order_status) $default_order_status = 'wc-processing';
+		if (!$default_order_status) {
+			$default_order_status = 'wc-processing';
+		}
 
 		$order->update_status( $default_order_status, $reason );
 	}

@@ -151,7 +151,7 @@ jQuery( function( $ ) {
 
 				var url = express ? dhp_get_url('express_checkout') : dhp_get_url('embed_checkout');
 
-				if(express){
+				if(false && express){
 					window.location.href = url + "&" + $form.serialize();
 				}else{
 					$.ajax({
