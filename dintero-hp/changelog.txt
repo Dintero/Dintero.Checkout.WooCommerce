@@ -1,0 +1,25 @@
+*** WooCommerce Dintero Plugin Changelog ***
+
+2020-02-28
+
+ * updated for phpcs compatibilities and minor adjustments
+
+2020-02-27
+
+ * commented out calling previous version of plugin
+
+2020-02-26
+
+ * adjusted display on embed and not-express settings
+
+2020-02-25
+
+ * fixed bugs
+
+2020-02-20
+
+ * updated and fixed bugs
+
+2020-02-18
+
+ * initial updates on woocommerce dintero plugin feature
