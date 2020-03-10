@@ -491,6 +491,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		global $wp;
 
 		if ( isset( $_REQUEST['woocommerce_pay'], $_REQUEST['key'] ) && ( isset( $_REQUEST['woocommerce-pay-nonce'] ) || isset( $_REQUEST['_wpnonce'] ) ) ) {
+
 			wc_nocache_headers();
 
 			$p = sanitize_text_field( wp_unslash( $_REQUEST['woocommerce-pay-nonce'] ) );
@@ -499,6 +500,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$nonce_value = wc_get_var( $p, wc_get_var( $n, '' ) ); // @codingStandardsIgnoreLine.
 
 			if ( ! wp_verify_nonce( $nonce_value, 'woocommerce-pay' ) ) {
+				wc_add_notice( __( 'We were unable to process your order, please try again.', 'woocommerce' ), 'error' );
 				return;
 			}
 
@@ -539,7 +541,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 						wc_add_notice( __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ), 'error' );
 						return;
 					}
-					
+
 					try {
 						// Update payment method.
 						$payment_method     = $this->payment_method;
@@ -576,6 +578,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			} else {
 				echo( 'Invalid order id' );
 			}
+		} else {
+			wc_add_notice( __( 'We were unable to process your order, please try again.', 'woocommerce' ), 'error' );
 		}
 	}
 
@@ -922,7 +926,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$msg = isset($results['msg']) ? $results['msg'] : '';
 			$url = isset($results['url']) ? $results['url'] : '';
 
-			if ( false && ( $express || $pay_for_order ) ) {
+			if ( $pay_for_order ) {
 				if (1 == $result && $url) {
 					wp_redirect( $url );
 					exit;
@@ -1251,7 +1255,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			 $order->get_transaction_id() &&
 			 'dintero-hp' === $order->get_payment_method() ) {
 
-
 			$transaction_id = $order->get_transaction_id();
 			$transaction    = $this->get_transaction( $transaction_id );
 			if ( ! array_key_exists( 'merchant_reference', $transaction ) ) {
@@ -1292,7 +1295,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				}
 			}
 		}
-		exit();
 	}
 
 	/**

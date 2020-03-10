@@ -68,6 +68,8 @@ final class WC_Dintero_HP {
 
 		add_action( 'woocommerce_applied_coupon', array( $this, 'applied_coupon' ), 10, 3 ); 
 		add_action( 'woocommerce_removed_coupon', array( $this, 'removed_coupon' ), 10, 3 ); 
+
+		add_action( 'template_redirect', array( $this, 'check_thankyou' ), 10, 3 ); 
 	}
 
 	/**
@@ -236,5 +238,39 @@ final class WC_Dintero_HP {
 			}
 			$order->calculate_totals();
 		}		
-	}	
+	}
+
+	/**
+	 * Check the order before display thank you page
+	 */
+	public function check_thankyou( $order_id ) {
+		if ( isset( $_SERVER['SERVER_NAME'] ) && isset( $_SERVER['REQUEST_URI'] ) && isset( $_REQUEST['key'] ) ) {
+			$url = sanitize_text_field( wp_unslash( $_SERVER['SERVER_NAME'] ) ) . sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+			$template_name = strpos( $url, '/order-received/' ) === false ? '/view-order/' : '/order-received/';
+			if ( strpos( $url, $template_name ) !== false ) {
+				$start = strpos( $url, $template_name );
+				$first_part = substr( $url, $start + strlen( $template_name ) );
+				$order_id = substr( $first_part, 0, strpos( $first_part, '/' ) );
+
+				$order = wc_get_order( $order_id );
+
+				if ( ! empty( $order ) && $order instanceof WC_Order ) {
+					$order_key = get_post_meta( $order_id, '_order_key', true );
+
+					if ( sanitize_text_field( wp_unslash( $_REQUEST['key'] ) ) == $order_key ) {
+						if ( isset( $_REQUEST['error'] ) && 'cancelled' == $_REQUEST['error'] ) {						
+							$order_status = $order->get_status();
+							if ( 'pending' == $order_status ) {
+								//$order->update_status( 'failed' );
+
+								$url = home_url() . '/my-account/view-order/' . $order_id . '/';
+								wp_redirect ( $url );
+								exit;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }

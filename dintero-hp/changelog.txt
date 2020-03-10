@@ -1,5 +1,13 @@
 *** WooCommerce Dintero Plugin Changelog ***
 
+2020-03-10
+
+ * test on each payment conditions
+ * fixed on cancel order and display blank page
+ * fixed submit and return blank screen when not check "I have read and agree..." on page My Account > Order > Pay
+ * fixed when click cancel from Dintero page, it shows thank you page
+
+
 2020-02-28
 
  * updated for phpcs compatibilities and minor adjustments

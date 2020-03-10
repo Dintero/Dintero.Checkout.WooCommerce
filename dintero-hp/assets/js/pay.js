@@ -111,38 +111,26 @@ jQuery( function( $ ) {
 				$form.addClass( 'processing' );
 				dhpPay.blockOnSubmit( $form );
 
-				// ajaxSetup is global, but we use it to ensure JSON is valid once returned.
-				$.ajaxSetup( {
-					dataFilter: function( raw_response, dataType ) {
-						// We only want to work with JSON
-						if ( 'json' !== dataType ) {
-							return raw_response;
+				var f = $form.serialize();
+
+				var valid = true;
+				var terms_field = $form.find( 'input[name=terms-field]' );
+				var terms = $form.find( '#terms' );
+				if(terms_field.length > 0) {
+					if( terms_field.val() == 1 ) {
+						if(!terms.is(':checked')) {
+							valid = false;
+							dhpPay.submit_error( '<div class="woocommerce-error">Please read and accept the terms and conditions to proceed with your order.</div>' );
+						}else{
+							f += '&terms=1';
 						}
-
-						if ( dhpPay.is_valid_json( raw_response ) ) {
-							return raw_response;
-						} else {
-							// Attempt to fix the malformed JSON
-							var maybe_valid_json = raw_response.match( /{"result.*}/ );
-
-							if ( null === maybe_valid_json ) {
-								console.log( 'Unable to fix malformed JSON' );
-							} else if ( dhpPay.is_valid_json( maybe_valid_json[0] ) ) {
-								console.log( 'Fixed malformed JSON. Original:' );
-								console.log( raw_response );
-								raw_response = maybe_valid_json[0];
-							} else {
-								console.log( 'Unable to fix malformed JSON' );
-							}
-						}
-
-						return raw_response;
 					}
-				} );
+				}
 
-				var url = express ? dhp_get_url('express_pay') : dhp_get_url('embed_pay');
-
-				window.location.href = url + "&key=" + dhpPay.getParameter('key') + "&" + $form.serialize();
+				if( valid ) {
+					var url = express ? dhp_get_url('express_pay') : dhp_get_url('embed_pay');
+					window.location.href = url + "&key=" + dhpPay.getParameter('key') + "&" + f;
+				}
 			}
 
 			return false;
