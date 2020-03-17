@@ -71,28 +71,8 @@ jQuery( function( $ ) {
 				if($('#dhp-exp-ele').length>0){
 					var exp = $('#dhp-exp-ele').val();
 					if(exp == 1){
-						//express enable
-						//$('#customer_details').css("display", "none");
-						$('.woocommerce-billing-fields').parent().addClass('dhp-hide');
-						$('.woocommerce-shipping-fields').parent().addClass('dhp-hide');
-						$('#order_review').addClass("dhp-exp");
+						//express enable						
 						$('.woocommerce-checkout').addClass("dhp-exp");
-
-						if( $('#customer_details .col-1').length>0 && $('#customer_details .col-1').css("display") == "none" ){
-							if( $('#customer_details .col-2').length>0 && $('#customer_details .col-2').css("display") != "none" ){
-								if( $('#customer_details .col-2').css("float") == "right" ){
-									$('#customer_details .col-2').css("float", "none");
-								}
-							}
-						}
-
-						if( $('#customer_details .col-2').length>0 && $('#customer_details .col-2').css("display") == "none" ){
-							if( $('#customer_details .col-1').length>0 && $('#customer_details .col-1').css("display") != "none" ){
-								if( $('#customer_details .col-1').css("float") == "right" ){
-									$('#customer_details .col-1').css("float", "none");
-								}
-							}
-						}
 					}
 				}			    
 			});			
@@ -106,7 +86,7 @@ jQuery( function( $ ) {
 			dhpCheckout.submit(true);
 		},
 
-		$order_review: $( '#order_review' ),
+		$order_review: $( '#dhp-order-review' ),
 		$checkout_form: $( 'form.checkout' ),
 
 		get_payment_method: function() {
@@ -170,55 +150,51 @@ jQuery( function( $ ) {
 
 				var url = express ? dhp_get_url('express_checkout') : dhp_get_url('embed_checkout');
 
-				if(false && express){
-					window.location.href = url + "&" + $form.serialize();
-				}else{
-					$.ajax({
-						type:		'POST',
-						url:		url,
-						data:		$form.serialize(),
-						dataType:   'json',
-						success:	function( result ) {
-							dhpCheckout.$checkout_form.removeClass( 'processing' ).unblock();
-							try {
-								if ( 'success' === result.result ) {
-									if ( -1 === result.redirect.indexOf( 'https://' ) || -1 === result.redirect.indexOf( 'http://' ) ) {
-										window.location = result.redirect;
-									} else {
-										window.location = decodeURI( result.redirect );
-									}
-								} else if ( 'failure' === result.result ) {
-									dhpCheckout.submit_error( result.messages );
-									//throw 'Result failure';
+				$.ajax({
+					type:		'POST',
+					url:		url,
+					data:		$form.serialize(),
+					dataType:   'json',
+					success:	function( result ) {
+						dhpCheckout.$checkout_form.removeClass( 'processing' ).unblock();
+						try {
+							if ( 'success' === result.result ) {
+								if ( -1 === result.redirect.indexOf( 'https://' ) || -1 === result.redirect.indexOf( 'http://' ) ) {
+									window.location = result.redirect;
 								} else {
-									dhpCheckout.submit_error( result.messages );
-									//throw 'Invalid response';
+									window.location = decodeURI( result.redirect );
 								}
-							} catch( err ) {
-								// Reload page
-								if ( true === result.reload ) {
-									window.location.reload();
-									return;
-								}
-
-								// Trigger update in case we need a fresh nonce
-								if ( true === result.refresh ) {
-									$( document.body ).trigger( 'update_checkout' );
-								}
-
-								// Add new errors
-								if ( result.messages ) {
-									dhpCheckout.submit_error( '<div class="woocommerce-error">' + result.messages + '</div>' );
-								} else {
-									dhpCheckout.submit_error( '<div class="woocommerce-error">' + wc_checkout_params.i18n_checkout_error + '</div>' );
-								}
+							} else if ( 'failure' === result.result ) {
+								dhpCheckout.submit_error( result.messages );
+								//throw 'Result failure';
+							} else {
+								dhpCheckout.submit_error( result.messages );
+								//throw 'Invalid response';
 							}
-						},
-						error:	function( jqXHR, textStatus, errorThrown ) {
-							dhpCheckout.submit_error( '<div class="woocommerce-error">' + errorThrown + '</div>' );
+						} catch( err ) {
+							// Reload page
+							if ( true === result.reload ) {
+								window.location.reload();
+								return;
+							}
+
+							// Trigger update in case we need a fresh nonce
+							if ( true === result.refresh ) {
+								$( document.body ).trigger( 'update_checkout' );
+							}
+
+							// Add new errors
+							if ( result.messages ) {
+								dhpCheckout.submit_error( '<div class="woocommerce-error">' + result.messages + '</div>' );
+							} else {
+								dhpCheckout.submit_error( '<div class="woocommerce-error">' + wc_checkout_params.i18n_checkout_error + '</div>' );
+							}
 						}
-					});
-				}
+					},
+					error:	function( jqXHR, textStatus, errorThrown ) {
+						dhpCheckout.submit_error( '<div class="woocommerce-error">' + errorThrown + '</div>' );
+					}
+				});
 			}
 
 			return false;

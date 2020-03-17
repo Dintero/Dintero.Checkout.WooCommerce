@@ -3,6 +3,9 @@
 2020-03-17
 
  * fixed checkout page display glitches for some specific themes
+ * added template for checkout and pay form
+ * bug fixed and adjustments
+
 
 2020-03-10
 

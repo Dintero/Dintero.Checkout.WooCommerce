@@ -120,8 +120,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$embed_enable = WCDHP()->setting()->get('embed_enable');
 			$express_enable = WCDHP()->setting()->get('express_enable');
 
-			if ('yes' == $express_enable) { //express
-				if ('yes' == $embed_enable) {
+			if ( 'yes' == $express_enable ) { //express
+				if ( 'yes' == $embed_enable ) {
 					//do embed
 					$this->start_embed(true);
 				} else {
@@ -130,13 +130,13 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 						echo( '<label>Dintero Checkout</label>' );
 						
 						$icon = WCDHP()->checkout()->get_icon_checkout();
-					if ($icon) {
+					if ( $icon ) {
 						echo( '<div class="dhp_checkout_logo">' . wp_kses_post( $icon ) . '</div>' );
 					}
 
 						echo( '<div class="dhp_checkout">' );
 							echo( '<div class="dhp_exch">' );
-								echo( '<a href="javascript:void(0);">Express Checkout</a>' );
+								echo( '<a href="javascript:void(0);">Checkout Express</a>' );
 							echo( '</div>' );
 						echo( '</div>' );
 					echo( '</div>' );
@@ -198,7 +198,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 			if ('yes' == $express_enable) { //express
 				if ('yes' == $embed_enable) {
-					$this->start_embed(true);
+					$this->start_embed( true, true );
 				} else {
 					$this->insertPaymentTypeFlag(true);
 					echo( '<div id="dhp_container" class="dhp_container">' );
@@ -211,7 +211,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 						echo( '<div class="dhp_checkout">' );
 							echo( '<div class="dhp_exch">' );
-								echo( '<a href="javascript:void(0);">Express Checkout</a>' );
+								echo( '<a href="javascript:void(0);">Checkout Express</a>' );
 							echo( '</div>' );
 						echo( '</div>' );
 					echo( '</div>' );
@@ -220,7 +220,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 			} else { //normal payment
 				if (false && 'yes' == $embed_enable) {
-					$this->start_embed();
+					$this->start_embed( false, true );
 				} else {
 					$this->insertPaymentTypeFlag(false);
 					echo( '<div id="dhp_container" class="dhp_container">' );
@@ -261,10 +261,10 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			wp_enqueue_script( $handle);
 		}
 
-		$this->check_payments();
+		$this->check_payments( true );
 	}
 
-	private function check_payments() {
+	private function check_payments( $pay = false ) {
 		//check available payment gateways
 		$gateways = WC()->payment_gateways->get_available_payment_gateways();
 		$enabled_gateways = array();
@@ -278,14 +278,20 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		}
 
 		if ( count( $enabled_gateways ) <= 0 ) {
-			echo( "<script type=\"text/javascript\">
-			jQuery('#order_review').addClass('no-payments');
-			</script>" );
+			if ( false === $pay ) {
+				echo( "<script type=\"text/javascript\">
+				jQuery('#dhp-order-review').addClass('no-payments');
+				</script>" );
+			} else {
+				echo( "<script type=\"text/javascript\">
+				jQuery('#order_review').addClass('no-payments');
+				</script>" );
+			}
 		}
 	}
 
-	private function start_embed( $express = false) {
-		if ( !WC()->cart->is_empty() ) {
+	private function start_embed( $express = false, $pay_for_order = false ) {
+		if ( true == $pay_for_order || ( false == $pay_for_order && !WC()->cart->is_empty() ) ) {
 			$errors      = new WP_Error();
 			$posted_data = $this->get_data();
 
@@ -316,7 +322,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 			if ( !$express ) {
 				// Validate posted data and cart items before proceeding.
-				$this->validate_checkout_hp( $posted_data, $errors );
+				if ( true == $pay_for_order ) {
+					$this->validate_pay_hp( $posted_data, $errors );
+				} else {
+					$this->validate_checkout_hp( $posted_data, $errors );
+				}
 			} else {
 				if ( ! empty( $_REQUEST['terms-field'] ) && empty( $_REQUEST['terms'] ) ) {
 					$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
@@ -327,24 +337,54 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				wc_add_notice( $message, 'error' );
 			}
 
-			if ( empty( $posted_data['woocommerce_checkout_update_totals'] ) && 0 === wc_notice_count( 'error' ) ) {
-				$this->process_customer( $posted_data );
-				$order_id = $this->create_order_hp( $posted_data );
-				$order    = wc_get_order( $order_id );
+			if ( 0 === wc_notice_count( 'error' ) ) {
+				if ( true == $pay_for_order ) {
+					$order_id = 0;
 
-				if ( is_wp_error( $order_id ) ) {
-					throw new Exception( $order_id->get_error_message() );
+					if ( isset ( $_REQUEST['key'] ) ) {
+						// Pay for existing order.
+						$order_key = sanitize_text_field( wp_unslash( $_REQUEST['key'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+						$host = isset($_SERVER['HTTP_HOST']) ? sanitize_text_field ( $_SERVER['HTTP_HOST'] ) : '';
+						$uri = isset($_SERVER['REQUEST_URI']) ? sanitize_text_field ( $_SERVER['REQUEST_URI'] ) : '';
+
+						$url = 'http://' . $host . $uri;
+
+						$referer = sanitize_text_field( wp_unslash( $url ) );
+						
+						$a1 = strpos($referer, 'order-pay/');
+						if (false !== $a1) {
+							$start_pos = $a1+10;
+							$a2 = strpos($referer, '?', $start_pos);
+							if (false !== $a1) {
+								$order_id  = absint( substr($referer, $start_pos, $a2-$start_pos) );
+							}
+						}
+					}
+				} else {
+					if ( empty( $posted_data['woocommerce_checkout_update_totals'] ) ) {
+						$this->process_customer( $posted_data );
+						$order_id = $this->create_order_hp( $posted_data );
+					}
 				}
 
-				if ( ! $order ) {
-					throw new Exception( __( 'Unable to create order.', 'woocommerce' ) );
+				if ( $order_id ) {
+					$order    = wc_get_order( $order_id );
+
+					if ( is_wp_error( $order_id ) ) {
+						throw new Exception( $order_id->get_error_message() );
+					}
+
+					if ( ! $order ) {
+						throw new Exception( __( 'Unable to create order.', 'woocommerce' ) );
+					}
+
+					do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
+
+					WC()->session->set( 'order_awaiting_payment', $order_id );
+
+					$this->process_payment_embed( $order_id, $express, $pay_for_order );
 				}
-
-				do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
-
-				WC()->session->set( 'order_awaiting_payment', $order_id );
-
-				$this->process_payment_embed( $order_id, $express );
 			}
 		}
 	}
@@ -487,11 +527,10 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	 *
 	 * @throws Exception On payment error.
 	 */
-	public function pay_action( $express = false) {
+	public function pay_action( $express = false ) {
 		global $wp;
 
 		if ( isset( $_REQUEST['woocommerce_pay'], $_REQUEST['key'] ) && ( isset( $_REQUEST['woocommerce-pay-nonce'] ) || isset( $_REQUEST['_wpnonce'] ) ) ) {
-
 			wc_nocache_headers();
 
 			$p = sanitize_text_field( wp_unslash( $_REQUEST['woocommerce-pay-nonce'] ) );
@@ -504,83 +543,120 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				return;
 			}
 
-			ob_start();
+			$errors      = new WP_Error();
+			$posted_data = $this->get_data();
 
-			// Pay for existing order.
-			$order_key = sanitize_text_field( wp_unslash( $_REQUEST['key'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$posted_data['payment_method'] = $this->payment_method;
 
-			$referer = isset( $_REQUEST['_wp_http_referer'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wp_http_referer'] ) ) : '';
-			$order_id = 0;
-			$a1 = strpos($referer, 'order-pay/');
-			if (false !== $a1) {
-				$start_pos = $a1+10;
-				$a2 = strpos($referer, '?', $start_pos);
-				if (false !== $a1) {
-					$order_id  = absint( substr($referer, $start_pos, $a2-$start_pos) );
+			// Update session for customer and totals.
+			//$this->update_session( $posted_data );
+
+			if (!$express) {
+				// Validate posted data and cart items before proceeding.
+				$this->validate_pay_hp( $posted_data, $errors );
+			} else {
+				if ( ! empty( $_REQUEST['terms-field'] ) && empty( $_REQUEST['terms'] ) ) {
+					$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
 				}
 			}
 
-			if ($order_id) {
-				$order     = wc_get_order( $order_id );
+			foreach ( $errors->get_error_messages() as $message ) {
+				wc_add_notice( $message, 'error' );
+			}
 
-				if ( $order_id === $order->get_id() && hash_equals( $order->get_order_key(), $order_key ) && $order->needs_payment() ) {
+			if ( 0 === wc_notice_count( 'error' ) ) {
+				ob_start();
 
-					do_action( 'woocommerce_before_pay_action', $order );
+				// Pay for existing order.
+				$order_key = sanitize_text_field( wp_unslash( $_REQUEST['key'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-					WC()->customer->set_props(
-						array(
-							'billing_country'  => $order->get_billing_country() ? $order->get_billing_country() : null,
-							'billing_state'    => $order->get_billing_state() ? $order->get_billing_state() : null,
-							'billing_postcode' => $order->get_billing_postcode() ? $order->get_billing_postcode() : null,
-							'billing_city'     => $order->get_billing_city() ? $order->get_billing_city() : null,
-						)
-					);
-					WC()->customer->save();
-
-					if ( ! empty( $_REQUEST['terms-field'] ) && empty( $_REQUEST['terms'] ) ) {
-						wc_add_notice( __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ), 'error' );
-						return;
+				$referer = isset( $_REQUEST['_wp_http_referer'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wp_http_referer'] ) ) : '';
+				$order_id = 0;
+				$a1 = strpos($referer, 'order-pay/');
+				if (false !== $a1) {
+					$start_pos = $a1+10;
+					$a2 = strpos($referer, '?', $start_pos);
+					if (false !== $a1) {
+						$order_id  = absint( substr($referer, $start_pos, $a2-$start_pos) );
 					}
-
-					try {
-						// Update payment method.
-						$payment_method     = $this->payment_method;
-
-						if ( ! $payment_method ) {
-							throw new Exception( __( 'Invalid payment method.', 'woocommerce' ) );
-						}
-
-						$order->set_payment_method( $payment_method );
-						$order->save();
-
-						$valid = true;
-						/*
-						if(!$express){
-							$payment_method->validate_fields();
-
-							if ( 0 === wc_notice_count( 'error' ) ) {
-
-							}else{
-								$valid = false;
-							}
-						}
-						*/
-						if ($valid) {
-							$this->process_payment( $order_id, $express, true );
-						}
-					} catch ( Exception $e ) {
-						wc_add_notice( $e->getMessage(), 'error' );
-					}
-
-					do_action( 'woocommerce_after_pay_action', $order );
-
 				}
-			} else {
-				echo( 'Invalid order id' );
+
+				if ($order_id) {
+					$order     = wc_get_order( $order_id );
+
+					if ( $order_id === $order->get_id() && hash_equals( $order->get_order_key(), $order_key ) && $order->needs_payment() ) {
+
+						do_action( 'woocommerce_before_pay_action', $order );
+
+						try {
+							// Update payment method.
+							$payment_method     = $this->payment_method;
+
+							if ( ! $payment_method ) {
+								throw new Exception( __( 'Invalid payment method.', 'woocommerce' ) );
+							}
+
+							$order->set_payment_method( $payment_method );
+							$order->save();
+
+							if ( !$express ) {
+								$a = $posted_data;
+
+								$first_name = isset($a['first_name']) ? $a['first_name'] : '';
+								$last_name = isset($a['last_name']) ? $a['last_name'] : '';
+								$company = isset($a['company']) ? $a['company'] : '';
+								$addr1 = isset($a['address_line']) ? $a['address_line'] : '';
+								$addr2 = isset($a['address_line_2']) ? $a['address_line_2'] : '';
+								$city = isset($a['city']) ? $a['city'] : '';
+								$state = isset($a['postal_place']) ? $a['postal_place'] : '';
+								$postal = isset($a['postal_code']) ? $a['postal_code'] : '';
+								$country = isset($a['country']) ? $a['country'] : '';
+								$email = isset($a['email']) ? $a['email'] : '';
+								$phone_number = isset($a['phone_number']) ? $a['phone_number'] : '';
+
+								update_post_meta( $order_id, '_shipping_first_name', $first_name );
+								update_post_meta( $order_id, '_shipping_last_name', $last_name );
+								update_post_meta( $order_id, '_shipping_company', $company );
+								update_post_meta( $order_id, '_shipping_address_1', $addr1 );
+								update_post_meta( $order_id, '_shipping_address_2', $addr2 );
+								update_post_meta( $order_id, '_shipping_city', $city );
+								update_post_meta( $order_id, '_shipping_state', $state );
+								update_post_meta( $order_id, '_shipping_postcode', $postal );
+								update_post_meta( $order_id, '_shipping_country', $country );
+								//update_post_meta( $order_id, '_shipping_email', $email );
+								//update_post_meta( $order_id, '_shipping_phone', $phone_number );
+
+								update_post_meta( $order_id, '_billing_first_name', $first_name );
+								update_post_meta( $order_id, '_billing_last_name', $last_name );
+								update_post_meta( $order_id, '_billing_company', $company );
+								update_post_meta( $order_id, '_billing_address_1', $addr1 );
+								update_post_meta( $order_id, '_billing_address_2', $addr2 );
+								update_post_meta( $order_id, '_billing_city', $city );
+								update_post_meta( $order_id, '_billing_state', $state );
+								update_post_meta( $order_id, '_billing_postcode', $postal );
+								update_post_meta( $order_id, '_billing_country', $country );
+								update_post_meta( $order_id, '_billing_email', $email );
+								update_post_meta( $order_id, '_billing_phone', $phone_number );
+							}
+
+							$this->process_payment( $order_id, $express, true );
+						} catch ( Exception $e ) {
+							wc_add_notice( $e->getMessage(), 'error' );
+						}
+
+						do_action( 'woocommerce_after_pay_action', $order );
+
+					}
+				} else {
+					//echo( 'Invalid order id' );
+					wc_add_notice( 'Invalid order id', 'error' );
+				}
 			}
 		} else {
 			wc_add_notice( __( 'We were unable to process your order, please try again.', 'woocommerce' ), 'error' );
 		}
+
+		$this->send_ajax_failure_response();
 	}
 
 	/**
@@ -704,6 +780,58 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				$nonce_value = wc_get_var( $c, '' );
 
 				if ( empty( $nonce_value ) || ! wp_verify_nonce( $nonce_value, 'woocommerce-process_checkout' ) ) {
+					$errors->add( 'general', __( 'We were unable to process your order, please try again (2).', 'woocommerce' ) );
+				} else {
+
+					if ( empty( $data['woocommerce_checkout_update_totals'] ) && empty( $data['terms'] ) && ! empty( $_POST['terms-field'] ) ) { // WPCS: input var ok, CSRF ok.
+						$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
+					}
+
+					if ( WC()->cart->needs_shipping() ) {
+						$shipping_country = WC()->customer->get_shipping_country();
+
+						if ( empty( $shipping_country ) ) {
+							$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
+						} elseif ( ! in_array( WC()->customer->get_shipping_country(), array_keys( WC()->countries->get_shipping_countries() ), true ) ) {
+							/* translators: %s: shipping location */
+							$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix() . ' ' . WC()->customer->get_shipping_country() ) );
+						} else {
+							$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+
+							foreach ( WC()->shipping()->get_packages() as $i => $package ) {
+								if ( ! isset( $chosen_shipping_methods[ $i ], $package['rates'][ $chosen_shipping_methods[ $i ] ] ) ) {
+									$errors->add( 'shipping', __( 'No shipping method has been selected. Please double check your address, or contact us if you need any help.', 'woocommerce' ) );
+								}
+							}
+						}
+					}
+
+					do_action( 'woocommerce_after_checkout_validation', $data, $errors );					
+				}
+			} else {
+				$errors->add( 'general', __( 'We were unable to process your order, please try again (1).', 'woocommerce' ) );
+			}
+		} catch ( Exception $e ) {
+			wc_add_notice( $e->getMessage(), 'error' );
+		}
+	}
+
+	/**
+	 * Validate pay form data
+	 *
+	 * Display error notice on invalid
+	 */
+	private function validate_pay_hp( &$data, &$errors ) {
+		try {
+			$this->validate_posted_data( $data, $errors );
+			$this->check_cart_items();
+
+			if ( isset( $_REQUEST['woocommerce-pay-nonce'] ) ) {
+				$c = sanitize_text_field( wp_unslash( $_REQUEST['woocommerce-pay-nonce'] ) );
+
+				$nonce_value = wc_get_var( $c, '' );
+
+				if ( empty( $nonce_value ) || ! wp_verify_nonce( $nonce_value, 'woocommerce-pay' ) ) {
 					$errors->add( 'general', __( 'We were unable to process your order, please try again (2).', 'woocommerce' ) );
 				} else {
 
@@ -866,9 +994,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				wp_register_script( $handle, $src, $deps, '0.0.11', true );
 				wp_enqueue_script( $handle);
 
+				$container_id = true === $pay_for_order ? 'order_review' : 'dhp-wrapper';
+
 				echo( "<script type=\"text/javascript\">
 						var emb = document.getElementById('dhp-embed');
-						var order_review = document.getElementById('order_review');
+						var order_review = document.getElementById('" . wp_kses_post ( $container_id ) . "');
 						order_review.appendChild(emb);
 
 						jQuery('document').ready(function() {
@@ -926,7 +1056,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$msg = isset($results['msg']) ? $results['msg'] : '';
 			$url = isset($results['url']) ? $results['url'] : '';
 
-			if ( $pay_for_order ) {
+			if ( false && $pay_for_order ) {
 				if (1 == $result && $url) {
 					wp_redirect( $url );
 					exit;
@@ -1629,7 +1759,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	private function writeContainerScript() {
 		echo( "<script type=\"text/javascript\">
 	        	var dhpc = document.getElementById('dhp_container');
-				var order_review = document.getElementById('order_review');
+				var order_review = document.getElementById('dhp-order-review');
 				order_review.appendChild(dhpc);
 				</script>" );
 	}

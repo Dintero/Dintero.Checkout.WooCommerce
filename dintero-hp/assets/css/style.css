@@ -11,11 +11,13 @@
 	margin-top: 100px;
 }
 
-#order_review.no-payments .wc_payment_methods {
+#order_review.no-payments .wc_payment_methods,
+#dhp-order-review.no-payments .wc_payment_methods {
 	display: none;
 }
 
-#order_review.no-payments #place_order {
+#order_review.no-payments #place_order,
+#dhp-order-review.no-payments #place_order {
 	display: none;
 }
 
@@ -98,13 +100,11 @@
 	margin: auto;
 }
 
-#order_review.dhp-exp #payment {
-	/*display: none;*/
+.woocommerce-checkout #customer_details {
+	padding-bottom: 25px;
 }
 
-.woocommerce-checkout.dhp-exp .woocommerce-billing-fields,
-.woocommerce-checkout.dhp-exp .woocommerce-shipping-fields,
-.woocommerce-checkout.dhp-exp .woocommerce-additional-fields {
+.woocommerce-checkout.dhp-exp #customer_details {
 	display: none;
 }
 

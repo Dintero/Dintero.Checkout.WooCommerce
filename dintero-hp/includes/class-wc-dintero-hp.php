@@ -53,23 +53,31 @@ final class WC_Dintero_HP {
 	 * Register all of the hooks related to plugin functionality.
 	 */
 	private function init_hooks() {
+		// Override template if Klarna Checkout page.
+		add_filter( 'wc_get_template', array( $this, 'override_template' ), 999, 2 );
+		add_action( 'wp_footer', array( $this, 'init_footer') );
+
 		$express_enable = $this->setting()->get('express_enable');
 		if ('yes' == $express_enable) { //express
 			add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'add_custom_style' ), 1, 1 );
 		}
 
 		add_action( 'wp_enqueue_scripts', array( $this, 'init_script' ));
-		add_action( 'woocommerce_checkout_order_review', array( $this, 'init_checkout' ), 50);
+		add_action( 'dhp_after_checkout_form', array( $this, 'init_checkout' ), 50);
 		add_action( 'woocommerce_pay_order_after_submit', array( $this, 'init_pay' ), 50);
 
 		add_action( 'woocommerce_cancelled_order', array( $this, 'cancel_order' ) );
 		add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
-		add_action( 'wp_footer', array( $this, 'init_footer') );
 
 		add_action( 'woocommerce_applied_coupon', array( $this, 'applied_coupon' ), 10, 3 ); 
 		add_action( 'woocommerce_removed_coupon', array( $this, 'removed_coupon' ), 10, 3 ); 
 
 		add_action( 'template_redirect', array( $this, 'check_thankyou' ), 10, 3 ); 
+
+		if ('no' == $express_enable) {
+			add_action( 'dhp_checkout_billing', array( $this, 'checkout_form_billing' ) );
+			add_action( 'dhp_checkout_shipping', array( $this, 'checkout_form_shipping' ) );
+		}
 	}
 
 	/**
@@ -142,7 +150,6 @@ final class WC_Dintero_HP {
 	public function add_custom_style() {
 		$custom_css = '<style type="text/css">
 	                #customer_details { display: none; }
-					#order_review #payment { display: none; }
 					</style>';
 
 		wp_kses_post( $custom_css );
@@ -272,5 +279,62 @@ final class WC_Dintero_HP {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Override checkout form template if Checkout is the selected payment method.
+	 *
+	 * @param string $template      Template.
+	 * @param string $template_name Template name.
+	 *
+	 * @return string
+	 */
+	public function override_template( $template, $template_name ) {
+		if ( is_checkout() ) {
+			// Fallback Order Received, used when WooCommerce checkout form submission fails.
+			if ( 'checkout/thankyou.php' === $template_name ) {
+				if ( isset( $_GET['dhp_checkout_error'] ) && 'true' === $_GET['dhp_checkout_error'] ) {
+					$template = DHP_ABSPATH . 'templates/dhp-checkout-order-received.php';
+				}
+			}
+
+			// Don't display template if we have a cart that doesn't needs payment.
+			/*
+			if ( apply_filters( 'dhp_check_if_needs_payment', true ) ) {
+				if ( ! WC()->cart->needs_payment() ) {
+					return $template;
+				}
+			}*/
+
+			// Checkout.
+			if ( 'checkout/form-checkout.php' === $template_name ) {
+				$dhp_checkout_template = DHP_ABSPATH . 'templates/dhp-checkout.php';
+
+				return $dhp_checkout_template;
+			}
+
+			// Pay.
+			if ( 'checkout/form-pay.php' === $template_name ) {
+				$dhp_pay_template = DHP_ABSPATH . 'templates/dhp-pay.php';
+
+				return $dhp_pay_template;
+			}			
+		}
+
+		return $template;
+	}
+
+	/**
+	 * Output the billing form.
+	 */
+	public function checkout_form_billing() {
+		WC()->checkout()->checkout_form_billing();
+	}
+
+	/**
+	 * Output the shipping form.
+	 */
+	public function checkout_form_shipping() {
+		WC()->checkout()->checkout_form_shipping();
 	}
 }
