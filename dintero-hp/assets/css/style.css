@@ -102,6 +102,16 @@
 	/*display: none;*/
 }
 
+.woocommerce-checkout.dhp-exp .woocommerce-billing-fields,
+.woocommerce-checkout.dhp-exp .woocommerce-shipping-fields,
+.woocommerce-checkout.dhp-exp .woocommerce-additional-fields {
+	display: none;
+}
+
+.dhp-hide {
+	display: none;
+}
+
 @media (max-width: 375px) {
 	.dhp_container .dhp_checkout {
 		display: inherit;
