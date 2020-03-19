@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 $order_totals = $order->get_order_item_totals();
 ?>
 <form id="order_review" method="post">
+	<?php if ( false ) { ?>
 	<div class="col2-set" id="customer_details">
 		<div class="col-1">
 			<?php do_action( 'dhp_checkout_billing' ); ?>
@@ -21,6 +22,7 @@ $order_totals = $order->get_order_item_totals();
 			<?php do_action( 'dhp_checkout_shipping' ); ?>
 		</div>
 	</div>
+	<?php } ?>
 
 	<table class="shop_table">
 		<thead>

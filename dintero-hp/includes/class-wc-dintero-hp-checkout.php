@@ -492,7 +492,15 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					if ( ! empty( $_REQUEST['terms-field'] ) && empty( $_REQUEST['terms'] ) ) {
 						$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
 					}
+
+					$base_country = WC()->countries->get_base_country();
+					$posted_data['shipping_country'] = $base_country;
+
+					WC()->customer->set_shipping_country($base_country);
 				}
+
+				WC()->cart->calculate_shipping();
+				WC()->cart->calculate_totals();
 
 				foreach ( $errors->get_error_messages() as $message ) {
 					wc_add_notice( $message, 'error' );
@@ -550,14 +558,16 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 			// Update session for customer and totals.
 			//$this->update_session( $posted_data );
-
+			/*
 			if (!$express) {
 				// Validate posted data and cart items before proceeding.
 				$this->validate_pay_hp( $posted_data, $errors );
 			} else {
-				if ( ! empty( $_REQUEST['terms-field'] ) && empty( $_REQUEST['terms'] ) ) {
-					$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
-				}
+				
+			}
+			*/
+			if ( ! empty( $_REQUEST['terms-field'] ) && empty( $_REQUEST['terms'] ) ) {
+				$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
 			}
 
 			foreach ( $errors->get_error_messages() as $message ) {
@@ -598,7 +608,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 							$order->set_payment_method( $payment_method );
 							$order->save();
-
+							/*
 							if ( !$express ) {
 								$a = $posted_data;
 
@@ -637,7 +647,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 								update_post_meta( $order_id, '_billing_country', $country );
 								update_post_meta( $order_id, '_billing_email', $email );
 								update_post_meta( $order_id, '_billing_phone', $phone_number );
-							}
+							}*/
 
 							$this->process_payment( $order_id, $express, true );
 						} catch ( Exception $e ) {

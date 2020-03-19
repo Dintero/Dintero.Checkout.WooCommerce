@@ -1,5 +1,11 @@
 *** WooCommerce Dintero Plugin Changelog ***
 
+2020-03-19
+
+ * fixed express checkout total issue from no shipping country was set and system use different rate than default shipping country
+ * removed billing/shipping address from pay form
+
+
 2020-03-17
 
  * fixed checkout page display glitches for some specific themes

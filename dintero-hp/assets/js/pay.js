@@ -98,11 +98,7 @@ jQuery( function( $ ) {
 			*/
 		},
 		submit: function(express) {
-			console.log('submit');
-
 			express = typeof(express) == "undefined" || express !== true ? false: true;
-
-			if(express) console.log('express');
 
 			var $form = $('#order_review');
 
@@ -115,67 +111,42 @@ jQuery( function( $ ) {
 
 			var f = $form.serialize();
 
-			var valid = true;
-			/*
-			var terms_field = $form.find( 'input[name=terms-field]' );
-			var terms = $form.find( '#terms' );
-			if(terms_field.length > 0) {
-				if( terms_field.val() == 1 ) {
-					if(!terms.is(':checked')) {
-						valid = false;
-						dhpPay.submit_error( '<div class="woocommerce-error">Please read and accept the terms and conditions to proceed with your order.</div>' );
-					}else{
-						f += '&terms=1';
-					}
-				}
-				console.log('AA');
-			}*/
-			console.log('BB');
+			var url = express ? dhp_get_url('express_pay') : dhp_get_url('embed_pay');
 
-			if( valid ) {
-				console.log('CC');
-				var url = express ? dhp_get_url('express_pay') : dhp_get_url('embed_pay');
-				//url += "&key=" + dhpPay.getParameter('key');
-				//window.location.href = url + "&key=" + dhpPay.getParameter('key') + "&" + f;
-
-				$.ajax({
-					type:		'POST',
-					url:		url,
-					data:		f + "&key=" + dhpPay.getParameter('key'),
-					dataType:   'json',
-					success:	function( result ) {
-						console.log(result);
-						dhpPay.$checkout_form.removeClass( 'processing' ).unblock();
-						try {
-							if ( 'success' === result.result ) {
-								if ( -1 === result.redirect.indexOf( 'https://' ) || -1 === result.redirect.indexOf( 'http://' ) ) {
-									window.location = result.redirect;
-								} else {
-									window.location = decodeURI( result.redirect );
-								}
-							} else if ( 'failure' === result.result ) {
-								dhpPay.submit_error( result.messages );
-								//throw 'Result failure';
+			$.ajax({
+				type:		'POST',
+				url:		url,
+				data:		f + "&key=" + dhpPay.getParameter('key'),
+				dataType:   'json',
+				success:	function( result ) {
+					dhpPay.$checkout_form.removeClass( 'processing' ).unblock();
+					try {
+						if ( 'success' === result.result ) {
+							if ( -1 === result.redirect.indexOf( 'https://' ) || -1 === result.redirect.indexOf( 'http://' ) ) {
+								window.location = result.redirect;
 							} else {
-								dhpPay.submit_error( result.messages );
-								//throw 'Invalid response';
+								window.location = decodeURI( result.redirect );
 							}
-						} catch( err ) {
-							console.log(err);
-
-							// Add new errors
-							if ( result.messages ) {
-								dhpPay.submit_error( '<div class="woocommerce-error">' + result.messages + '</div>' );
-							} else {
-								dhpPay.submit_error( '<div class="woocommerce-error">' + wc_checkout_params.i18n_checkout_error + '</div>' );
-							}
+						} else if ( 'failure' === result.result ) {
+							dhpPay.submit_error( result.messages );
+							//throw 'Result failure';
+						} else {
+							dhpPay.submit_error( result.messages );
+							//throw 'Invalid response';
 						}
-					},
-					error:	function( jqXHR, textStatus, errorThrown ) {
-						dhpPay.submit_error( '<div class="woocommerce-error">' + errorThrown + '</div>' );
+					} catch( err ) {
+						// Add new errors
+						if ( result.messages ) {
+							dhpPay.submit_error( '<div class="woocommerce-error">' + result.messages + '</div>' );
+						} else {
+							dhpPay.submit_error( '<div class="woocommerce-error">' + wc_checkout_params.i18n_checkout_error + '</div>' );
+						}
 					}
-				});
-			}
+				},
+				error:	function( jqXHR, textStatus, errorThrown ) {
+					dhpPay.submit_error( '<div class="woocommerce-error">' + errorThrown + '</div>' );
+				}
+			});
 
 			return false;
 		},
