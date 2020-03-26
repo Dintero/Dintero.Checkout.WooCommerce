@@ -1,5 +1,10 @@
 *** WooCommerce Dintero Plugin Changelog ***
 
+2020-03-26
+
+ * removed order review from embed + express mode
+
+
 2020-03-19
 
  * fixed express checkout total issue from no shipping country was set and system use different rate than default shipping country

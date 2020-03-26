@@ -308,9 +308,18 @@ final class WC_Dintero_HP {
 
 			// Checkout.
 			if ( 'checkout/form-checkout.php' === $template_name ) {
-				$dhp_checkout_template = DHP_ABSPATH . 'templates/dhp-checkout.php';
+				$embed_enable = WCDHP()->setting()->get('embed_enable');
+				$express_enable = WCDHP()->setting()->get('express_enable');
 
-				return $dhp_checkout_template;
+				if ( 'yes' == $express_enable && 'yes' == $embed_enable ) {
+					$dhp_checkout_template = DHP_ABSPATH . 'templates/dhp-checkout-embed-express.php';
+
+					return $dhp_checkout_template;
+				} else {				
+					$dhp_checkout_template = DHP_ABSPATH . 'templates/dhp-checkout.php';
+
+					return $dhp_checkout_template;
+				}
 			}
 
 			// Pay.

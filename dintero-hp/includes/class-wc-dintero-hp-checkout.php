@@ -1258,11 +1258,23 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				'Authorization' => 'Bearer ' . $access_token
 			);
 
-			$payload = array(
-				'url'        => array(
+
+			$payload_url = array(
 					'return_url'   => $return_url,
 					'callback_url' => $callback_url
-				),
+				);
+
+			$terms_page_id   = wc_terms_and_conditions_page_id();
+			$terms_link      = esc_url( get_permalink( $terms_page_id ) );
+
+			$embed_enable = WCDHP()->setting()->get('embed_enable');
+
+			if ( 'yes' == $embed_enable && $express ) {
+				$payload_url[ 'merchant_terms_url' ] = $terms_link;
+			}
+
+			$payload = array(
+				'url'        => $payload_url,
 				'customer'   => array(
 					'email'        => $order->get_billing_email(),
 					'phone_number' => $order->get_billing_phone()
