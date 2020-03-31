@@ -136,7 +136,7 @@ class Dintero_HP {
 		$embed_enable = WCDHP()->setting()->get('embed_enable');
 		$express_enable = WCDHP()->setting()->get('express_enable');
 
-		if ( 'yes' != $express_enable ) {
+		if ( 'yes' != $express_enable || 'yes' != $embed_enable ) {
 			$methods[] = 'WC_Gateway_Dintero_HP';
 		}
 

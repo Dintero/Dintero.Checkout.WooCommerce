@@ -125,22 +125,24 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					//do embed
 					$this->start_embed(true);
 				} else {
-					$this->insertPaymentTypeFlag(true);
-					echo( '<div id="dhp_container" class="dhp_container">' );
-						echo( '<label>Dintero Checkout</label>' );
-						
-						$icon = WCDHP()->checkout()->get_icon_checkout();
-					if ( $icon ) {
-						echo( '<div class="dhp_checkout_logo">' . wp_kses_post( $icon ) . '</div>' );
-					}
+					if ( false ) {
+						$this->insertPaymentTypeFlag(true);
+						echo( '<div id="dhp_container" class="dhp_container">' );
+							echo( '<label>Dintero Checkout</label>' );
+							
+							$icon = WCDHP()->checkout()->get_icon_checkout();
+						if ( $icon ) {
+							echo( '<div class="dhp_checkout_logo">' . wp_kses_post( $icon ) . '</div>' );
+						}
 
-						echo( '<div class="dhp_checkout">' );
-							echo( '<div class="dhp_exch">' );
-								echo( '<a href="javascript:void(0);">Checkout Express</a>' );
+							echo( '<div class="dhp_checkout">' );
+								echo( '<div class="dhp_exch">' );
+									echo( '<a href="javascript:void(0);">Checkout Express</a>' );
+								echo( '</div>' );
 							echo( '</div>' );
 						echo( '</div>' );
-					echo( '</div>' );
-					$this->writeContainerScript();
+						$this->writeContainerScript();
+					}
 				}
 			} else { //normal payment
 				if ( false ) {
@@ -202,22 +204,24 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				if ('yes' == $embed_enable) {
 					$this->start_embed( true, true );
 				} else {
-					$this->insertPaymentTypeFlag(true);
-					echo( '<div id="dhp_container" class="dhp_container">' );
-						echo( '<label>Dintero Checkout</label>' );
-						
-						$icon = WCDHP()->checkout()->get_icon_checkout();
-					if ($icon) {
-						echo( '<div class="dhp_checkout_logo">' . wp_kses_post( $icon ) . '</div>' );
-					}
+					if ( false ) {
+						$this->insertPaymentTypeFlag(true);
+						echo( '<div id="dhp_container" class="dhp_container">' );
+							echo( '<label>Dintero Checkout</label>' );
+							
+							$icon = WCDHP()->checkout()->get_icon_checkout();
+						if ($icon) {
+							echo( '<div class="dhp_checkout_logo">' . wp_kses_post( $icon ) . '</div>' );
+						}
 
-						echo( '<div class="dhp_checkout">' );
-							echo( '<div class="dhp_exch">' );
-								echo( '<a href="javascript:void(0);">Checkout Express</a>' );
+							echo( '<div class="dhp_checkout">' );
+								echo( '<div class="dhp_exch">' );
+									echo( '<a href="javascript:void(0);">Checkout Express</a>' );
+								echo( '</div>' );
 							echo( '</div>' );
 						echo( '</div>' );
-					echo( '</div>' );
-					$this->writeContainerScript();
+						$this->writeContainerScript();
+					}
 				}
 
 			} else { //normal payment

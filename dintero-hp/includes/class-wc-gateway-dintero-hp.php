@@ -309,8 +309,16 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			$access_token = $this->get_access_token();
 			$api_endpoint = $this->checkout_endpoint . '/sessions-profile';
 
+			$express_enable = WCDHP()->setting()->get('express_enable');
+			$embed_enable = WCDHP()->setting()->get('embed_enable');
+
 			$return_url   = $this->get_return_url( $order );
-			$callback_url = WC()->api_request_url( strtolower( get_class( $this ) ) );
+
+			if ( 'yes' == $express_enable ) {
+				$callback_url = home_url() . '?dhp-ajax=dhp_update_ord';
+			} else {
+				$callback_url = WC()->api_request_url( strtolower( get_class( $this ) ) );
+			}			
 
 			$order_total_amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
 			$order_tax_amount   = absint( strval( floatval( $order->get_total_tax() ) * 100 ) );
@@ -318,6 +326,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			$items = array();
 
 			$counter = 0;
+			$total_amount = 0;
 			foreach ( $order->get_items() as $order_item ) {
 				$counter ++;
 				$line_id                = strval( $counter );
@@ -337,7 +346,12 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 					'line_id'     => $line_id
 				);
 				array_push( $items, $item );
+
+				$total_amount += $item_line_total_amount;
 			}
+
+			$shipping_option = array();
+			$express_option = array();
 
 			if ( count( $order->get_shipping_methods() ) > 0 ) {
 				$counter ++;
@@ -348,16 +362,113 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
 						2 ) * 100 ) : 0;
 
-				$item = array(
-					'id'          => 'shipping',
-					'description' => 'Shipping: ' . $order->get_shipping_method(),
-					'quantity'    => 1,
-					'vat_amount'  => $item_tax_amount,
-					'vat'         => $item_tax_percentage,
-					'amount'      => $item_line_total_amount,
-					'line_id'     => $line_id
-				);
-				array_push( $items, $item );
+				if ( 'no' == $express_enable ) {
+					$item = array(
+						'id'          => 'shipping',
+						'description' => 'Shipping: ' . $order->get_shipping_method(),
+						'quantity'    => 1,
+						'vat_amount'  => $item_tax_amount,
+						'vat'         => $item_tax_percentage,
+						'amount'      => $item_line_total_amount,
+						'line_id'     => $line_id
+					);
+					array_push( $items, $item );
+
+					$total_amount += $item_line_total_amount;
+				}
+
+				$order_total_amount = $total_amount;
+
+				$shipping_option = array(
+						'id'				=> 'shipping',
+						'line_id'			=> $line_id,
+						//"countries"			=> array($order->get_shipping_country()),
+						'country'			=> $order->get_shipping_country(),
+						'amount'			=> $item_line_total_amount,
+						'vat_amount'		=> $item_tax_amount,
+						'vat'				=> $item_tax_percentage,
+						'title'				=> 'Shipping: ' . $order->get_shipping_method(),
+						'description'		=> '',
+						'delivery_method'	=> 'delivery',						
+						'operator'			=> '',
+						'operator_product_id' => '',
+						'eta'				=> array(),
+						/*
+						"time_slot"			=> array(),
+						"pick_up_address"	=> array(
+								"first_name"=>$order->get_shipping_first_name(),
+								"last_name"=>$order->get_shipping_last_name(),
+								"address_line"=>$order->get_shipping_address_1(),
+								"address_line_2"=>$order->get_shipping_address_2(),
+								"co_address"=>"",
+								"business_name"=>"",
+								"postal_code"=>$order->get_shipping_postcode(),
+								"postal_place"=>$order->get_shipping_city(),
+								"country"=>$order->get_shipping_country(),
+								"phone_number"=>$order->get_billing_phone(),
+								"email"=>$order->get_billing_email(),
+								"latitude"=>0,
+								"longitude"=>0,
+								"comment"=>"",
+								"distance"=>0
+							)*/
+					);
+
+				if ( 'yes' == $express_enable ) {
+					$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
+
+					$express_option = array(
+						'shipping_address_callback_url'=>$ship_callback_url,
+						'shipping_options'=>array(
+								0=>array(
+										'id'=>'shipping_express',
+										'line_id'=>$line_id,
+										//"countries"=>array($order->get_shipping_country()),
+										'country'=>$order->get_shipping_country(),
+										'amount'=>$item_line_total_amount,
+										'vat_amount'=>$item_tax_amount,
+										'vat'=>$item_tax_percentage,
+										'title'=>'Shipping: ' . $order->get_shipping_method(),
+										'description'=>'',
+										'delivery_method'=>'delivery',
+										'operator'=>'',
+										'operator_product_id'=>'',
+										'eta'=>array(
+												'relative'=>array(
+													'minutes_min'=>0,
+													'minutes_max'=>0
+												),
+												'absolute'=>array(
+													'starts_at'=>'',
+													'ends_at'=>''
+												)
+											),
+										/*
+										"time_slot"=>array(
+												"starts_at"=>"2020-10-14T19:00:00Z",
+												"ends_at"=>"2020-10-14T20:00:00Z"
+											),
+										"pick_up_address"=>array(
+												"first_name"=>$order->get_shipping_first_name(),
+												"last_name"=>$order->get_shipping_last_name(),
+												"address_line"=>$order->get_shipping_address_1(),
+												"address_line_2"=>$order->get_shipping_address_2(),
+												"co_address"=>"",
+												"business_name"=>"",
+												"postal_code"=>$order->get_shipping_postcode(),
+												"postal_place"=>$order->get_shipping_city(),
+												"country"=>$order->get_shipping_country(),
+												"phone_number"=>"123456", //$order->get_billing_phone(),
+												"email"=>$order->get_billing_email(),
+												"latitude"=>0,
+												"longitude"=>0,
+												"comment"=>""
+												//"distance"=>0
+											)*/
+									)
+							)
+					);
+				}
 			}
 
 			$headers = array(
@@ -366,11 +477,20 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'Authorization' => 'Bearer ' . $access_token
 			);
 
-			$payload = array(
-				'url'        => array(
+			$payload_url = array(
 					'return_url'   => $return_url,
 					'callback_url' => $callback_url
-				),
+				);
+
+			$terms_page_id   = wc_terms_and_conditions_page_id();
+			$terms_link      = esc_url( get_permalink( $terms_page_id ) );
+
+			if ( 'yes' == $embed_enable && 'yes' == $express_enable ) {
+				$payload_url[ 'merchant_terms_url' ] = $terms_link;
+			}
+
+			$payload = array(
+				'url'        => $payload_url,
 				'customer'   => array(
 					'email'        => $order->get_billing_email(),
 					'phone_number' => $order->get_billing_phone()
@@ -400,6 +520,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				),
 				'profile_id' => $this->profile_id
 			);
+
+			if ( 'yes' == $express_enable ) {
+				$payload['express'] = $express_option;
+			}
 
 			$response = wp_remote_post( $api_endpoint, array(
 				'method'    => 'POST',

@@ -58,6 +58,8 @@ final class WC_Dintero_HP {
 		add_action( 'wp_footer', array( $this, 'init_footer') );
 
 		$express_enable = $this->setting()->get('express_enable');
+		$embed_enable = $this->setting()->get('embed_enable');
+
 		if ('yes' == $express_enable) { //express
 			add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'add_custom_style' ), 1, 1 );
 		}
@@ -74,10 +76,42 @@ final class WC_Dintero_HP {
 
 		add_action( 'template_redirect', array( $this, 'check_thankyou' ), 10, 3 ); 
 
-		if ('no' == $express_enable) {
+		if ( 'no' == $express_enable || ( 'yes' == $express_enable && 'no' == $embed_enable ) ) {
 			add_action( 'dhp_checkout_billing', array( $this, 'checkout_form_billing' ) );
 			add_action( 'dhp_checkout_shipping', array( $this, 'checkout_form_shipping' ) );
 		}
+
+		if ('yes' == $express_enable) {
+			//make billing fields not required in checkout
+			add_filter( 'woocommerce_billing_fields', array( $this, 'wc_npr_filter_billing_fields' ), 10, 1 );
+
+			//make shipping fields not required in checkout
+			add_filter( 'woocommerce_shipping_fields', array( $this, 'wc_npr_filter_shipping_fields' ), 10, 1 );
+		}
+	}
+
+	public function wc_npr_filter_billing_fields( $address_fields ) {
+		$address_fields['billing_first_name']['required'] = false;
+		$address_fields['billing_last_name']['required'] = false;
+		$address_fields['billing_address_1']['required'] = false;
+		$address_fields['billing_country']['required'] = false;
+		$address_fields['billing_city']['required'] = false;
+		$address_fields['billing_postcode']['required'] = false;
+		$address_fields['billing_phone']['required'] = false;
+		$address_fields['billing_email']['required'] = false;
+
+		return $address_fields;
+	}
+
+	public function wc_npr_filter_shipping_fields( $address_fields ) {
+		$address_fields['shipping_first_name']['required'] = false;
+		$address_fields['shipping_last_name']['required'] = false;
+		$address_fields['shipping_address_1']['required'] = false;
+		$address_fields['shipping_city']['required'] = false;
+		$address_fields['shipping_postcode']['required'] = false;
+		$address_fields['shipping_country']['required'] = false;
+
+		return $address_fields;
 	}
 
 	/**
@@ -311,10 +345,16 @@ final class WC_Dintero_HP {
 				$embed_enable = WCDHP()->setting()->get('embed_enable');
 				$express_enable = WCDHP()->setting()->get('express_enable');
 
-				if ( 'yes' == $express_enable && 'yes' == $embed_enable ) {
-					$dhp_checkout_template = DHP_ABSPATH . 'templates/dhp-checkout-embed-express.php';
+				if ( 'yes' == $express_enable ) {
+					if ( 'yes' == $embed_enable ) {
+						$dhp_checkout_template = DHP_ABSPATH . 'templates/dhp-checkout-embed-express.php';
 
-					return $dhp_checkout_template;
+						return $dhp_checkout_template;
+					} else {
+						$dhp_checkout_template = DHP_ABSPATH . 'templates/dhp-checkout-noembed-express.php';
+
+						return $dhp_checkout_template;
+					}
 				} else {				
 					$dhp_checkout_template = DHP_ABSPATH . 'templates/dhp-checkout.php';
 
