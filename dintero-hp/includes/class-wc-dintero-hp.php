@@ -93,9 +93,12 @@ final class WC_Dintero_HP {
 	public function wc_npr_filter_billing_fields( $address_fields ) {
 		$address_fields['billing_first_name']['required'] = false;
 		$address_fields['billing_last_name']['required'] = false;
+		$address_fields['billing_company']['required'] = false;
 		$address_fields['billing_address_1']['required'] = false;
+		$address_fields['billing_address_2']['required'] = false;
 		$address_fields['billing_country']['required'] = false;
 		$address_fields['billing_city']['required'] = false;
+		$address_fields['billing_state']['required'] = false;
 		$address_fields['billing_postcode']['required'] = false;
 		$address_fields['billing_phone']['required'] = false;
 		$address_fields['billing_email']['required'] = false;
@@ -106,8 +109,11 @@ final class WC_Dintero_HP {
 	public function wc_npr_filter_shipping_fields( $address_fields ) {
 		$address_fields['shipping_first_name']['required'] = false;
 		$address_fields['shipping_last_name']['required'] = false;
+		$address_fields['shipping_company']['required'] = false;
 		$address_fields['shipping_address_1']['required'] = false;
+		$address_fields['shipping_address_2']['required'] = false;
 		$address_fields['shipping_city']['required'] = false;
+		$address_fields['shipping_state']['required'] = false;
 		$address_fields['shipping_postcode']['required'] = false;
 		$address_fields['shipping_country']['required'] = false;
 
