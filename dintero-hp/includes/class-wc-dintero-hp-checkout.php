@@ -143,25 +143,27 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					$this->writeContainerScript();
 				}
 			} else { //normal payment
-				if (false && 'yes' == $embed_enable) {
-					$this->start_embed();
-				} else {
-					$this->insertPaymentTypeFlag(false);
-					echo( '<div id="dhp_container" class="dhp_container">' );
-						echo( '<label>Dintero Checkout</label>' );
-						
-						$icon = WCDHP()->checkout()->get_icon_checkout();
-					if ($icon) {
-						echo( '<div class="dhp_checkout_logo">' . wp_kses_post( $icon ) . '</div>' );
-					}
+				if ( false ) {
+					if ( 'yes' == $embed_enable ) {
+						$this->start_embed();
+					} else {
+						$this->insertPaymentTypeFlag(false);
+						echo( '<div id="dhp_container" class="dhp_container">' );
+							echo( '<label>Dintero Checkout</label>' );
+							
+							$icon = WCDHP()->checkout()->get_icon_checkout();
+						if ($icon) {
+							echo( '<div class="dhp_checkout_logo">' . wp_kses_post( $icon ) . '</div>' );
+						}
 
-						echo( '<div class="dhp_checkout">' );
-							echo( '<div class="dhp_ebch">' );
-								echo( '<a href="javascript:void(0);">Checkout</a>' );
+							echo( '<div class="dhp_checkout">' );
+								echo( '<div class="dhp_ebch">' );
+									echo( '<a href="javascript:void(0);">Checkout</a>' );
+								echo( '</div>' );
 							echo( '</div>' );
 						echo( '</div>' );
-					echo( '</div>' );
-					$this->writeContainerScript();
+						$this->writeContainerScript();
+					}
 				}
 			}	    	
 
@@ -219,25 +221,27 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				}
 
 			} else { //normal payment
-				if (false && 'yes' == $embed_enable) {
-					$this->start_embed( false, true );
-				} else {
-					$this->insertPaymentTypeFlag(false);
-					echo( '<div id="dhp_container" class="dhp_container">' );
-						echo( '<label>Dintero Checkout</label>' );
-						
-						$icon = WCDHP()->checkout()->get_icon_checkout();
-					if ($icon) {
-						echo( '<div class="dhp_checkout_logo">' . wp_kses_post( $icon ) . '</div>' );
-					}
+				if ( false ) {
+					if ( 'yes' == $embed_enable) {
+						$this->start_embed( false, true );
+					} else {
+						$this->insertPaymentTypeFlag(false);
+						echo( '<div id="dhp_container" class="dhp_container">' );
+							echo( '<label>Dintero Checkout</label>' );
+							
+							$icon = WCDHP()->checkout()->get_icon_checkout();
+						if ($icon) {
+							echo( '<div class="dhp_checkout_logo">' . wp_kses_post( $icon ) . '</div>' );
+						}
 
-						echo( '<div class="dhp_checkout">' );
-							echo( '<div class="dhp_ebch">' );
-								echo( '<a href="javascript:void(0);">Checkout</a>' );
+							echo( '<div class="dhp_checkout">' );
+								echo( '<div class="dhp_ebch">' );
+									echo( '<a href="javascript:void(0);">Checkout</a>' );
+								echo( '</div>' );
 							echo( '</div>' );
 						echo( '</div>' );
-					echo( '</div>' );
-					$this->writeContainerScript();
+						$this->writeContainerScript();
+					}
 				}
 			}
 

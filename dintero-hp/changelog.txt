@@ -1,5 +1,10 @@
 *** WooCommerce Dintero Plugin Changelog ***
 
+2020-03-31
+
+ * use payment options (list) for not express mode
+
+
 2020-03-26
 
  * removed order review from embed + express mode

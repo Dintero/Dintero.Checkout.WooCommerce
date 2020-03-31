@@ -44,7 +44,7 @@ register_deactivation_hook( __FILE__, 'deactivate_dintero_hp' );
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
  */
-//require plugin_dir_path( __FILE__ ) . 'includes/class-dintero-hp.php';
+require plugin_dir_path( __FILE__ ) . 'includes/class-dintero-hp.php';
 require plugin_dir_path( __FILE__ ) . 'includes/class-wc-dintero-hp.php';
 
 /**
@@ -54,14 +54,14 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-wc-dintero-hp.php';
  * then kicking off the plugin from this point in the file does
  * not affect the page life cycle.
  */
-/*
+
 function run_dintero_hp() {
 	$plugin_basename = plugin_basename( __FILE__ );
 	$plugin = new Dintero_HP($plugin_basename);
 	$plugin->run();
 }
 run_dintero_hp();
-*/
+
 /**
  * Get instance of WooCommerce Dintero Plugin
  */
