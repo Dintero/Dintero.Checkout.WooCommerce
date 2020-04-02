@@ -4,6 +4,7 @@
 2020-04-02
 
  * updated UI for embed and express mode, display payment as tab
+ * updated checkout logo & adjusted setting page to use the one under payment
 
 
 2020-03-31

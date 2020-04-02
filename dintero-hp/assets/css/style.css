@@ -102,9 +102,10 @@
 }
 
 .dhp_footer_logo img {
-	width: 100px;
+	max-height: 100px;
 	max-width: 100%;
 	margin: auto;
+	width: auto;
 }
 
 .woocommerce-checkout #customer_details {
@@ -132,14 +133,29 @@
 }
 
 .dhp-checkout-tab>div:hover {
-	background-color: rgba(200, 200, 200, 1);
+	border-top: 1px solid rgb(150,150,150);
+	background: linear-gradient(180deg, rgba(230,230,230,1) 0%, rgba(240,240,240,1) 12%, rgba(255,255,255,1) 100%);
 	cursor: pointer;
 }
 
 .dhp-checkout-tab>div.active {
-	background-color: rgba(200, 200, 200, 1);
+	border-top: 1px solid rgb(203,203,203);
+	border-bottom: 1px solid rgb(255,255,255);
+	background: rgb(203,203,203);
+	background: linear-gradient(180deg, rgba(215,215,215,1) 0%, rgba(235,235,235,1) 25%, rgba(255,255,255,1) 100%);
 	font-weight: bold;
 	color: #000;
+}
+
+#dhp-embed .dhp-logo {
+	text-align: center;
+	width: auto;
+    margin: auto;
+}
+
+#dhp-embed .dhp-logo img {
+	width: auto;
+    margin: auto;
 }
 
 @media (max-width: 375px) {

@@ -343,11 +343,11 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 	}
 
 	private function get_icon_footer() {
-		return WCDHP()->checkout()->get_icon_footer(420);
+		return WCDHP()->checkout()->get_icon_footer();
 	}
 
 	private function get_icon_checkout() {
-		return WCDHP()->checkout()->get_icon_checkout(420);
+		return WCDHP()->checkout()->get_icon_checkout();
 	}
 }
 

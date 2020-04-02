@@ -55,6 +55,10 @@ class WC_Dintero_HP_Setting extends WC_Settings_API {
 	}
 
 	public function get( $key ) {
-		return $this->get_option($key);
+		return $this->get_option( $key );
+	}
+
+	public function getDefault( $key ) {
+		return $this->get_field_default( $key );
 	}
 }

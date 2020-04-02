@@ -259,7 +259,69 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'default'     => - 1,
 				'description' => __( 'Select an additional status that will be used to refund the order payment. Status "Refunded" will be always used to refund the order payment.' ),
 				'desc_tip'    => true
-			)
+			),
+
+			'embed_settings'                => array(
+				'title'       => __( 'Embedding Dintero Checkout:' ),
+				'type'        => 'title',
+				'description' => ''
+			),
+			'embed_enable'                        => array(
+				'title'       => __( 'Enable:' ),
+				'label'       => __( 'Enable Embed Checkout' ),
+				'type'        => 'checkbox',
+				'description' => __( 'Enable or disable Dintero Embed Checkout on Checkout page' ),
+				'default'     => 'yes',
+				'desc_tip'    => true,
+			),
+			'express_settings'                => array(
+				'title'       => __( 'Checkout Express' ),
+				'type'        => 'title',
+				'description' => ''
+			),
+			'express_enable'                        => array(
+				'title'       => __( 'Enable:' ),
+				'label'       => __( 'Enable Checkout Express' ),
+				'type'        => 'checkbox',
+				'description' => __( 'Enable or disable Dintero Checkout Express on Checkout page' ),
+				'default'     => 'yes',
+				'desc_tip'    => true,
+			),
+			'express_rewards'                        => array(
+				'title'       => __( 'Enable Rewards:' ),
+				'label'       => __( 'Enable Checkout Express Rewards' ),
+				'type'        => 'checkbox',
+				'description' => __( 'Enable or disable Dintero Checkout Express Rewards' ),
+				'default'     => 'yes',
+				'desc_tip'    => true,
+			),
+			'express_shopping_price'                        => array(
+				'title'       => __( 'Show Shopping Price:' ),
+				'label'       => __( 'Show/Hide Shipping Price' ),
+				'type'        => 'checkbox',
+				'description' => __( 'Show or hide shopping price' ),
+				'default'     => 'yes',
+				'desc_tip'    => true,
+			),
+			'branding_title'                => array(
+				'title'       => __( 'Branding:' ),
+				'type'        => 'title',
+				'description' => ''
+			),
+			'branding_footer_url'            => array(
+				'title'       => __( 'URL (Footer):' ),
+				'type'        => 'text',
+				'description' => __( 'You can change color & size in Dintero Backoffice. Paste the new URL here:<br />Preview:<div>' . $this->get_icon_footer() . '</div>'),
+				'default'     => '',
+				'desc_tip'    => false,
+			),
+			'branding_checkout_url'            => array(
+				'title'       => __( 'URL (In Checkout):' ),
+				'type'        => 'text',
+				'description' => __( 'You can change color & size in Dintero Backoffice. Paste the new URL here:<br />Preview:<div>' . $this->get_icon_checkout() . '</div>' ),
+				'default'     => '',
+				'desc_tip'    => false,
+			),
 		);
 	}
 
@@ -1062,5 +1124,13 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				exit;
 			}
 		}
+	}
+
+	private function get_icon_footer() {
+		return WCDHP()->checkout()->get_icon_footer();
+	}
+
+	private function get_icon_checkout() {
+		return WCDHP()->checkout()->get_icon_checkout();
 	}
 }

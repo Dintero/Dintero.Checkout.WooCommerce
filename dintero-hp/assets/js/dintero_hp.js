@@ -9,7 +9,7 @@ jQuery( function( $ ) {
 		 */
 		init: function() {
 			$( document ).ready(function() {
-			    $('footer').before($('.dhp_footer_logo'));
+			    $('.site-footer').prepend($('.dhp_footer_logo'));
 			});			
 		}
 	};

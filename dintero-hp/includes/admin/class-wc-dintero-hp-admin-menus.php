@@ -32,9 +32,9 @@ class WC_Dintero_HP_Admin_Menus {
 	 * Add menu item.
 	 */
 	public function settings_menu() {
-		$settings_page = add_submenu_page( 'woocommerce', __( 'Dintero Checkout Settings', 'woocommerce' ), __( 'Dintero Checkout Settings', 'woocommerce' ), 'manage_woocommerce', 'wc-dintero-settings', array( $this, 'settings_page' ) );
+		//$settings_page = add_submenu_page( 'woocommerce', __( 'Dintero Checkout Settings', 'woocommerce' ), __( 'Dintero Checkout Settings', 'woocommerce' ), 'manage_woocommerce', 'wc-dintero-settings', array( $this, 'settings_page' ) );
 
-		add_action( 'load-' . $settings_page, array( $this, 'settings_page_init' ) );
+		//add_action( 'load-' . $settings_page, array( $this, 'settings_page_init' ) );
 	}
 
 	/**
@@ -48,7 +48,7 @@ class WC_Dintero_HP_Admin_Menus {
 		WC_Dintero_HP_Admin_Settings::get_settings_pages();
 
 		$nonce = wp_create_nonce( 'dhp-nonce' );
-			echo( '<input type="hidden" id="_dhp_setting_nonce" name="_dhp_setting_nonce" value="1a9c366a6c" />' );
+			echo( '<input type="hidden" id="_dhp_setting_nonce" name="_dhp_setting_nonce" value="' . esc_attr( $nonce ) . '" />' );
 
 		// Add any posted messages.
 		if ( ! empty( $_GET['wc_error'] ) ) { // WPCS: input var okay, CSRF ok.

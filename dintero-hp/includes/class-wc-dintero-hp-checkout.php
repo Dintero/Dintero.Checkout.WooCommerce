@@ -408,11 +408,27 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	 *
 	 * @return string
 	 */
-	public function get_icon( $width = '') {
+	public function get_icon( $type = '' ) {
 		if ($this->profile_id) {
-			$w_str = $width && is_numeric($width) ? $width : 420;
+			$logo_w = WCDHP()->setting()->get('checkout_logo_width');
 
-			$icon_url = 'https://backoffice.dintero.com/api/checkout/v1/branding/profiles/' . $this->profile_id . '/type/colors/width/' . $w_str . '/dintero_top_frame.svg';
+			$width = WCDHP()->setting()->get('checkout_logo_width');
+			if ( !$width ) {
+				$width = WCDHP()->setting()->getDefault('checkout_logo_width');
+			}
+
+			$w_str = $width && is_numeric($width) ? $width : $logo_w;
+
+			$template = 'dintero_left_frame'; //or dintero_top_frame
+
+			if ( 'checkout' == $type ) {
+				$logos = 'visa_mastercard_vipps_swish_instabank';
+				$variant = 'colors'; //or mono
+				$color = 'ffffff';				
+				$icon_url = 'https://checkout.dintero.com/v1/branding/logos/' . $logos . '/variant/' . $variant . '/color/' . $color . '/width/' . $w_str . '/' . $template . '.svg';
+			} else {
+				$icon_url = 'https://backoffice.dintero.com/api/checkout/v1/branding/profiles/' . $this->profile_id . '/type/colors/width/' . $w_str . '/' . $template . '.svg';
+			}
 
 			$icon_html = '<img src="' . esc_attr( $icon_url ) . '" alt="Dintero Logo" />';
 
@@ -425,11 +441,16 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	 *
 	 * @return string url
 	 */
-	public function get_icon_footer( $width = '') {
+	public function get_icon_footer() {
 		$icon_url = trim(WCDHP()->setting()->get('branding_footer_url'));
 		if ('' == $icon_url) {
-			$icon_url = $this->get_icon($width);
+			$icon_url = $this->get_icon();
 		} else {
+			$width = WCDHP()->setting()->get('checkout_logo_width');
+			if ( !$width ) {
+				$width = WCDHP()->setting()->getDefault('checkout_logo_width');
+			}
+
 			$w_str = $width && is_numeric($width) ? ' width="' . $width . '"' : '';
 			$icon_url = '<img src="' . esc_attr( $icon_url ) . '" alt="Dintero Logo"' . $w_str . ' />';
 		}
@@ -442,11 +463,16 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	 *
 	 * @return string url
 	 */
-	public function get_icon_checkout( $width = '') {
+	public function get_icon_checkout() {
 		$icon_url = trim(WCDHP()->setting()->get('branding_checkout_url'));
 		if ('' == $icon_url) {
-			$icon_url = $this->get_icon($width);
+			$icon_url = $this->get_icon( 'checkout' );
 		} else {
+			$width = WCDHP()->setting()->get('checkout_logo_width');
+			if ( !$width ) {
+				$width = WCDHP()->setting()->getDefault('checkout_logo_width');
+			}
+
 			$w_str = $width && is_numeric($width) ? ' width="' . $width . '"' : '';
 			$icon_url = '<img src="' . esc_attr( $icon_url ) . '" alt="Dintero Logo"' . $w_str . ' />';
 		}
@@ -998,8 +1024,10 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$id = isset($results['id']) ? $results['id'] : '';
 
 			if (1 == $result && $url) {
+
 				echo( '<div id="dhp-embed">' );
 				$this->insertPaymentTypeFlag($express);
+				echo( '<div class="dhp-logo">' . wp_kses_post( WCDHP()->checkout()->get_icon_checkout() ) . '</div>' );
 				echo( '<div id="dintero-checkout-iframe"></div>' );
 				echo( '</div>' );
 
