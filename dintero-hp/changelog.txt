@@ -1,5 +1,11 @@
 *** WooCommerce Dintero Plugin Changelog ***
 
+
+2020-04-02
+
+ * updated UI for embed and express mode, display payment as tab
+
+
 2020-03-31
 
  * use payment options (list) for not express mode

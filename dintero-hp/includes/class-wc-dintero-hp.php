@@ -75,13 +75,14 @@ final class WC_Dintero_HP {
 		add_action( 'woocommerce_removed_coupon', array( $this, 'removed_coupon' ), 10, 3 ); 
 
 		add_action( 'template_redirect', array( $this, 'check_thankyou' ), 10, 3 ); 
+		add_action( 'dhp_payment_tab', array( $this, 'create_checkout_nav' ));
 
-		if ( 'no' == $express_enable || ( 'yes' == $express_enable && 'no' == $embed_enable ) ) {
+		//if ( 'no' == $express_enable || ( 'yes' == $express_enable && 'no' == $embed_enable ) ) {
 			add_action( 'dhp_checkout_billing', array( $this, 'checkout_form_billing' ) );
 			add_action( 'dhp_checkout_shipping', array( $this, 'checkout_form_shipping' ) );
-		}
+		//}
 
-		if ('yes' == $express_enable) {
+		if ( 'yes' == $express_enable && 'no' == $embed_enable ) {
 			//make billing fields not required in checkout
 			add_filter( 'woocommerce_billing_fields', array( $this, 'wc_npr_filter_billing_fields' ), 10, 1 );
 
@@ -151,7 +152,7 @@ final class WC_Dintero_HP {
 	 * Include script and style
 	 */
 	public function init_script() {
-		wp_enqueue_style( 'style', plugin_dir_url(__DIR__) . 'assets/css/style.css', array(), '1.0.04', 'all' );
+		wp_enqueue_style( 'style', plugin_dir_url(__DIR__) . 'assets/css/style.css', array(), '1.0.05', 'all' );
 
 		$handle = 'dhp-hp';
 		$src = plugin_dir_url(__DIR__) . 'assets/js/dintero_hp.js';
@@ -391,5 +392,30 @@ final class WC_Dintero_HP {
 	 */
 	public function checkout_form_shipping() {
 		WC()->checkout()->checkout_form_shipping();
+	}
+
+	public function create_checkout_nav() {
+		$gateways = WC()->payment_gateways->get_available_payment_gateways();
+		$enabled_gateways = array();
+
+		if ( $gateways ) {
+			foreach ( $gateways as $gateway ) {
+				if ( 'yes' == $gateway->enabled ) {
+					$enabled_gateways[] = $gateway;
+				}
+			}
+		}
+
+		if ( count( $enabled_gateways ) > 1) {
+			echo( '<div class="dhp-checkout-tab">' );
+			foreach ( $enabled_gateways as $gateway ) {
+				$title = $gateway->settings['title'] ? $gateway->settings['title'] : '';
+				$id = $gateway->id ? $gateway->id : '';
+				$rel = 'dintero-hp' == $id ? 'dhp-embed' : 'dhp-others';
+				
+				echo( '<div id="' . esc_attr( $id ) . '" rel="' . esc_attr ( $rel ) . '">' . esc_html ( $title ) . '</div>' );
+			}
+			echo( '</div>' );
+		}
 	}
 }

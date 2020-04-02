@@ -12,8 +12,14 @@
 }
 
 #order_review.no-payments .wc_payment_methods,
-#dhp-order-review.no-payments .wc_payment_methods {
+#dhp-order-review.no-payments .wc_payment_methods,
+#dhp-wrapper.embexp .wc_payment_methods {
 	display: none;
+}
+
+#dhp-wrapper.embexp {
+	border: 1px solid #eee;
+	padding: 5px;
 }
 
 #order_review.no-payments #place_order,
@@ -92,6 +98,7 @@
 
 .dhp_footer_logo {
 	text-align: center;
+	padding: 15px;
 }
 
 .dhp_footer_logo img {
@@ -110,6 +117,29 @@
 
 .dhp-hide {
 	display: none;
+}
+
+.dhp-checkout-tab {
+	display: flex;
+	margin-bottom: 25px;
+}
+
+.dhp-checkout-tab>div {
+	flex: auto;
+	border: 1px solid #e8e8e8;
+	text-align: center;
+	padding: 10px 10px;
+}
+
+.dhp-checkout-tab>div:hover {
+	background-color: rgba(200, 200, 200, 1);
+	cursor: pointer;
+}
+
+.dhp-checkout-tab>div.active {
+	background-color: rgba(200, 200, 200, 1);
+	font-weight: bold;
+	color: #000;
 }
 
 @media (max-width: 375px) {

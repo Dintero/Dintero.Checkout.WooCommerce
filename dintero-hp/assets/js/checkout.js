@@ -74,7 +74,39 @@ jQuery( function( $ ) {
 						//express enable						
 						$('.woocommerce-checkout').addClass("dhp-exp");
 					}
-				}			    
+				}
+
+				if($('#dhp-wrapper .dhp-checkout-tab>div').length > 0){
+					jQuery.each( $('#dhp-wrapper .dhp-checkout-tab>div'), function( i, val ) {
+	  					var rel = $(this).attr('rel');
+	  					var o = $('#'+rel);
+	  					if(o.length>0){
+		  					o.addClass('dhp_ptg').css('display', 'none');
+		  					$(this).click(function(){
+		  						var a_rel = $(this).attr('rel');
+		  						var a_id = $(this).attr('id');
+		  						$('.dhp_ptg').not('#'+rel).css('display', 'none');
+		  						$('#dhp-wrapper .dhp-checkout-tab>div').removeClass('active');
+		  						$('#'+a_rel).css('display', 'block');
+		  						$(this).addClass('active');
+		  						$('input:radio[name=payment_method]').filter('[value='+a_id+']').attr('checked', true);
+
+		  						var submit_btn = $('button#place_order');
+								submit_btn.html(submit_btn.attr('data-value'));
+		  					})
+		  				}
+					});
+
+					//show first tab content
+					var fst = $('#dhp-wrapper .dhp-checkout-tab>div:first');
+					var fst_rel = fst.attr('rel');
+					$('#'+fst_rel).css('display', 'block');
+					fst.addClass('active');
+
+					var submit_btn = $('button#place_order');
+					console.log(submit_btn.attr('data-value'));
+					submit_btn.html(submit_btn.attr('data-value'));
+				}
 			});			
 		},
 

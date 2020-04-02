@@ -20,8 +20,18 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 <form name="checkout" class="checkout woocommerce-checkout">
 <?php do_action( 'dhp_before_wrapper' ); ?>
-	<div id="dhp-wrapper">
+	<div id="dhp-wrapper" class='embexp'>
+		<?php do_action( 'dhp_payment_tab' ); ?>
+		<div id="dhp-others">
+			<div class='dhp_billing'>
+				<?php do_action( 'dhp_checkout_billing' ); ?>
+			</div>
+			<div class='dhp_shipping'>
+				<?php do_action( 'dhp_checkout_shipping' ); ?>
+			</div>
 
+			<?php woocommerce_checkout_payment(); ?>
+		</div>
 	</div>
 	<?php do_action( 'dhp_after_wrapper' ); ?>
 </form>
