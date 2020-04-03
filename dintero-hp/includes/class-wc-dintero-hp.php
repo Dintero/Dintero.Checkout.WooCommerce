@@ -152,7 +152,7 @@ final class WC_Dintero_HP {
 	 * Include script and style
 	 */
 	public function init_script() {
-		wp_enqueue_style( 'style', plugin_dir_url(__DIR__) . 'assets/css/style.css', array(), '1.0.05', 'all' );
+		wp_enqueue_style( 'style', plugin_dir_url(__DIR__) . 'assets/css/style.css', array(), '1.0.07', 'all' );
 
 		$handle = 'dhp-hp';
 		$src = plugin_dir_url(__DIR__) . 'assets/js/dintero_hp.js';
@@ -407,13 +407,19 @@ final class WC_Dintero_HP {
 		}
 
 		if ( count( $enabled_gateways ) > 1) {
+			$tab_w = 100 / count( $enabled_gateways );
+
 			echo( '<div class="dhp-checkout-tab">' );
 			foreach ( $enabled_gateways as $gateway ) {
 				$title = $gateway->settings['title'] ? $gateway->settings['title'] : '';
 				$id = $gateway->id ? $gateway->id : '';
 				$rel = 'dintero-hp' == $id ? 'dhp-embed' : 'dhp-others';
 				
-				echo( '<div id="' . esc_attr( $id ) . '" rel="' . esc_attr ( $rel ) . '">' . esc_html ( $title ) . '</div>' );
+				if ( 'dintero-hp' == $id ) {
+					echo( '<div id="' . esc_attr( $id ) . '" rel="' . esc_attr ( $rel ) . '" style="width:' . esc_attr( $tab_w ) . '%;background-image: url(\'' . wp_kses_post( WCDHP()->checkout()->get_icon_tab() ) . '\');"></div>' );
+				} else {
+					echo( '<div id="' . esc_attr( $id ) . '" rel="' . esc_attr ( $rel ) . '" style="width:' . esc_attr( $tab_w ) . '%;">' . esc_html ( $title ) . '</div>' );
+				}
 			}
 			echo( '</div>' );
 		}

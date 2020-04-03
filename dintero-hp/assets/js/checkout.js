@@ -104,7 +104,6 @@ jQuery( function( $ ) {
 					fst.addClass('active');
 
 					var submit_btn = $('button#place_order');
-					console.log(submit_btn.attr('data-value'));
 					submit_btn.html(submit_btn.attr('data-value'));
 				}
 			});			
