@@ -425,8 +425,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				$logos = 'visa_mastercard_vipps_swish_instabank';
 				$variant = 'colors'; //or mono
 				$color = 'ffffff';				
-				$icon_url = 'https://checkout.dintero.com/v1/branding/logos/' . $logos . '/variant/' . $variant . '/color/' . $color . '/width/' . $w_str . '/' . $template . '.svg';
+				//$icon_url = 'https://checkout.dintero.com/v1/branding/logos/' . $logos . '/variant/' . $variant . '/color/' . $color . '/width/' . $w_str . '/' . $template . '.svg';
+				$template = 'dintero_left_frame';
+
+				$icon_url = 'https://checkout.dintero.com/v1/branding/profiles/' . $this->profile_id . '/variant/' . $variant . '/color/' . $color . '/width/' . $w_str . '/' . $template . '.svg';
 			} else {
+				$template = 'dintero_top_frame';
 				$icon_url = 'https://backoffice.dintero.com/api/checkout/v1/branding/profiles/' . $this->profile_id . '/type/colors/width/' . $w_str . '/' . $template . '.svg';
 			}
 
