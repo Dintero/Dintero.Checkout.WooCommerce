@@ -89,6 +89,9 @@ final class WC_Dintero_HP {
 			//make shipping fields not required in checkout
 			add_filter( 'woocommerce_shipping_fields', array( $this, 'wc_npr_filter_shipping_fields' ), 10, 1 );
 		}
+
+		add_action( 'woocommerce_admin_order_data_after_shipping_address', array( $this, 'check_dintero_shipping' ));
+		add_action( 'dhp_business_customer', array( $this, 'check_dintero_shipping' ));		
 	}
 
 	public function wc_npr_filter_billing_fields( $address_fields ) {
@@ -354,27 +357,24 @@ final class WC_Dintero_HP {
 
 				if ( 'yes' == $express_enable ) {
 					if ( 'yes' == $embed_enable ) {
-						$dhp_checkout_template = DHP_ABSPATH . 'templates/dhp-checkout-embed-express.php';
-
-						return $dhp_checkout_template;
+						return DHP_ABSPATH . 'templates/dhp-checkout-embed-express.php';
 					} else {
-						$dhp_checkout_template = DHP_ABSPATH . 'templates/dhp-checkout-noembed-express.php';
-
-						return $dhp_checkout_template;
+						return DHP_ABSPATH . 'templates/dhp-checkout-noembed-express.php';
 					}
 				} else {				
-					$dhp_checkout_template = DHP_ABSPATH . 'templates/dhp-checkout.php';
-
-					return $dhp_checkout_template;
+					return DHP_ABSPATH . 'templates/dhp-checkout.php';
 				}
 			}
 
 			// Pay.
 			if ( 'checkout/form-pay.php' === $template_name ) {
-				$dhp_pay_template = DHP_ABSPATH . 'templates/dhp-pay.php';
-
-				return $dhp_pay_template;
+				return DHP_ABSPATH . 'templates/dhp-pay.php';
 			}			
+		}
+
+		// Order detail customer info
+		if ( 'order/order-details-customer.php' === $template_name ) {
+			return DHP_ABSPATH . 'templates/order/order-details-customer.php';
 		}
 
 		return $template;
@@ -422,6 +422,44 @@ final class WC_Dintero_HP {
 				}
 			}
 			echo( '</div>' );
+		}
+	}
+
+	public function check_dintero_shipping( $order ) {
+		if ( ! empty( $order ) && $order instanceof WC_Order ) {
+			$payment_method = $order->get_payment_method();
+
+			if ( 'dintero-hp' == $payment_method && $order->get_transaction_id() ) {
+				$transaction_id = $order->get_transaction_id();
+
+				$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
+				if ( isset ( $transaction['shipping_address'] ) ) {
+					$shipping_addr = $transaction['shipping_address'];
+					$organization_number = isset ( $shipping_addr['organization_number'] ) ? $shipping_addr['organization_number'] : '';
+					$business_name = isset ( $shipping_addr['business_name'] ) ? $shipping_addr['business_name'] : '';
+					$co_address = isset ( $shipping_addr['co_address'] ) ? $shipping_addr['co_address'] : '';
+					$customer_reference = isset ( $shipping_addr['customer_reference'] ) ? $shipping_addr['customer_reference'] : '';
+					$cost_center = isset ( $shipping_addr['cost_center'] ) ? $shipping_addr['cost_center'] : '';
+
+					if ( $organization_number || $customer_reference || $cost_center ) {
+						if ( $organization_number ) {
+							echo ( '<p><strong>Organization Number:</strong><br />' . esc_attr( $organization_number ) . '</p>' );
+						}
+						if ( $organization_number ) {
+							echo ( '<p><strong>Business Name:</strong><br />' . esc_attr( $business_name ) . '</p>' );
+						}
+						if ( $co_address ) {
+							echo ( '<p><strong>C/O:</strong><br />' . esc_attr( $co_address ) . '</p>' );
+						}
+						if ( $customer_reference ) {
+							echo ( '<p><strong>Reference:</strong><br />' . esc_attr( $customer_reference ) . '</p>' );
+						}
+						if ( $cost_center ) {
+							echo ( '<p><strong>Cost Center:</strong><br />' . esc_attr( $cost_center ) . '</p>' );
+						}
+					}
+				}
+			}
 		}
 	}
 }
