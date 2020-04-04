@@ -429,8 +429,11 @@ final class WC_Dintero_HP {
 		if ( ! empty( $order ) && $order instanceof WC_Order ) {
 			$payment_method = $order->get_payment_method();
 
-			if ( 'dintero-hp' == $payment_method && $order->get_transaction_id() ) {
+			if ( 'dintero-hp' == $payment_method ) { // && $order->get_transaction_id()
 				$transaction_id = $order->get_transaction_id();
+				if ( !$transaction_id && isset($_GET['transaction_id']) ) {
+					$transaction_id = sanitize_text_field( $_GET['transaction_id'] );
+				}
 
 				$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
 				if ( isset ( $transaction['shipping_address'] ) ) {
