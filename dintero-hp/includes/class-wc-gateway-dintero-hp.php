@@ -1141,33 +1141,37 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 
 		$title = '';
 
-		//if ( ! empty( $order ) && $order instanceof WC_Order && $order->get_transaction_id() ) {
-		$transaction_id = $order->get_transaction_id();
-		if ( $transaction_id ) {
-			$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
+		if ( ! empty( $order ) && $order instanceof WC_Order ) { // && $order->get_transaction_id()
+			$transaction_id = $order->get_transaction_id();
+			if ( $transaction_id ) {
+				$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
 
-			$payment_product_type = isset( $transaction['payment_product_type'] ) ? $transaction['payment_product_type'] : '';
-			switch ($payment_product_type) {
-				case 'instabank.finance':
-				case 'instabank.invoice':
-					$title .= 'Instabank';
-					break;
-				case 'vipps':
-					$title .= 'Vipps';
-					break;
-				case 'payex.creditcard':
-					$title .= 'Card';
-					break;
-				case 'payex.swish':
-					$title .= 'Swish';
-					break;
-				default:
-					$title .= 'Other';
-			}
-		}
-		//}
+				$payment_product_type = isset( $transaction['payment_product_type'] ) ? $transaction['payment_product_type'] : '';
+				switch ($payment_product_type) {
+					case 'instabank.finance':
+					case 'instabank.invoice':
+						$title .= 'Instabank';
+						break;
+					case 'vipps':
+						$title .= 'Vipps';
+						break;
+					case 'payex.creditcard':
+						$title .= 'Card';
+						break;
+					case 'payex.swish':
+						$title .= 'Swish';
+						break;
+					default:
+						$title .= 'Other';
+				}
 
-		$title .= ' (via ' . $this->title . ')';
+				$title .= ' (via ' . $this->title . ')';
+			} else {
+				$title = $this->title;
+			}			
+		} else {
+			$title = $this->title;
+		}		
 
 		return apply_filters( 'woocommerce_gateway_title', $title, $this->id );
 	}
