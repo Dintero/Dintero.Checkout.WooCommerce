@@ -103,7 +103,8 @@ class WC_AJAX_HP {
 			'dhp_update_ord',
 			'dhp_update_ord_emded',
 			'dhp_update_ship',
-			'create_order'
+			'create_order',
+			'dhp_create_order'
 		);
 
 		foreach ( $ajax_events_nopriv as $ajax_event ) {
@@ -148,6 +149,159 @@ class WC_AJAX_HP {
 		}
 
 		return apply_filters( 'woocommerce_get_return_url', $return_url, $order );
+	}
+
+
+	/*
+	* The function can create order in woocommerce
+	* This funtion is used for backup callback if order does not get created in first instance
+	*
+	*/
+	public function dhp_create_order(){
+		if ( ! empty( $_GET['transaction_id'] ) ) {
+			
+			$transaction_id = sanitize_text_field( wp_unslash( $_GET['transaction_id'] ) );
+			
+			$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
+			
+			$transaction_order_id = trim($transaction['merchant_reference']);
+			if($transaction_order_id == '' && isset($transaction['merchant_reference_2'])){
+				$transaction_order_id = trim($transaction['merchant_reference_2']);
+			}
+
+			$order                = wc_get_order( $transaction_order_id );
+
+			if(!$order){
+			
+
+				$items = $transaction['items'];
+				$order = wc_create_order( array( 'status' => 'pending' ) );
+				foreach ($items as $product) {
+					$id = wc_get_product_id_by_sku( $product['id'] );
+					if($id){
+						$order->add_product(get_product( $id ),$product['quantity']);
+					}
+
+					
+				}
+			
+				if($transaction['shipping_address']['business_name']){ // if Business Checkout
+					$postMeta = get_post_meta( $order->get_id()) ;
+
+					update_post_meta( $order->get_id(), '_shipping_vat_number', sanitize_text_field($transaction['shipping_address']['organization_number'] ) );
+
+					update_post_meta( $order->get_id(), '_shipping_company', sanitize_text_field($transaction['shipping_address']['business_name'] ) );
+					update_post_meta( $order->get_id(), '_billing_company', sanitize_text_field($transaction['shipping_address']['business_name'] ) );
+
+
+					$coName = $transaction['shipping_address']['co_address'];
+					$tempName = explode(" ",$coName);
+					
+					$firstName = $tempName[0];
+					$lastName = str_replace($tempName[0],"",$coName);
+					
+					$order->set_billing_first_name( sanitize_text_field($firstName));
+					$order->set_billing_last_name( sanitize_text_field( $lastName) );
+					
+					$order->set_shipping_first_name( sanitize_text_field( $firstName) );
+					$order->set_shipping_last_name( sanitize_text_field( $lastName) );
+				}else{
+					$order->set_billing_first_name( sanitize_text_field($transaction['shipping_address']['first_name']));
+					$order->set_billing_last_name( sanitize_text_field( $transaction['shipping_address']['last_name']  ) );
+					$order->set_shipping_first_name( sanitize_text_field( $transaction['shipping_address']['first_name']) );
+					$order->set_shipping_last_name( sanitize_text_field( $transaction['shipping_address']['last_name']) );
+
+				}
+
+				
+				
+
+				$order->set_billing_country( sanitize_text_field($transaction['shipping_address']['country']) );
+				$order->set_billing_address_1( sanitize_text_field( $transaction['shipping_address']['address_line'] ) );
+				$order->set_billing_city( sanitize_text_field( $transaction['shipping_address']['postal_place'] ) );
+				$order->set_billing_postcode( sanitize_text_field( $transaction['shipping_address']['postal_code']  ) );
+				$order->set_billing_phone( sanitize_text_field( $transaction['shipping_address']['phone_number']) );
+				$order->set_billing_email( sanitize_text_field( $transaction['shipping_address']['email'] ) );
+
+				
+
+
+				$order->set_shipping_country( sanitize_text_field( $transaction['shipping_address']['country'] ) );
+				$order->set_shipping_address_1( sanitize_text_field( $transaction['shipping_address']['address_line'] ) );
+				
+				$order->set_shipping_city( sanitize_text_field( $transaction['shipping_address']['postal_place']) );
+				
+				$order->set_shipping_postcode( sanitize_text_field( $transaction['shipping_address']['postal_code'] ) );
+				update_post_meta( $order->get_id(), '_shipping_phone', sanitize_text_field($transaction['shipping_address']['phone_number'] ) );
+				update_post_meta( $order->get_id(), '_shipping_email', sanitize_text_field( $transaction['shipping_address']['email']  ) );
+
+				
+
+				// Get the customer country code
+				$country_code = $order->get_shipping_country();
+
+				// Set the array for tax calculations
+				$calculate_tax_for = array(
+				    'country' => $country_code,
+				    'state' => '', // Can be set (optional)
+				    'postcode' => '', // Can be set (optional)
+				    'city' => '', // Can be set (optional)
+				);
+
+				// Optionally, set a total shipping amount
+				$new_ship_price =$transaction['shipping_option']['amount'] / 100;
+
+				// Get a new instance of the WC_Order_Item_Shipping Object
+				$item = new WC_Order_Item_Shipping();
+				$shippingTitle = $transaction['shipping_option']['title'] ;
+				$tempTitle = explode('Shipping:', $shippingTitle);
+				
+				$item->set_method_title($tempTitle[1] );
+				$item->set_method_id( $transaction['shipping_option']['id'] ); // set an existing Shipping method rate ID
+				$item->set_total( $new_ship_price ); // (optional)
+				$item->calculate_taxes($calculate_tax_for);
+
+				$order->add_item( $item );
+
+				$order->calculate_totals();
+
+				$available_gateways = WC()->payment_gateways->payment_gateways();
+				$payment_method     = $available_gateways['dintero-hp'];
+				$order->set_payment_method( $payment_method );
+				// Set the payment product used for transaction
+				$methodName = 'Dintero - '.$transaction['payment_product'];
+				$order->set_payment_method_title($methodName);
+				$order->save();
+
+				
+
+				if ( ! empty( $order ) && $order instanceof WC_Order ) {
+					$amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
+					if ( array_key_exists( 'status', $transaction ) &&
+						 array_key_exists( 'amount', $transaction ) &&
+						 $transaction['amount'] === $amount ) {
+
+						WC()->session->set( 'order_awaiting_payment', null );
+						
+
+						if ( 'AUTHORIZED' === $transaction['status'] ) {
+
+							$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
+							self::process_authorization( $order, $transaction_id, $hold_reason );
+						} elseif ( 'CAPTURED' === $transaction['status'] ) {
+
+							$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
+							self::payment_complete( $order, $transaction_id, $note );
+						}
+					}
+				}
+				$transaction = WCDHP()->checkout()->update_transaction($transaction_id, $order->get_id());
+				
+			}
+
+
+		}
+	
 	}
 
 	/*
