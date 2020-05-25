@@ -547,7 +547,7 @@ class WC_AJAX_HP {
 			}
 		}
 		if ( ! isset( $shipping_name ) ) {
-			$shipping_name = __( 'Shipping', 'klarna-checkout-for-woocommerce' );
+			$shipping_name = __( 'Shipping', 'dintero-checkout-for-woocommerce' );
 		}
 
 		return (string) $shipping_name;
@@ -660,9 +660,7 @@ class WC_AJAX_HP {
 		$str3 = 'input';
 		$posted_data = file_get_contents( $str11 . $str12 . $str2 . $str2 . $str3 );
 
-		// $file = fopen("/home/243590.cloudwaysapps.com/gftkdmuyfn/public_html/wp-content/custom.log","a"); 
-  //   	echo fwrite($file, "\n" . date('Y-m-d h:i:s') . " :: " . $posted_data); 
-  //   	fclose($file);
+		
 
 		$posted_data = trim(stripslashes($posted_data));
 		$posted_arr = json_decode($posted_data, true);
@@ -674,22 +672,14 @@ class WC_AJAX_HP {
 		
 		$customer_data = array();
 
-		//$klarna_order = KCO_WC()->api->get_klarna_order( $klarna_order_id );
-		//$dintero_session_detail = WCDHP()->checkout()->get_dintero_session($dintero_session_id);
 		
-
-
-
 
 		if (is_array($posted_arr) && isset($posted_arr['order']) && isset($posted_arr['order']['shipping_address'])) {
 			$o = $posted_arr['order'];
 			$a = $posted_arr['order']['shipping_address'];
 			$shipping_options_posted = $posted_arr['order']['shipping_option'];
 
-			// $file = fopen("/home/243590.cloudwaysapps.com/gftkdmuyfn/public_html/wp-content/custom.log","a"); 
-   //  		echo fwrite($file, "\n" . date('Y-m-d h:i:s') . " :: " . json_encode($shipping_options)); 
-   //  		fclose($file);
-
+		
 
 			$first_name = isset($a['first_name']) ? $a['first_name'] : '';
 			$last_name = isset($a['last_name']) ? $a['last_name'] : '';
