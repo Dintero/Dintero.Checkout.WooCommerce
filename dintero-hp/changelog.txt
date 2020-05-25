@@ -1,0 +1,68 @@
+*** WooCommerce Dintero Plugin Changelog ***
+
+2020-04-04
+
+ * updated order shipping address to display information for business customer
+ * updated the order payment method, show actual payment method (via Dintero)
+
+
+2020-04-02
+
+ * updated UI for embed and express mode, display payment as tab
+ * updated checkout logo & adjusted setting page to use the one under payment
+
+
+2020-03-31
+
+ * use payment options (list) for not express mode
+
+
+2020-03-26
+
+ * removed order review from embed + express mode
+
+
+2020-03-19
+
+ * fixed express checkout total issue from no shipping country was set and system use different rate than default shipping country
+ * removed billing/shipping address from pay form
+
+
+2020-03-17
+
+ * fixed checkout page display glitches for some specific themes
+ * added template for checkout and pay form
+ * bug fixed and adjustments
+
+
+2020-03-10
+
+ * test on each payment conditions
+ * fixed on cancel order and display blank page
+ * fixed submit and return blank screen when not check "I have read and agree..." on page My Account > Order > Pay
+ * fixed when click cancel from Dintero page, it shows thank you page
+
+
+2020-02-28
+
+ * updated for phpcs compatibilities and minor adjustments
+
+2020-02-27
+
+ * commented out calling previous version of plugin
+
+2020-02-26
+
+ * adjusted display on embed and not-express settings
+
+2020-02-25
+
+ * fixed bugs
+
+2020-02-20
+
+ * updated and fixed bugs
+
+2020-02-18
+
+ * initial updates on woocommerce dintero plugin feature
