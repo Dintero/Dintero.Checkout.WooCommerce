@@ -1556,11 +1556,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	 * @return string $item_reference Cart item reference.
 	 */
 	public function get_item_reference( $product ) {
-		if ( $product->get_sku() ) {
-			$item_reference = $product->get_sku();
-		} else {
-			$item_reference = $product->get_id();
-		}
+		$item_reference = $product->get_id();
 
 		return substr( (string) $item_reference, 0, 64 );
 	}

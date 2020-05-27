@@ -177,7 +177,7 @@ class WC_AJAX_HP {
 				$items = $transaction['items'];
 				$order = wc_create_order( array( 'status' => 'pending' ) );
 				foreach ($items as $product) {
-					$id = wc_get_product_id_by_sku( $product['id'] );
+					$id = $product['id'];
 					if($id){
 						$order->add_product(get_product( $id ),$product['quantity']);
 					}
