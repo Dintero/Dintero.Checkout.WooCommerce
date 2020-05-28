@@ -1833,8 +1833,15 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		);
 		$billingPhone =  WC()->checkout()->get_value( 'billing_phone' );
 		if($billingPhone != ''){
-			$payload['order']['shipping_address']['phone_number'] = '+47'.(string) WC()->checkout()->get_value( 'billing_phone' );
-			$payload['order']['billing_address']['phone_number'] = '+47'.(string) WC()->checkout()->get_value( 'billing_phone' );
+			$phone = (string) WC()->checkout()->get_value( 'billing_phone' );
+			// Add Norwegian Phone code is there in not in number to automatic fill up iframe
+			if(strpos($phone, '+47') === false){
+			   	$phone = '+47'.$phone;
+				
+			} 
+			
+			$payload['order']['shipping_address']['phone_number'] = $phone;
+			$payload['order']['billing_address']['phone_number'] = $phone;
 			
 		}
 
