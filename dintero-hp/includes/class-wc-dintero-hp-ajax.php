@@ -249,7 +249,8 @@ class WC_AJAX_HP {
 				);
 
 				// Optionally, set a total shipping amount
-				$new_ship_price =$transaction['shipping_option']['amount'] / 100;
+				$shippingAmountWithoutVat = $transaction['shipping_option']['amount'] - $transaction['shipping_option']['vat_amount'];
+				$new_ship_price =$shippingAmountWithoutVat / 100;
 
 				// Get a new instance of the WC_Order_Item_Shipping Object
 				$item = new WC_Order_Item_Shipping();
