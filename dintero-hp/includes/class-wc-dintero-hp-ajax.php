@@ -178,7 +178,7 @@ class WC_AJAX_HP {
 				$order = wc_create_order( array( 'status' => 'pending' ) );
 				foreach ($items as $product) {
 					$id = $product['id'];
-					if($id){
+					if($id && get_product( $id )){
 						$order->add_product(get_product( $id ),$product['quantity']);
 					}
 
@@ -335,14 +335,14 @@ class WC_AJAX_HP {
 
 			$order = wc_create_order( array( 'status' => 'pending' ) );
 
-			$order->set_billing_first_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'billing_first_name' ) ));
-			$order->set_billing_last_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'billing_last_name' )  ) );
-			$order->set_billing_country( sanitize_text_field( (string) WC()->checkout()->get_value( 'billing_country' ) ) );
-			$order->set_billing_address_1( sanitize_text_field( (string) WC()->checkout()->get_value( 'billing_address_1' ) ) );
-			$order->set_billing_city( sanitize_text_field( (string) WC()->checkout()->get_value( 'billing_city' ) ) );
-			$order->set_billing_postcode( sanitize_text_field( (string) WC()->checkout()->get_value( 'billing_postcode' ) ) );
-			$order->set_billing_phone( sanitize_text_field( (string) WC()->checkout()->get_value( 'billing_phone' )) );
-			$order->set_billing_email( sanitize_text_field( (string) WC()->checkout()->get_value( 'billing_email' ) ) );
+			$order->set_billing_first_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_first_name' ) ));
+			$order->set_billing_last_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_last_name' )  ) );
+			$order->set_billing_country( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_country' ) ) );
+			$order->set_billing_address_1( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_address_1' ) ) );
+			$order->set_billing_city( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_city' ) ) );
+			$order->set_billing_postcode( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_postcode' ) ) );
+			$order->set_billing_phone( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_phone' )) );
+			$order->set_billing_email( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_email' ) ) );
 
 			$order->set_shipping_first_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_first_name' )  ) );
 			$order->set_shipping_last_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_last_name' ) ) );

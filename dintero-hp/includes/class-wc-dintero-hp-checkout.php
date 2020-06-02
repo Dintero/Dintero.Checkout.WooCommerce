@@ -1818,12 +1818,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					'email'        => (string) WC()->checkout()->get_value( 'billing_email' )
 				),
 				'billing_address'    => array(
-					'first_name'   => (string) WC()->checkout()->get_value( 'billing_first_name' ),
-					'last_name'    => (string) WC()->checkout()->get_value( 'billing_last_name' ),
-					'address_line' => (string) WC()->checkout()->get_value( 'billing_address_1' ),
-					'postal_code'  => (string) WC()->checkout()->get_value( 'billing_postcode' ),
-					'postal_place' => (string) WC()->checkout()->get_value( 'billing_city' ),
-					'country'      => (string) WC()->checkout()->get_value( 'billing_country' ),
+					'first_name'   => (string) WC()->checkout()->get_value( 'shipping_first_name' ),
+					'last_name'    => (string) WC()->checkout()->get_value( 'shipping_last_name' ),
+					'address_line' => (string) WC()->checkout()->get_value( 'shipping_address_1' ),
+					'postal_code'  => (string) WC()->checkout()->get_value( 'shipping_postcode' ),
+					'postal_place' => (string) WC()->checkout()->get_value( 'shipping_city' ),
+					'country'      => (string) WC()->checkout()->get_value( 'shipping_country' ),
 					'email'        => (string) WC()->checkout()->get_value( 'billing_email' )
 
 				),
