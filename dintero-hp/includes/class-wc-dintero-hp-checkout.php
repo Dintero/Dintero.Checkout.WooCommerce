@@ -1817,16 +1817,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					'country'      => (string) WC()->checkout()->get_value( 'shipping_country' ),
 					'email'        => (string) WC()->checkout()->get_value( 'billing_email' )
 				),
-				'billing_address'    => array(
-					'first_name'   => (string) WC()->checkout()->get_value( 'shipping_first_name' ),
-					'last_name'    => (string) WC()->checkout()->get_value( 'shipping_last_name' ),
-					'address_line' => (string) WC()->checkout()->get_value( 'shipping_address_1' ),
-					'postal_code'  => (string) WC()->checkout()->get_value( 'shipping_postcode' ),
-					'postal_place' => (string) WC()->checkout()->get_value( 'shipping_city' ),
-					'country'      => (string) WC()->checkout()->get_value( 'shipping_country' ),
-					'email'        => (string) WC()->checkout()->get_value( 'billing_email' )
-
-				),
 				'items'              => $this->order_lines
 			),
 			'profile_id' => $this->profile_id
@@ -1841,7 +1831,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			} 
 			
 			$payload['order']['shipping_address']['phone_number'] = $phone;
-			$payload['order']['billing_address']['phone_number'] = $phone;
+			
 			
 		}
 
@@ -1855,7 +1845,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$payload['express'] = $express_option;
 		//}
 	
-
+		
 		$response = wp_remote_post( $api_endpoint, array(
 			'method'    => 'POST',
 			'headers'   => $headers,
