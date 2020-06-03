@@ -1,5 +1,10 @@
 *** WooCommerce Dintero Plugin Changelog ***
 
+2020-06-02
+
+ * supports now embedded/iframe
+ * New feature: Express where the Checkout will handle the name, address and shipping
+
 2020-04-04
 
  * updated order shipping address to display information for business customer
