@@ -1379,7 +1379,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			}
 
 			$order_total_amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
-
+			$order_total_amount = 0;
 			if ( array_key_exists( 'status', $transaction ) &&
 				 array_key_exists( 'amount', $transaction ) &&
 				 'AUTHORIZED' === $transaction['status'] &&
@@ -1399,16 +1399,31 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 							true ) ) * 100 ) );
 					$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
 							2 ) * 100 ) : 0;
-					$item                   = array(
-						'id'          => 'item_' . $counter,
-						'description' => $order_item->get_name(),
-						'quantity'    => $order_item->get_quantity(),
-						'vat_amount'  => $item_tax_amount,
-						'vat'         => $item_tax_percentage,
-						'amount'      => $item_line_total_amount,
-						'line_id'     => $line_id
-					);
-					array_push( $items, $item );
+
+
+
+					if ( $order_item['variation_id'] ) {
+						$product = wc_get_product( $order_item['variation_id'] );
+					} else {
+						$product = wc_get_product( $order_item['product_id'] );
+					}
+					if($product){
+						$item_reference = $product->get_id();
+
+						$productId =  substr( (string) $item_reference, 0, 64 );
+						$item                   = array(
+							'id'          => $productId,
+							'description' => $order_item->get_name(),
+							'quantity'    => $order_item->get_quantity(),
+							'vat_amount'  => $item_tax_amount,
+							'vat'         => $item_tax_percentage,
+							'amount'      => $item_line_total_amount,
+							'line_id'     => $productId
+						);
+						$order_total_amount+=$item_line_total_amount;
+						array_push( $items, $item );
+					}
+					
 				}
 
 				if ( count( $order->get_shipping_methods() ) > 0 ) {
@@ -1419,17 +1434,23 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 					$item_line_total_amount = $item_total_amount + $item_tax_amount;
 					$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
 							2 ) * 100 ) : 0;
-
+					
+					
+					$shipping_method = @array_shift($order->get_shipping_methods());
+					$shipping_method_id = $shipping_method['method_id'].':'.$shipping_method['instance_id'];
+					
+					// exit;
 					$item = array(
-						'id'          => 'shipping',
-						'description' => 'Shipping: ' . $order->get_shipping_method(),
+						'id'          => (string)$shipping_method_id,
+						'description' => ', Shipping: ' . $order->get_shipping_method(),
 						'quantity'    => 1,
 						'vat_amount'  => $item_tax_amount,
 						'vat'         => $item_tax_percentage,
 						'amount'      => $item_line_total_amount,
-						'line_id'     => $line_id
+						'line_id'     => 'shipping_method'
 					);
 					array_push( $items, $item );
+					$order_total_amount+=$item_line_total_amount;
 				}
 
 				$headers = array(
@@ -1455,13 +1476,14 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				// Retrieve the body's response if no errors found
 				$response_body  = wp_remote_retrieve_body( $response );
 				$response_array = json_decode( $response_body, true );
-
+				
 				if ( array_key_exists( 'status', $response_array ) &&
 					 'CAPTURED' === $response_array['status'] ) {
 
 					$note = __( 'Payment captured via Dintero. Transaction ID: ' ) . $transaction_id;
 					$this->payment_complete( $order, $transaction_id, $note );
 				}
+				
 			}
 		}
 	}
