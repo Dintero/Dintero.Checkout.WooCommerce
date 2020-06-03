@@ -1,4 +1,7 @@
 *** WooCommerce Dintero Plugin Changelog ***
+2020-06-03
+
+ * Bugfixes
 
 2020-06-02
 
