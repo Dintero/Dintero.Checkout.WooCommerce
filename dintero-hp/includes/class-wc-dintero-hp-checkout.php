@@ -1690,8 +1690,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		//$return_url = add_query_arg( array( 'payment_successful' =>'1'), wc_get_checkout_url() );
 
 
-		//$callback_url = home_url() . '?dhp-ajax=dhp_create_order';
-		$callback_url = home_url() . '?dhp-ajax=dhp_update_ord_emded';
+		$callback_url = home_url() . '?dhp-ajax=dhp_create_order';
+		//$callback_url = home_url() . '?dhp-ajax=dhp_update_ord_emded';
 		$cart = WC()->cart;
 
 		$totals = $cart->get_totals();
@@ -1834,9 +1834,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$payload['express'] = $express_option;
 		
 		//}
-		echo '<pre>';
-		print_r($payload);
-		exit;
+		
 		
 		$response = wp_remote_post( $api_endpoint, array(
 			'method'    => 'POST',
