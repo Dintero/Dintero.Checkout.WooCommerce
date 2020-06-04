@@ -71,3 +71,9 @@
 2020-02-18
 
  * initial updates on woocommerce dintero plugin feature
+
+2020-06-04
+ * New Checkout view with improved flow
+    a. Collector issue
+    B. Vat % issue
+    C. Better layout of checkout

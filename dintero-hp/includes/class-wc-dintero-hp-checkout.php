@@ -39,7 +39,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	private $additional_cancel_status;
 	private $additional_refund_status;
 
-
+	public $separate_sales_tax = false;
 
 	// Added By Ritesh
 	public $order_lines = array();
@@ -1054,35 +1054,16 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					        .embed({
 					            container,
 					            sid: \"" . esc_attr( $id ) . "\",
-					            onPaymentAuthorized : function(event,checkout){
+					            // onPaymentAuthorized : function(event,checkout){
 					            	 
-					            	 	jQuery('.loader').css('display','block');
-					            	 	jQuery('.loader').css('opacity','1');
-					            		console.log(\"session Aut\", event);
-					            		console.log(\"checkout\",checkout);
-					            		console.log(\"session Checkout\", checkout.iframe.src);
+					            // 	 	jQuery('.loader').css('display','block');
+					            // 	 	jQuery('.loader').css('opacity','1');
+					            		
 
-					            		var response = jQuery( 'form.checkout' ).submit();  
+					            // 		var response = jQuery( 'form.checkout' ).submit();  
 
-					            		// Dont need to user create_order as we are using default WooCommerce Checout form
-					     //        		var data = {
-										//         action: 'create_order',
-										//         post_data: checkoutSessionData,
-										//         iframe_src: checkout.iframe.src
-										//     };
-					     //        		var url = \"".home_url().'?dhp-ajax=create_order'."\";
-										    
-										// jQuery.ajax({
-										// 	type:		'POST',
-										// 	url:		url,
-										// 	data:		data,
-											
-										// 	success:	function( result ) {
-										// 					console.log(result.redirect);
-										// 					window.location = result.redirect ; 
-										// 				}
-										// 	});
-					            	},
+					            		
+					            // 	},
 					            onSession: function(event, checkout) {
 					                console.log(\"session\", event.session);
 					                var ss = event.session;
@@ -1391,14 +1372,14 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$shipping_rates = WC_Tax::get_shipping_tax_rates();
 			$vat            = array_shift( $shipping_rates );
 			if ( isset( $vat['rate'] ) ) {
-				$shipping_tax_rate = round( $vat['rate'] * 100 );
+				$shipping_tax_rate = round( $vat['rate']  );
 			} else {
 				$shipping_tax_rate = 0;
 			}
 		} else {
 			$shipping_tax_rate = 0;
 		}
-
+		
 		return round( $shipping_tax_rate );
 	}
 
@@ -1422,7 +1403,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$shipping_tax_amount = 0;
 		} else {
 			$shiping_total_amount        = $this->get_shipping_amount();
-			$shipping_total_exluding_tax = $shiping_total_amount / ( 1 + ( $this->get_shipping_tax_rate() / 10000 ) );
+			$shipping_total_exluding_tax = $shiping_total_amount / ( 1 + ( $this->get_shipping_tax_rate() / 100 ) );
 			$shipping_tax_amount         = $shiping_total_amount - $shipping_total_exluding_tax;
 		}
 		return round( $shipping_tax_amount );
@@ -1464,12 +1445,17 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$item_tax_amount = 0;
 		} else {
 			// $item_tax_amount = $cart_item['line_tax'] * 100;
-			$item_total_amount       = $this->get_item_total_amount( $cart_item, $product );
-			$item_total_exluding_tax = $item_total_amount / ( 1 + ( $this->get_item_tax_rate( $cart_item, $product ) / 10000 ) );
-			$item_tax_amount         = $item_total_amount - $item_total_exluding_tax;
+			$item_total_amount       =  $this->get_item_total_amount( $cart_item, $product );
+
+
+			// $item_total_exluding_tax = $item_total_amount / ( 1 + ( $this->get_item_tax_rate( $cart_item, $product ) / 100 ) );
+			
+
+			// $item_tax_amount         = $item_total_amount - $item_total_exluding_tax;
+			$item_tax_amount = ( $item_total_amount * ( $this->get_item_tax_rate( $cart_item, $product ) / 100 ) );
 		}
 
-		return round( $item_tax_amount );
+		return round( $cart_item['line_tax'] * 100);
 	}
 
 	/**
@@ -1493,7 +1479,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				$tmp_rates = $_tax->get_rates( $product->get_tax_class() );
 				$vat       = array_shift( $tmp_rates );
 				if ( isset( $vat['rate'] ) ) {
-					$item_tax_rate = round( $vat['rate'] * 100 );
+					$item_tax_rate = round( $vat['rate'] );
 				} else {
 					$item_tax_rate = 0;
 				}
@@ -1501,7 +1487,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		} else {
 			$item_tax_rate = 0;
 		}
-
+		
 		return round( $item_tax_rate );
 	}
 
@@ -1636,7 +1622,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$item_total_amount = ( ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100 );
 		}
 		*/
-
+		
 		if ( $this->separate_sales_tax ) {
 			$item_total_amount     = number_format( ( $cart_item['line_total'] ) * ( 1 + ( $this->get_item_tax_rate( $cart_item, $product ) / 10000 ) ), wc_get_price_decimals(), '.', '' ) * 100;
 			$max_order_line_amount = ( number_format( wc_get_price_including_tax( $cart_item['data'] ), wc_get_price_decimals(), '.', '' ) * $cart_item['quantity'] ) * 100;
@@ -1649,7 +1635,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		if ( $item_total_amount > $max_order_line_amount ) {
 			$item_total_amount = $max_order_line_amount;
 		}
-
+		$perItemCost = round($cart_item['line_total'] +  $cart_item['line_tax']);
+		$item_total_amount = ( $perItemCost *  $cart_item['quantity']) * 100;
 		return round( $item_total_amount );
 	}
 
@@ -1665,7 +1652,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				} else {
 					$product = wc_get_product( $cart_item['product_id'] );
 				}
-				
 
 				$dintero_item                   = array(
 					'id'          => $this->get_item_reference( $product ),
@@ -1701,7 +1687,10 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$api_endpoint = $this->checkout_endpoint . '/sessions-profile';
 
 		$return_url   = $this->get_return_url( );
+		//$return_url = add_query_arg( array( 'payment_successful' =>'1'), wc_get_checkout_url() );
 
+
+		//$callback_url = home_url() . '?dhp-ajax=dhp_create_order';
 		$callback_url = home_url() . '?dhp-ajax=dhp_update_ord_emded';
 		$cart = WC()->cart;
 
@@ -1804,8 +1793,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				'phone_number' => (string) WC()->checkout()->get_value( 'billing_phone' )
 			),
 			'order'      => array(
-				'amount'             => $order_total_amount,
-				'vat_amount'         => $order_tax_amount,
+				'amount'             => $order_total_amount ,
+				'vat_amount'         => $order_tax_amount ,
 				'currency'           => 'NOK',
 				'merchant_reference' => '',
 				'shipping_address'   => array(
@@ -1843,8 +1832,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		
 		//if ($express) {
 		$payload['express'] = $express_option;
+		
 		//}
-	
+		echo '<pre>';
+		print_r($payload);
+		exit;
 		
 		$response = wp_remote_post( $api_endpoint, array(
 			'method'    => 'POST',
@@ -2422,6 +2414,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				$headers = array(
 					'Content-type'  => 'application/json; charset=utf-8',
 					'Accept'        => 'application/json',
+					'User-Agent' => 'Dintero.Checkout.Woocomerce.1.2.1 (+https://github.com/Dintero/Dintero.Checkout.Woocomerce)',
 					'Authorization' => 'Bearer ' . $access_token
 				);
 
