@@ -2,7 +2,7 @@
 /**
 Plugin Name: Dintero Checkout
 Description: Dintero Checkout - payment gateway for WooCommerce
-Version:     2020.06.02
+Version:     2020.06.03
 Author:      Dintero
 Author URI:  mailto:integration@dintero.com
 Text Domain: dintero-hp
