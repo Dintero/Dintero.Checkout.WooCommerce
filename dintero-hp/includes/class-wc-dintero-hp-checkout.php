@@ -1687,11 +1687,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$api_endpoint = $this->checkout_endpoint . '/sessions-profile';
 
 		$return_url   = $this->get_return_url( );
-		//$return_url = add_query_arg( array( 'payment_successful' =>'1'), wc_get_checkout_url() );
-
-
-		$callback_url = home_url() . '?dhp-ajax=dhp_create_order';
-		//$callback_url = home_url() . '?dhp-ajax=dhp_update_ord_emded';
+		
+		$callback_url = home_url() . '?dhp-ajax=dhp_update_ord_emded';
 		$cart = WC()->cart;
 
 		$totals = $cart->get_totals();
@@ -1713,55 +1710,55 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$shipping_option = array();
 		$express_option = array();
 
-		//if ( count( $cart->get_shipping_methods() ) > 0 ) {
-			$counter ++;
-			$line_id                = strval( $counter );
-			$item_total_amount      = absint( strval( floatval( $cart->get_shipping_total() ) * 100 ) );
-			$item_tax_amount        = absint( strval( floatval( $cart->get_shipping_tax() ) * 100 ) );
-			$item_line_total_amount = $item_total_amount + $item_tax_amount;
-			$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
-					2 ) * 100 ) : 0;
-			
-			
-
-			$order_total_amount = $total_amount;  
 		
-			
-			$express_option = array();
-			if ( WC()->shipping->get_packages() && WC()->session->get( 'chosen_shipping_methods' )[0] )  {
-				$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
+		$counter ++;
+		$line_id                = strval( $counter );
+		$item_total_amount      = absint( strval( floatval( $cart->get_shipping_total() ) * 100 ) );
+		$item_tax_amount        = absint( strval( floatval( $cart->get_shipping_tax() ) * 100 ) );
+		$item_line_total_amount = $item_total_amount + $item_tax_amount;
+		$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
+				2 ) * 100 ) : 0;
+		
+		
 
-				$express_option = array(
-					'shipping_address_callback_url'=>$ship_callback_url,
-					'shipping_options'=>array(
-							0=>array(
-									'id'=> $this->get_shipping_reference(),
-									'line_id'=>'shipping_method',
-									//"countries"=>array($order->get_shipping_country()),
-									'country'=> (string) WC()->checkout()->get_value( 'billing_country' ),
-									'amount'=> $this->get_shipping_amount(),
-									'vat_amount'=> $this->get_shipping_tax_amount(),
-									'vat'=> $this->get_shipping_tax_rate(),
-									'title'=>'Shipping: ' . $this->get_shipping_name(),
-									'description'=>'',
-									'delivery_method'=>'delivery',
-									'operator'=>'',
-									'operator_product_id'=>'',
-									'eta'=>array(
-											'relative'=>array(
-												'minutes_min'=>0,
-												'minutes_max'=>0
-											),
-											'absolute'=>array(
-												'starts_at'=>'',
-												'ends_at'=>''
-											)
+		$order_total_amount = $total_amount;  
+	
+		
+		$express_option = array();
+		if ( WC()->shipping->get_packages() && WC()->session->get( 'chosen_shipping_methods' )[0] )  {
+			$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
+
+			$express_option = array(
+				'shipping_address_callback_url'=>$ship_callback_url,
+				'shipping_options'=>array(
+						0=>array(
+								'id'=> $this->get_shipping_reference(),
+								'line_id'=>'shipping_method',
+								//"countries"=>array($order->get_shipping_country()),
+								'country'=> (string) WC()->checkout()->get_value( 'billing_country' ),
+								'amount'=> $this->get_shipping_amount(),
+								'vat_amount'=> $this->get_shipping_tax_amount(),
+								'vat'=> $this->get_shipping_tax_rate(),
+								'title'=>'Shipping: ' . $this->get_shipping_name(),
+								'description'=>'',
+								'delivery_method'=>'delivery',
+								'operator'=>'',
+								'operator_product_id'=>'',
+								'eta'=>array(
+										'relative'=>array(
+											'minutes_min'=>0,
+											'minutes_max'=>0
 										),
-									)
-						)
-				);
-			}
-		//}
+										'absolute'=>array(
+											'starts_at'=>'',
+											'ends_at'=>''
+										)
+									),
+								)
+					)
+			);
+		}
+		
 
 
 

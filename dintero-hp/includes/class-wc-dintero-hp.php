@@ -120,7 +120,9 @@ final class WC_Dintero_HP {
         // Allow overriding their templates
         add_filter('template_include', array($this,'template_include'), 10, 1);
 
-		 $this->add_shortcodes();
+        add_action( 'wp_footer', array( $this, 'maybe_submit_wc_checkout' ), 999 );
+
+		$this->add_shortcodes();
 		
 	}
 
@@ -192,6 +194,36 @@ final class WC_Dintero_HP {
         }
     }
 
+    public function maybe_submit_wc_checkout(){
+
+        if ( ! $this->is_dintero_confirmation() ) {
+            return;
+        }
+
+        // TO DO, If push callback is used for Order creation
+    }
+    /**
+     * Checks if in  confirmation page.
+     *
+     * @return bool
+     */
+    private function is_dintero_confirmation() {
+        
+        if ( is_checkout() && is_wc_endpoint_url( 'order-received' ) ) {
+            if (strpos($_SERVER['REQUEST_URI'], "error=cancelled") !== false){ // order Cancelled
+                   $location = wc_get_cart_url();
+                    wp_safe_redirect( $location );
+                    exit;
+                }
+           if ( isset( $_GET['transaction_id'] )  && !isset($_GET['key'])) {
+                return true;
+            }
+        }
+       
+        return false;
+
+        
+    }
      // Code that will generate various versions of the 'buy now with Vipps' button IOK 2018-09-27
     public function get_buy_now_button($product_id,$variation_id=null,$sku=null,$disabled=false, $classes='') {
         $disabled = $disabled ? 'disabled' : '';
