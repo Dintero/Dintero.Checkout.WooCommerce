@@ -80,3 +80,7 @@
     a. Collector issue
     B. Vat % issue
     C. Better layout of checkout
+
+2020.06.05
+ * Cart Item price issue resolved and Express checkout from cart removed billing address fields
+   

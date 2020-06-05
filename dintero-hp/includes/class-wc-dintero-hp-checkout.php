@@ -1636,7 +1636,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$item_total_amount = $max_order_line_amount;
 		}
 		$perItemCost = round($cart_item['line_total'] +  $cart_item['line_tax']);
-		$item_total_amount = ( $perItemCost *  $cart_item['quantity']) * 100;
+		$item_total_amount = ( $perItemCost ) * 100;
 		return round( $item_total_amount );
 	}
 

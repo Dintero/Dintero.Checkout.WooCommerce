@@ -733,14 +733,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 						'postal_place' => $order->get_shipping_city(),
 						'country'      => $order->get_shipping_country()
 					),
-					'billing_address'    => array(
-						'first_name'   => $order->get_billing_first_name(),
-						'last_name'    => $order->get_billing_last_name(),
-						'address_line' => $order->get_billing_address_1(),
-						'postal_code'  => $order->get_billing_postcode(),
-						'postal_place' => $order->get_billing_city(),
-						'country'      => $order->get_billing_country()
-					),
 					'items'              => $items
 				),
 				'profile_id' => $this->profile_id
