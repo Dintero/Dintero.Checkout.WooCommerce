@@ -86,4 +86,8 @@
 
 2020.06.05 - 2
  * Payment cancelled issue resolved, Now it redirects to cart page
+
+2020.06.08
+ * Refund issue resolved
+
    

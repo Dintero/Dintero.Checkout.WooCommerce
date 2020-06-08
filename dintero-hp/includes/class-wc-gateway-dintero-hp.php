@@ -1289,8 +1289,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 
 				$payload = array(
 					'amount' => $amount,
-					'reason' => $reason,
-					'items'  => $items
+					'reason' => $reason
 				);
 
 				$response = wp_remote_post( $api_endpoint . '/' . $transaction_id . '/refund', array(
