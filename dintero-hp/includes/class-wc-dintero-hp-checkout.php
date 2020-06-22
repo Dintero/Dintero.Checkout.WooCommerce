@@ -1811,6 +1811,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		if($billingPhone != ''){
 			$phone = (string) WC()->checkout()->get_value( 'billing_phone' );
 			// Add Norwegian Phone code is there in not in number to automatic fill up iframe
+			$phone = str_replace(' ', '', $phone); // remove space from Phone number if any
 			if(strpos($phone, '+47') === false){
 			   	$phone = '+47'.$phone;
 				
