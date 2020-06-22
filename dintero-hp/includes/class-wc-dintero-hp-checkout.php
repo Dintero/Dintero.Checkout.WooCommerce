@@ -1054,16 +1054,16 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					        .embed({
 					            container,
 					            sid: \"" . esc_attr( $id ) . "\",
-					            // onPaymentAuthorized : function(event,checkout){
+					            onPaymentAuthorized : function(event,checkout){
 					            	 
-					            // 	 	jQuery('.loader').css('display','block');
-					            // 	 	jQuery('.loader').css('opacity','1');
+					            	 	jQuery('.loader').css('display','block');
+					            	 	jQuery('.loader').css('opacity','1');
 					            		
 
-					            // 		var response = jQuery( 'form.checkout' ).submit();  
+					            		var response = jQuery( 'form.checkout' ).submit();  
 
 					            		
-					            // 	},
+					            	},
 					            onSession: function(event, checkout) {
 					                console.log(\"session\", event.session);
 					                var ss = event.session;
