@@ -70,13 +70,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$environment_character                  = $this->test_mode ? 'T' : 'P';
 		$this->oid                              = $environment_character . $this->account_id;
 
-		if ( $this->callback_verification ) {
-			//Enable callback server-to-server verification
-			add_action( 'woocommerce_api_' . strtolower( get_class( $this ) ), array( $this, 'callback' ) );
-		} else {
-			//Use thank you page to check for transactions, only if callbacks are unavailable
-			add_action( 'woocommerce_thankyou', array( $this, 'callback' ), 1, 1 );
-		}
 	}
 
 	/**

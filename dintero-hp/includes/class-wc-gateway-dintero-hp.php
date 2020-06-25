@@ -67,7 +67,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			add_action( 'woocommerce_api_' . strtolower( get_class( $this ) ), array( $this, 'callback' ) );
 		} else {
 			//Use thank you page to check for transactions, only if callbacks are unavailable
-			add_action( 'woocommerce_thankyou', array( $this, 'callback' ), 1, 1 );
+			add_action( 'woocommerce_thankyou', array( $this, 'callback' ));
 		}
 
 		add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
