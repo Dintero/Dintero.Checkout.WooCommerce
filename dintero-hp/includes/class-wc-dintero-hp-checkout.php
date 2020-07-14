@@ -1681,7 +1681,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 		$return_url   = $this->get_return_url( );
 		
-		$callback_url = home_url() . '?dhp-ajax=dhp_update_ord_emded';
+		$callback_url = home_url() . '?dhp-ajax=dhp_create_order&delay_callback=10';
 		$cart = WC()->cart;
 
 		$totals = $cart->get_totals();
