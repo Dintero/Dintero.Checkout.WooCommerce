@@ -94,3 +94,5 @@
  * parameter mismatch warning solved
 2020.07.14
   * Delayed callback for backup order creation 
+2020.08.14
+  * Rounding Off of price issue resolved 

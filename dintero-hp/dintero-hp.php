@@ -14,7 +14,7 @@ Domain Path: /languages
 defined( 'ABSPATH' ) || exit;
 
 
-define( 'DINTERO_HP_VERSION', '2020.07.14' );
+define( 'DINTERO_HP_VERSION', '2020.08.14' );
 
 
 if ( ! defined( 'DHP_PLUGIN_FILE' ) ) {

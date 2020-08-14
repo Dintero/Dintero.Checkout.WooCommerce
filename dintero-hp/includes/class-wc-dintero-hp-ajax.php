@@ -278,8 +278,7 @@ class WC_AJAX_HP {
 
 				if ( ! empty( $order ) && $order instanceof WC_Order ) {
 					$amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
-					if ( array_key_exists( 'status', $transaction ) &&
-						 array_key_exists( 'amount', $transaction ) ) {
+					if ( array_key_exists( 'status', $transaction )) {
 
 						WC()->session->set( 'order_awaiting_payment', null );
 						

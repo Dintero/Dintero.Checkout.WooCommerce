@@ -1365,7 +1365,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$shipping_rates = WC_Tax::get_shipping_tax_rates();
 			$vat            = array_shift( $shipping_rates );
 			if ( isset( $vat['rate'] ) ) {
-				$shipping_tax_rate = round( $vat['rate']  );
+				$shipping_tax_rate = round( $vat['rate'] , 2 );
 			} else {
 				$shipping_tax_rate = 0;
 			}
@@ -1373,7 +1373,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$shipping_tax_rate = 0;
 		}
 		
-		return round( $shipping_tax_rate );
+		return round( $shipping_tax_rate  , 2 );
 	}
 
 	/**
@@ -1399,7 +1399,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$shipping_total_exluding_tax = $shiping_total_amount / ( 1 + ( $this->get_shipping_tax_rate() / 100 ) );
 			$shipping_tax_amount         = $shiping_total_amount - $shipping_total_exluding_tax;
 		}
-		return round( $shipping_tax_amount );
+		return round( $shipping_tax_amount  , 2 );
 	}
 
 
@@ -1448,7 +1448,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$item_tax_amount = ( $item_total_amount * ( $this->get_item_tax_rate( $cart_item, $product ) / 100 ) );
 		}
 
-		return round( $cart_item['line_tax'] * 100);
+		return round( $cart_item['line_tax'] * 100 , 2 );
 	}
 
 	/**
@@ -1472,7 +1472,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				$tmp_rates = $_tax->get_rates( $product->get_tax_class() );
 				$vat       = array_shift( $tmp_rates );
 				if ( isset( $vat['rate'] ) ) {
-					$item_tax_rate = round( $vat['rate'] );
+					$item_tax_rate = round( $vat['rate']  , 2 );
 				} else {
 					$item_tax_rate = 0;
 				}
@@ -1481,7 +1481,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$item_tax_rate = 0;
 		}
 		
-		return round( $item_tax_rate );
+		return round( $item_tax_rate  , 2  );
 	}
 
 	/**
@@ -1505,7 +1505,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		}
 		// $item_price = $item_subtotal * 100 / $cart_item['quantity'];
 		$item_price = number_format( $item_subtotal, wc_get_price_decimals(), '.', '' ) * 100;
-		return round( $item_price );
+		return round( $item_price  , 2 );
 	}
 
 	/**
@@ -1576,7 +1576,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			}
 		}
 
-		return round( $item_discount_amount );
+		return round( $item_discount_amount  , 2 );
 	}
 
 	
@@ -1594,7 +1594,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	public function get_item_discount_rate( $cart_item ) {
 		$item_discount_rate = ( 1 - ( $cart_item['line_total'] / $cart_item['line_subtotal'] ) ) * 100 * 100;
 
-		return round( $item_discount_rate );
+		return round( $item_discount_rate  , 2  );
 	}
 
 	/**
@@ -1628,9 +1628,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		if ( $item_total_amount > $max_order_line_amount ) {
 			$item_total_amount = $max_order_line_amount;
 		}
-		$perItemCost = round($cart_item['line_total'] +  $cart_item['line_tax']);
+		$perItemCost = round($cart_item['line_total'] +  $cart_item['line_tax']  , 2 );
 		$item_total_amount = ( $perItemCost ) * 100;
-		return round( $item_total_amount );
+		return round( $item_total_amount  , 2 );
 	}
 
 
@@ -1670,7 +1670,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			
 			$total_amount += $order_line['amount'];
 		}
-		return round( $total_amount );
+		return round( $total_amount  , 2 );
 	}
 
 
