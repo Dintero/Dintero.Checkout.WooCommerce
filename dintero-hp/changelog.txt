@@ -96,3 +96,12 @@
   * Delayed callback for backup order creation 
 2020.08.14
   * Rounding Off of price issue resolved 
+
+2020.09.21
+  * Pause, Update, Resume Session implemented
+  * Supports Dynamic Shipping 
+  * Discount codes in Callback Issue resolved
+  * On_Hold status for collector payment
+  * Failed status for Collector Payment
+  * Callback delay to 3 minutes to prevent duplicate orders
+  

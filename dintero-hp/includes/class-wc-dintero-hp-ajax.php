@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_AJAX_HP {
 	public $separate_sales_tax = false;
+	public static $isOnGoingPushOperation = false;
 	/**
 	 * Hook in ajax handlers.
 	 */
@@ -104,7 +105,10 @@ class WC_AJAX_HP {
 			'dhp_update_ord_emded',
 			'dhp_update_ship',
 			'create_order',
-			'dhp_create_order'
+			'dhp_create_order',
+			'check_order_status',
+			'update_session',
+			'update_shipping_postcode'
 		);
 
 		foreach ( $ajax_events_nopriv as $ajax_event ) {
@@ -150,16 +154,90 @@ class WC_AJAX_HP {
 
 		return apply_filters( 'woocommerce_get_return_url', $return_url, $order );
 	}
+	public function update_shipping_postcode(){
+		$formData = $_POST['post_code'];
+		$posted_data['postcode'] = $_POST['post_code'];
+		$customer_data = array();
+		$customer_data['billing_postcode']  = $_POST['post_code'];
+		$customer_data['shipping_postcode'] = $_POST['post_code'];
+		$country = 'NO';
+		$customer_data['billing_country']  = $country;
+			$customer_data['shipping_country'] = $country;
+		WC()->customer->set_props( $customer_data );
+		WC()->customer->save();
 
+		WC()->cart->calculate_shipping();
+		WC()->cart->calculate_totals();
+		WC()->session->reload_checkout = true;
+		wp_send_json_success(
+			array(
+				'success'  => true
+				
+			)
+		);
+		wp_die();
+	}
+	public function check_order_status(){
+		if(!isset($_POST['transaction_id'])){
+			return false;
+		}
+		$transaction_id = $_POST['transaction_id'];
 
+		//$transaction_id = 'T12000001.4XmAg8326rD1rdYFepUBe4';
+		$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
+
+		$transaction_order_id = trim($transaction['merchant_reference']);
+		if($transaction_order_id == '' && isset($transaction['merchant_reference_2'])){
+			$transaction_order_id = trim($transaction['merchant_reference_2']);
+		}
+
+		$order                = wc_get_order( $transaction_order_id );
+
+		if($order){
+            $location = $order->get_checkout_order_received_url();
+            $location = $location.'&merchant_reference='.$transaction_order_id.'&transaction_id='.$transaction_id;
+           	
+            $return = array(
+                'message' => __( 'order created', 'textdomain' ),
+                'redirect_url' => $location,
+                
+            );
+            wp_send_json_success($return);
+
+        }
+	}
+
+	public function update_session(){
+		
+		if ( apply_filters( 'dhp_check_if_needs_payment', true ) ) {
+	        if ( ! WC()->cart->needs_payment() ) {
+	            $redirectUrl = wc_get_checkout_url();
+	            $result = array(
+					'success' => false,
+					'redirect_url' => $redirectUrl
+				);
+	            wp_send_json($result);
+	        }
+        }
+		$sessionId = WC()->session->get( 'dintero_wc_order_id' );
+		$session = WCDHP()->checkout()->update_session($sessionId);
+		$result = array(
+			'success' => true
+		);
+		wp_send_json($result);
+		
+	}
 	/*
 	* The function can create order in woocommerce
 	* This funtion is used for backup callback if order does not get created in first instance
 	*
 	*/
 	public function dhp_create_order(){
+		
+		
 		if ( ! empty( $_GET['transaction_id'] ) ) {
 			
+
 			$transaction_id = sanitize_text_field( wp_unslash( $_GET['transaction_id'] ) );
 			
 			$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
@@ -169,22 +247,38 @@ class WC_AJAX_HP {
 				$transaction_order_id = trim($transaction['merchant_reference_2']);
 			}
 
+
 			$order                = wc_get_order( $transaction_order_id );
 
-			if(!$order){
-			
-
+			if(!$order && $transaction['merchant_reference_2'] == ''){
+				
+				$couponCode = array();
 				$items = $transaction['items'];
 				$order = wc_create_order( array( 'status' => 'pending' ) );
+				$order->set_transaction_id( $transaction_id );
+				$order->save();
 				foreach ($items as $product) {
 					$id = $product['id'];
 					if($id && get_product( $id )){
+						
+						$args = array(
+								'total'   => $product['amount'] / 100
+					      );
 						$order->add_product(get_product( $id ),$product['quantity']);
+
+						if(isset($product['discount_lines'])){
+							foreach($product['discount_lines'] as $discountLines){
+								$couponCode[] = $discountLines['description'];
+							}
+							
+							//$order->apply_coupon( $couponCode );  // TO DO to add coupon code
+						}
+						
 					}
 
 					
 				}
-			
+				
 				if($transaction['shipping_address']['business_name']){ // if Business Checkout
 					$postMeta = get_post_meta( $order->get_id()) ;
 
@@ -263,6 +357,14 @@ class WC_AJAX_HP {
 				$item->calculate_taxes($calculate_tax_for);
 
 				$order->add_item( $item );
+				if(count($couponCode)> 0){ // Add Coupon Code to Order
+					foreach($couponCode as $code){
+						$couponObj = new WC_Coupon($code);
+						$order->apply_coupon($couponObj);
+					}
+					
+				}
+				
 
 				$order->calculate_totals();
 
@@ -274,11 +376,16 @@ class WC_AJAX_HP {
 				$order->set_payment_method_title($methodName);
 				$order->save();
 
-				
+				// The text for the note
+				$orderNote = __("Order Created Via CallBack");
+
+				// Add the note
+				$order->add_order_note( $orderNote );
 
 				if ( ! empty( $order ) && $order instanceof WC_Order ) {
 					$amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
-					if ( array_key_exists( 'status', $transaction )) {
+					if ( array_key_exists( 'status', $transaction ) &&
+						 array_key_exists( 'amount', $transaction )) {
 
 						WC()->session->set( 'order_awaiting_payment', null );
 						
@@ -291,11 +398,31 @@ class WC_AJAX_HP {
 
 							$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
 							self::payment_complete( $order, $transaction_id, $note );
+						}elseif('ON_HOLD' === $transaction['status'] ){
+							$hold_reason = __( 'The payment is put on on-hold for manual review. The status of the payment will be updated when the manual review is finished. Transaction ID: ' ) . $transaction_id;
+							self::on_hold_order( $order, $transaction_id, $hold_reason );
+						}elseif('FAILED' === $transaction['status'] ){
+							$hold_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;
+							self::failed_order( $order, $transaction_id, $hold_reason );
 						}
+
 					}
 				}
 				$transaction = WCDHP()->checkout()->update_transaction($transaction_id, $order->get_id());
-				
+				self::$isOnGoingPushOperation = false;
+			}elseif($order && $order->get_status() == 'on-hold'){
+				if ( 'AUTHORIZED' === $transaction['status'] ) {
+
+					$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
+					self::process_authorization( $order, $transaction_id, $hold_reason );
+				} elseif ( 'CAPTURED' === $transaction['status'] ) {
+
+					$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
+					self::payment_complete( $order, $transaction_id, $note );
+				}elseif('FAILED' === $transaction['status'] ){
+					$hold_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;
+					self::failed_order( $order, $transaction_id, $hold_reason );
+				}
 			}
 
 
@@ -369,7 +496,7 @@ class WC_AJAX_HP {
 			$order->set_cart_tax( WC()->cart->get_cart_contents_tax() + WC()->cart->get_fee_tax() );
 			$order->set_shipping_tax( WC()->cart->get_shipping_tax() );
 			$order->set_total( WC()->cart->get_total( 'edit' ) );
-
+			//$order->apply_coupon($coupon_code);
 			//$order->set_transaction_id( $transaction_id );
 
 			WC()->checkout()->create_order_line_items( $order, WC()->cart );
@@ -756,13 +883,14 @@ class WC_AJAX_HP {
 	 */
 	public static function payment_complete( $order, $transaction_id = '', $note = '' ) {
 		$order->add_order_note( $note );
+		$order->set_transaction_id( $transaction_id );
 		$order->payment_complete( $transaction_id );
 		wc_reduce_stock_levels( $order->get_id() );
 		WCDHP()->checkout()->create_receipt( $order );
 	}
 
 	/**
-	 * Hold order and add note.
+	 * Pricess order and add note.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @param string $transaction_id Transaction ID.
@@ -779,6 +907,43 @@ class WC_AJAX_HP {
 		$order->update_status( $default_order_status, $reason );
 		
 	}
+
+	/**
+	 * Hold order and add note.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param string $transaction_id Transaction ID.
+	 * @param string $reason Reason why the payment is on hold.
+	 */
+	private static function on_hold_order( $order, $transaction_id = '', $reason = '' ) {
+		$order->set_transaction_id( $transaction_id );
+		
+		
+		$default_order_status = 'wc-on-hold';
+		
+
+		$order->update_status( $default_order_status, $reason );
+		
+	}
+	/**
+	 * Failed order and add note.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param string $transaction_id Transaction ID.
+	 * @param string $reason Reason why the payment is on hold.
+	 */
+	private static function failed_order( $order, $transaction_id = '', $reason = '' ) {
+		$order->set_transaction_id( $transaction_id );
+		
+		
+		$default_order_status = 'wc-failed';
+		
+
+		$order->update_status( $default_order_status, $reason );
+		
+	}
+
+	
 }
 
 WC_AJAX_HP::init();

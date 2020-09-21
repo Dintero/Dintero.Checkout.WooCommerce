@@ -852,6 +852,12 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 
 					$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $dintero_order_transaction_id;
 					self::payment_complete( $order, $transaction_id, $note );
+				}elseif('ON_HOLD' === $transaction['status'] ){
+					$hold_reason = __( 'The payment is put on on-hold for manual review. The status of the payment will be updated when the manual review is finished. Transaction ID: ' ) . $transaction_id;
+					self::on_hold_order( $order, $transaction_id, $hold_reason );
+				}elseif('FAILED' === $transaction['status'] ){
+					$hold_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;
+					self::failed_order( $order, $transaction_id, $hold_reason );
 				}
 				
 			}
@@ -1125,7 +1131,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Hold order and add note.
+	 * Process order and add note.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @param string $transaction_id Transaction ID.
@@ -1134,6 +1140,42 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	private function process_authorization( $order, $transaction_id = '', $reason = '' ) {
 		$order->set_transaction_id( $transaction_id );
 		$order->update_status( $this->get_option('default_order_status'), $reason );
+	}
+
+	/**
+	 * Hold order and add note.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param string $transaction_id Transaction ID.
+	 * @param string $reason Reason why the payment is on hold.
+	 */
+	private static function on_hold_order( $order, $transaction_id = '', $reason = '' ) {
+		$order->set_transaction_id( $transaction_id );
+		
+		
+		$default_order_status = 'wc-on-hold';
+		
+
+		$order->update_status( $default_order_status, $reason );
+		
+	}
+
+	/**
+	 * Failed order and add note.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param string $transaction_id Transaction ID.
+	 * @param string $reason Reason why the payment is on hold.
+	 */
+	private static function failed_order( $order, $transaction_id = '', $reason = '' ) {
+		$order->set_transaction_id( $transaction_id );
+		
+		
+		$default_order_status = 'wc-failed';
+		
+
+		$order->update_status( $default_order_status, $reason );
+		
 	}
 
 	/**
@@ -1235,6 +1277,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 * @return bool|WP_Error
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
+		
 		$order = wc_get_order( $order_id );
 		if ( ! empty( $order ) &&
 			 $order instanceof WC_Order &&
@@ -1274,12 +1317,12 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 
 				$amount = absint( strval( $amount ) );
 
-				$items = array(
-					array(
-						'amount'  => $amount,
-						'line_id' => '1'
-					)
-				);
+				// $items = array(
+				// 	array(
+				// 		'amount'  => $amount,
+				// 		'line_id' => '1'
+				// 	)
+				// );
 
 				$headers = array(
 					'Content-type'  => 'application/json; charset=utf-8',
@@ -1303,7 +1346,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				// Retrieve the body's response if no errors found
 				$response_body  = wp_remote_retrieve_body( $response );
 				$response_array = json_decode( $response_body, true );
-
+				// echo '<pre>';
+				// print_r($payload);
+				// print_r($response_array);
+				// exit;
 				if ( array_key_exists( 'status', $response_array ) ) {
 
 					$note = '';
@@ -1370,7 +1416,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			}
 
 			$order_total_amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
-			$order_total_amount = 0;
+
 			if ( array_key_exists( 'status', $transaction ) &&
 				 array_key_exists( 'amount', $transaction ) &&
 				 'AUTHORIZED' === $transaction['status'] &&
@@ -1390,31 +1436,24 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 							true ) ) * 100 ) );
 					$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
 							2 ) * 100 ) : 0;
-
-
-
 					if ( $order_item['variation_id'] ) {
 						$product = wc_get_product( $order_item['variation_id'] );
 					} else {
 						$product = wc_get_product( $order_item['product_id'] );
 					}
-					if($product){
-						$item_reference = $product->get_id();
+					$item_reference = $product->get_id();
 
-						$productId =  substr( (string) $item_reference, 0, 64 );
-						$item                   = array(
-							'id'          => $productId,
-							'description' => $order_item->get_name(),
-							'quantity'    => $order_item->get_quantity(),
-							'vat_amount'  => $item_tax_amount,
-							'vat'         => $item_tax_percentage,
-							'amount'      => $item_line_total_amount,
-							'line_id'     => $productId
-						);
-						$order_total_amount+=$item_line_total_amount;
-						array_push( $items, $item );
-					}
-					
+					$productId =  substr( (string) $item_reference, 0, 64 );
+					$item                   = array(
+						'id'          => $productId,
+						'description' => $order_item->get_name(),
+						'quantity'    => $order_item->get_quantity(),
+						'vat_amount'  => $item_tax_amount,
+						'vat'         => $item_tax_percentage,
+						'amount'      => $item_line_total_amount,
+						'line_id'     => $productId
+					);
+					array_push( $items, $item );
 				}
 
 				if ( count( $order->get_shipping_methods() ) > 0 ) {
@@ -1441,7 +1480,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 						'line_id'     => 'shipping_method'
 					);
 					array_push( $items, $item );
-					$order_total_amount+=$item_line_total_amount;
 				}
 
 				$headers = array(
@@ -1468,6 +1506,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				$response_body  = wp_remote_retrieve_body( $response );
 				$response_array = json_decode( $response_body, true );
 				
+
 				if ( array_key_exists( 'status', $response_array ) &&
 					 'CAPTURED' === $response_array['status'] ) {
 
@@ -1509,6 +1548,12 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 
 						$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
 						$this->payment_complete( $order, $transaction_id, $note );
+					}elseif('ON_HOLD' === $transaction['status'] ){
+						$hold_reason = __( 'The payment is put on on-hold for manual review. The status of the payment will be updated when the manual review is finished.. Transaction ID: ' ) . $transaction_id;
+						$this->on_hold_order( $order, $transaction_id, $hold_reason );
+					}elseif('FAILED' === $transaction['status'] ){
+						$hold_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;
+						$this->failed_order( $order, $transaction_id, $hold_reason );
 					}
 				}
 			}

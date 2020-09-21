@@ -95,17 +95,17 @@ final class WC_Dintero_HP {
 
 
 		// Added By Ritesh - After Cart update hook to check if cart is updated 
-		 add_action( 'woocommerce_update_cart_action_cart_updated',  array( $this, 'destroy_dintero_ongoing_session' ));	
+		 // add_action( 'woocommerce_update_cart_action_cart_updated',  array( $this, 'destroy_dintero_ongoing_session' ));	
 
-		 add_action('woocommerce_checkout_update_order_review',  array( $this, 'on_action_update_review' ),10,1);
+		 // add_action('woocommerce_checkout_update_order_review',  array( $this, 'on_action_update_review' ),10,1);
 
-		 add_action( 'woocommerce_applied_coupon',array( $this, 'destroy_dintero_ongoing_session' ) );
-		 add_action( 'woocommerce_removed_coupon',array( $this, 'destroy_dintero_ongoing_session' ) );
-		 add_action( 'woocommerce_add_to_cart',array( $this, 'destroy_dintero_ongoing_session' ) );
-		 add_action( 'woocommerce_remove_cart_item'  ,array( $this, 'destroy_dintero_ongoing_session' ) );
+		 // add_action( 'woocommerce_applied_coupon',array( $this, 'destroy_dintero_ongoing_session' ) );
+		 // add_action( 'woocommerce_removed_coupon',array( $this, 'destroy_dintero_ongoing_session' ) );
+		 // add_action( 'woocommerce_add_to_cart',array( $this, 'destroy_dintero_ongoing_session' ) );
+		 // add_action( 'woocommerce_remove_cart_item'  ,array( $this, 'destroy_dintero_ongoing_session' ) );
 
-		 add_action( 'woocommerce_after_shipping_calculator'  ,array( $this, 'destroy_dintero_ongoing_session' ) );
-
+		 // add_action( 'woocommerce_after_shipping_calculator'  ,array( $this, 'destroy_dintero_ongoing_session' ) );
+        add_action('woocommerce_checkout_update_order_review',  array( $this, 'on_action_update_review' ),10,1);
 
 
 		 // Template integrations
@@ -122,7 +122,7 @@ final class WC_Dintero_HP {
 
         add_action( 'wp_footer', array( $this, 'maybe_submit_wc_checkout' ), 999 );
 
-		$this->add_shortcodes();
+		 $this->add_shortcodes();
 		
 	}
 
@@ -199,9 +199,69 @@ final class WC_Dintero_HP {
         if ( ! $this->is_dintero_confirmation() ) {
             return;
         }
+        ?>
+        <script>
+            var dintero_text = '<?php echo __( 'Vent mens vi behandler bestillingen.', 'collector-checkout-for-woocommerce' ); ?>';
+            jQuery(function ($) {
+                $( 'body' ).append( $( '<div class="dintero-modal"><div class="dintero-modal-content">' + dintero_text + '</div></div>' ) );
+                
 
-        // TO DO, If push callback is used for Order creation
+                setTimeout(checkIfOrderNowExists, 2000);
+
+                function checkIfOrderNowExists(){
+                    var url = 'dhp-ajax';
+                    var home_url = '<?php echo home_url()?>';
+                    var transactionId = '<?php echo $_GET["transaction_id"] ?>';
+                    // Dont need to user create_order as we are using default WooCommerce Checout form
+                    var data = {
+                            action: 'check_order_status',
+                            transaction_id : transactionId
+                        };
+                                    var url ='?dhp-ajax=check_order_status';
+                                            
+                    jQuery.ajax({
+                         type:       'POST',
+                         url:        url,
+                         data:       data,
+                            
+                         success:    function( result ) {
+
+                                         if(result.data.redirect_url){
+                                            window.location = result.data.redirect_url ; 
+                                         }
+                                        
+                                     }
+                         });
+
+                }
+
+
+
+
+                console.log('processing class added to form');
+            });
+        </script>
+        <?php
+
+        $transaction_id = sanitize_text_field( wp_unslash( $_GET['transaction_id'] ) );
+            
+        $transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
+
+        $transaction_order_id = trim($transaction['merchant_reference']);
+        if($transaction_order_id == '' && isset($transaction['merchant_reference_2'])){
+            $transaction_order_id = trim($transaction['merchant_reference_2']);
+        }
+
+        $order                = wc_get_order( $transaction_order_id );
+
+        if($order){
+            $location = $order->get_checkout_order_received_url();
+            $location = $location.'&merchant_reference='.$transaction_order_id.'&transaction_id='.$transaction_id;
+            wp_safe_redirect( $location );
+            exit;
+        }
     }
+
     /**
      * Checks if in  confirmation page.
      *
@@ -660,12 +720,12 @@ final class WC_Dintero_HP {
 			}
 
 			// Don't display template if we have a cart that doesn't needs payment.
-			/*
+			
 			if ( apply_filters( 'dhp_check_if_needs_payment', true ) ) {
 				if ( ! WC()->cart->needs_payment() ) {
 					return $template;
 				}
-			}*/
+			}
 
 			// Checkout.
 			if ( 'checkout/form-checkout.php' === $template_name ) {
@@ -740,27 +800,44 @@ final class WC_Dintero_HP {
 	}
 
 	public function on_action_update_review($postData){
-		
-		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+        $data = array();
+        foreach(explode('&', $postData) as $value)
+        {
+            $value1 = explode('=', $value);
+           
+            $data[$value1[0]] = urldecode($value1[1]);
+        }
+        WC()->customer->set_props(
+            array(
+                'billing_first_name'   => $data['billing_first_name'],
+                'billing_last_name'     => $data['billing_last_name'],
+                'billing_email'  => $data['billing_email'],
+                'billing_phone' => $data['billing_phone'],
+                
+            )
+        );
+        WC()->customer->save();
+        
+		// $chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
-    	$posted_shipping_methods = isset( $_POST['shipping_method'] ) ? wc_clean( wp_unslash( $_POST['shipping_method'] ) ) : array();
-    	$newMethod = array();
+  //   	$posted_shipping_methods = isset( $_POST['shipping_method'] ) ? wc_clean( wp_unslash( $_POST['shipping_method'] ) ) : array();
+  //   	$newMethod = array();
     
     	
-    	if ( is_array( $posted_shipping_methods ) && count($posted_shipping_methods)>0 ) {
-		    foreach ( $posted_shipping_methods as $i => $value ) {
-		        $newMethod[ $i ] = $value;
-		    }
+  //   	if ( is_array( $posted_shipping_methods ) && count($posted_shipping_methods)>0 ) {
+		//     foreach ( $posted_shipping_methods as $i => $value ) {
+		//         $newMethod[ $i ] = $value;
+		//     }
 		   
-	    }
+	 //    }
     	
 
-    	if($chosen_shipping_methods[0] != $newMethod[0]){
+  //   	if($chosen_shipping_methods[0] != $newMethod[0]){
     		
-	    	WC()->session->reload_checkout = true;
+	 //    	WC()->session->reload_checkout = true;
 	    	
-	    	WC()->session->__unset('dintero_wc_order_id');
-	    }
+	 //    	WC()->session->__unset('dintero_wc_order_id');
+	 //    }
 	}
 	public function update_shipping_method_in_order(){
 		// $order_id = WC()->session->get( 'order_awaiting_payment');
@@ -794,7 +871,11 @@ final class WC_Dintero_HP {
 				if ( 'dintero-hp' == $id ) {
 					echo( '<div id="' . esc_attr( $id ) . '" rel="' . esc_attr ( $rel ) . '" style="width:' . esc_attr( $tab_w ) . '%;background-image: url(\'' . wp_kses_post( WCDHP()->checkout()->get_icon_tab() ) . '\');"></div>' );
 				} else {
-					echo( '<div id="' . esc_attr( $id ) . '" rel="' . esc_attr ( $rel ) . '" style="width:' . esc_attr( $tab_w ) . '%;">' . esc_html ( $title ) . '</div>' );
+					if(!$paymentMethods->icon){
+                       echo( '<div id="' . esc_attr( $id ) . '" rel="' . esc_attr ( $rel ) . '" style="width:' . esc_attr( $tab_w ) . '%;">' . esc_html ( $title ) . '</div>' );
+                    }else{
+                          echo( '<div id="' . esc_attr( $id ) . '" rel="' . esc_attr ( $rel ) . '" style="width:' . esc_attr( $tab_w ) . '%;background-image: url(\'' . $paymentMethods->icon . '\');"></div>' );
+                    }
 				}
 			}
 			echo( '</div>' );

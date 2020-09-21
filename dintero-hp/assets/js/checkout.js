@@ -1,5 +1,5 @@
 jQuery( function( $ ) {
-
+	var session = checkoutSession;
 	// wc_checkout_params is required to continue, ensure the object exists
 	if ( typeof wc_checkout_params === 'undefined' ) {
 		return false;
@@ -66,7 +66,8 @@ jQuery( function( $ ) {
 
 			$( document ).on('click', '.dhp_ebch a', this.embedClicked);
 			$( document ).on('click', '.dhp_exch a', this.expressClicked);
-
+			$( document ).on( 'updated_checkout', this.updateDinteroSession );
+			
 			$( document ).ready(function() {
 				if($('#dhp-exp-ele').length>0){
 					var exp = $('#dhp-exp-ele').val();
@@ -116,6 +117,21 @@ jQuery( function( $ ) {
 		expressClicked: function() {
 			dhpCheckout.submit(true);
 		},
+		updateDinteroSession: function(checkout){
+			// console.log('UpDate Called'+dintero_url );
+			//checkout.lockSession();
+			// $.ajax({
+			// 		type:		'POST',
+			// 		url:		dintero_url,
+			// 		data:		'Test',
+			// 		dataType:   'json',
+			// 		success:	function( result ) {
+			// 						checkout.refreshSession();
+			// 					}
+			// 	});
+			//checkout.lockSession();
+		},
+
 
 		$order_review: $( '#dhp-order-review' ),
 		$checkout_form: $( 'form.checkout' ),
