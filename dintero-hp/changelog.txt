@@ -117,5 +117,7 @@
 2020.09.22
   * Destroy Session 
   * create new checkout session if current session is COMPLETED, DECLINED, CANCELLED
+  * Business Checkout fix with Update session
+  
 
 

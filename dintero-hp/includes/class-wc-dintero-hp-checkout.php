@@ -1073,7 +1073,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		}
 		$order_id = $this->get_order_id_from_session(); 
 		$session = $this->check_if_session_is_validated($order_id);
-		
+
 		// Checks if session is still valid
 		foreach ($session['events'] as $event) {
 			if($event['name'] == 'COMPLETED'  || $event['name'] == 'CANCELLED' || $event['name'] == 'DECLINED' ){
@@ -1083,7 +1083,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			
 		}
 	
-
+		$order_id = null;
 		if ( $order_id ) {
 			// Get Dintero order. create array and load Ongoing session 
 			$results  = array(
@@ -1131,6 +1131,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					var dintero_url = \"".home_url().'?dhp-ajax=update_session'."\";
 					var emb = document.getElementById('dhp-embed');
 					var order_review = document.getElementById('" . wp_kses_post ( $container_id ) . "');
+					var isSessionLocked =  false;
 					order_review.appendChild(emb);
 					var checkoutSessionData;
 					var checkoutSession;
@@ -1203,33 +1204,39 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 									});
 							    },
 							    onSessionLocked: (event, checkout) => {
-							        console.log('pay_lock_id', event.pay_lock_id);
-							        console.log(checkout);
-							        //checkout.refreshSession();
-							        checkoutSession = checkout;
-							        var data = {
-									        action: 'create_order',
-									        post_data: checkoutSessionData,
-									        iframe_src: checkout.iframe.src
-									    };
-				            		var url = \"".home_url().'?dhp-ajax=update_session'."\";
-									    
-									jQuery.ajax({
-										type:		'POST',
-										url:		url,
-										data:		data,
-										
-										success:	function( result ) {
-														console.log('Success Called');
-														if(result.redirect_url){
-															window.location.href = result.redirect_url ;
-														}else{
-															checkout.refreshSession();
+							    	if(!isSessionLocked){
+							    		isSessionLocked =  true;
+							    		console.log('pay_lock_id', event.pay_lock_id);
+								        console.log(checkout);
+								        //checkout.refreshSession();
+								        checkoutSession = checkout;
+								        var data = {
+										        action: 'create_order',
+										        post_data: checkoutSessionData,
+										        iframe_src: checkout.iframe.src
+										    };
+										var processOngoing =  false;
+					            		var url = \"".home_url().'?dhp-ajax=update_session'."\";
+
+										jQuery.ajax({
+											type:		'POST',
+											url:		url,
+											data:		data,
+											
+											success:	function( result ) {
+															console.log('Success Called');
+															if(result.redirect_url){
+																window.location.href = result.redirect_url ;
+															}else{
+																checkout.refreshSession();
+																isSessionLocked = false;
+															}
+															
+															
 														}
-														
-														
-													}
-									});
+										});
+							    	}
+							        
 							    },
 							    onPayment: function(event, checkout) {
 					                // console.log('transaction_id', event.transaction_id);
@@ -1272,6 +1279,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 
 
+									}else{
+										jQuery( '#billing_company' ).val('');
+										jQuery( '#billing_vat' ).val('');
+										
+
 									}
 									jQuery( '#terms' ).prop( 'checked', true);
 
@@ -1296,11 +1308,16 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 								        		bc.dispatchEvent(new Event(\"change\"));
 												jQuery('body').trigger('update_checkout' );
 											}
+										
+
 
 							        	}
+							        	if(!isSessionLocked){
+							        		checkout.lockSession();
+							        	}
+							        	
 
-							        	checkout.lockSession();
-
+							        	
 							        	// Dont need to user update_session as we are using default WooCommerce Checout form
 					            		
 							        	
@@ -2439,6 +2456,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				
 			} 
 			$payload['order']['shipping_address']['phone_number'] = $phone;
+		}
+
+		if(WC()->checkout()->get_value( 'billing_company' ) !=''){
+			$payload['order']['shipping_address']['organization_number'] =  WC()->session->get( 'dintero_billing_vat');
+			$payload['order']['shipping_address']['business_name'] = (string) WC()->checkout()->get_value( 'billing_company' );
 		}
 
 		

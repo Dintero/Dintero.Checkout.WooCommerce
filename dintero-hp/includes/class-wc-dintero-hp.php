@@ -807,15 +807,21 @@ final class WC_Dintero_HP {
            
             $data[$value1[0]] = urldecode($value1[1]);
         }
-        WC()->customer->set_props(
-            array(
+        $customerData = array(
                 'billing_first_name'   => $data['billing_first_name'],
                 'billing_last_name'     => $data['billing_last_name'],
                 'billing_email'  => $data['billing_email'],
-                'billing_phone' => $data['billing_phone'],
+                'billing_phone' => $data['billing_phone']
                 
-            )
-        );
+            );
+        if(isset($data['billing_vat'])){
+            WC()->session->set( 'dintero_billing_vat',$data['billing_vat'] );
+            $customerData['billing_vat'] =  $data['billing_vat'];
+            $customerData['billing_company'] = $data['billing_company'];
+            
+        }
+       
+        WC()->customer->set_props($customerData);
         WC()->customer->save();
         
 		// $chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
