@@ -104,4 +104,9 @@
   * On_Hold status for collector payment
   * Failed status for Collector Payment
   * Callback delay to 3 minutes to prevent duplicate orders
+
+2020.09.22
+  * Destroy Session 
+  * create new checkout session if current session is COMPLETED, DECLINED, CANCELLED
+
   

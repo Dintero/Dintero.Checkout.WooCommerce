@@ -108,6 +108,7 @@ class WC_AJAX_HP {
 			'dhp_create_order',
 			'check_order_status',
 			'update_session',
+			'destroy_session',
 			'update_shipping_postcode'
 		);
 
@@ -154,6 +155,18 @@ class WC_AJAX_HP {
 
 		return apply_filters( 'woocommerce_get_return_url', $return_url, $order );
 	}
+
+	public function destroy_session(){
+		//WC()->session->reload_checkout = true;
+		WC()->session->__unset('dintero_wc_order_id');
+		wp_send_json_success(
+			array(
+				'success'  => true
+				
+			)
+		);
+	}
+
 	public function update_shipping_postcode(){
 		$formData = $_POST['post_code'];
 		$posted_data['postcode'] = $_POST['post_code'];

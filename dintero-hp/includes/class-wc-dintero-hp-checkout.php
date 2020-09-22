@@ -1072,7 +1072,18 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 		}
 		$order_id = $this->get_order_id_from_session(); 
+		$session = $this->check_if_session_is_validated($order_id);
 		
+		// Checks if session is still valid
+		foreach ($session['events'] as $event) {
+			if($event['name'] == 'COMPLETED'  || $event['name'] == 'CANCELLED' || $event['name'] == 'DECLINED' ){
+				$order_id = null;
+				break;
+			}
+			
+		}
+	
+
 		if ( $order_id ) {
 			// Get Dintero order. create array and load Ongoing session 
 			$results  = array(
@@ -1147,10 +1158,49 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					            		var response = jQuery( 'form.checkout' ).submit();  
 
 					            		
-					            	},
+					            },
+					            onPaymentError : function (){
+					            	var url = \"".home_url().'?dhp-ajax=destroy_session'."\";
+									    
+									jQuery.ajax({
+										type:		'POST',
+										url:		url,
+										data:		'',
+										
+										success:	function( result ) {
+														console.log('Session destroyed');
+														if(result.redirect_url){
+															window.location.href = result.redirect_url ;
+														}else{
+															location.reload();
+														}
+														
+														
+													}
+									});
+									
+								},
 					            onSessionCancel: (event, SessionCancel) => {
 							        console.log('href', event.href);
-							        checkout.destroy();
+							        //checkout.destroy();
+							        var url = \"".home_url().'?dhp-ajax=destroy_session'."\";
+									    
+									jQuery.ajax({
+										type:		'POST',
+										url:		url,
+										data:		'',
+										
+										success:	function( result ) {
+														console.log('Session destroyed');
+														if(result.redirect_url){
+															window.location.href = result.redirect_url ;
+														}else{
+															location.reload();
+														}
+														
+														
+													}
+									});
 							    },
 							    onSessionLocked: (event, checkout) => {
 							        console.log('pay_lock_id', event.pay_lock_id);
@@ -2260,6 +2310,29 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		return apply_filters( 'woocommerce_get_return_url', $return_url, $order );
 	}
 
+
+	public function check_if_session_is_validated($session_id){
+		$access_token = $this->get_access_token();
+		$api_endpoint = $this->checkout_endpoint . '/sessions';
+
+		$headers = array(
+			'Accept'        => 'application/json',
+			'Authorization' => 'Bearer ' . $access_token
+		);
+
+		$response = wp_remote_get( $api_endpoint . '/' . $session_id, array(
+			'method'    => 'GET',
+			'headers'   => $headers,
+			'timeout'   => 90,
+			'sslverify' => false
+		) );
+
+		// Retrieve the body's response if no errors found
+		$response_body = wp_remote_retrieve_body( $response );
+		$session   = json_decode( $response_body, true );
+
+		return $session;
+	}
 	/**
 	 * Get transaction by ID.
 	 */
