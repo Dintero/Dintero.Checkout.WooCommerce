@@ -1,4 +1,12 @@
 *** WooCommerce Dintero Plugin Changelog ***
+
+2020-09-21
+
+* added support for on_hold status 
+* added support for dynamic shipping pricing
+* pause, update and resume sessions
+* callback delayed to 3 minutes to prevent duplicate orders
+
 2020-06-05
 
  * Bugfixes
@@ -105,8 +113,9 @@
   * Failed status for Collector Payment
   * Callback delay to 3 minutes to prevent duplicate orders
 
+
 2020.09.22
   * Destroy Session 
   * create new checkout session if current session is COMPLETED, DECLINED, CANCELLED
 
-  
+
