@@ -109,7 +109,9 @@ class WC_AJAX_HP {
 			'check_order_status',
 			'update_session',
 			'destroy_session',
-			'update_shipping_postcode'
+			'update_shipping_postcode',
+			'check_transaction',
+			'test'
 		);
 
 		foreach ( $ajax_events_nopriv as $ajax_event ) {
@@ -125,7 +127,13 @@ class WC_AJAX_HP {
 	 * Testing function
 	 */
 	public static function test() {
-		echo( 'Hello Test' );
+		$orders = wc_get_orders( array(
+						    'transaction_id' => 'T12000001.4XrEWRnfPBEsp34LEmBzdP'
+						)
+		 			);
+		echo '<pre>';
+		print_r($orders);
+		exit;
 	}
 
 	public static function embed_checkout() {
@@ -154,6 +162,40 @@ class WC_AJAX_HP {
 		}
 
 		return apply_filters( 'woocommerce_get_return_url', $return_url, $order );
+	}
+
+	public function check_transaction(){
+		$transaction_id = $_POST['transaction_id'];
+		
+		$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
+			
+		$transaction_order_id = trim($transaction['merchant_reference']);
+		if($transaction_order_id == '' && isset($transaction['merchant_reference_2'])){
+			$transaction_order_id = trim($transaction['merchant_reference_2']);
+		}
+
+
+		$order                = wc_get_order( $transaction_order_id );
+	
+		if(!$order){
+			wp_send_json_success(
+				array(
+					'msg'  => 'Order Doesnot exist'
+					
+				)
+			);
+		}else{
+			$url = apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order );
+			$redirectUrl = $url.'&transaction_id='.$transaction_id;
+			wp_send_json_error(
+				array(
+					'redirect_url'  => $redirectUrl
+					
+				)
+			);
+
+		}
+
 	}
 
 	public function destroy_session(){

@@ -1,4 +1,7 @@
 *** WooCommerce Dintero Plugin Changelog ***
+2020.10.06
+  * Session Update only with Shipping Options
+  * Improvement in Session lock
 
 2020-09-21
 
@@ -119,5 +122,8 @@
   * create new checkout session if current session is COMPLETED, DECLINED, CANCELLED
   * Business Checkout fix with Update session
   
-
+2020.10.06
+  * Session Update only with Shipping Options
+  * Improvement in Session lock
+  
 

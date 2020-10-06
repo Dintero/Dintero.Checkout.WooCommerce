@@ -1083,7 +1083,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			
 		}
 	
-		$order_id = null;
+		//$order_id = null;
 		if ( $order_id ) {
 			// Get Dintero order. create array and load Ongoing session 
 			$results  = array(
@@ -1151,12 +1151,37 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					            container,
 					            sid: \"" . esc_attr( $id ) . "\",
 					            onPaymentAuthorized : function(event,checkout){
-					            	 
+					            	 	console.log(event.transaction_id);
 					            	 	jQuery('.loader').css('display','block');
 					            	 	jQuery('.loader').css('opacity','1');
+
+					            	 	 var data = {
+										      
+										        transaction_id: event.transaction_id
+										    };
+					            	 	var checkUrl = \"".home_url().'?dhp-ajax=check_transaction'."\";
+					            	 	jQuery.ajax({
+											type:		'POST',
+											url:		checkUrl,
+											data:		data,
+											
+											success:	function( result ) {
+															console.log('Session destroyed');
+															if(result.success ){
+																var response = jQuery( 'form.checkout' ).submit(); 
+															}else{
+																console.log(result.data.redirect_url);
+
+																window.location.href = result.data.redirect_url;
+															}
+															
+															
+														}
+										});
+					            	 	
 					            		
 
-					            		var response = jQuery( 'form.checkout' ).submit();  
+					            		 
 
 					            		
 					            },
@@ -1239,19 +1264,37 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 							        
 							    },
 							    onPayment: function(event, checkout) {
-					                // console.log('transaction_id', event.transaction_id);
-					                // console.log('href', event.href);
-					                // checkout.destroy();
-					                jQuery('.loader').css('display','block');
+					                console.log(event.transaction_id);
+				            	 	jQuery('.loader').css('display','block');
 				            	 	jQuery('.loader').css('opacity','1');
-				            		
 
-				            		var response = jQuery( 'form.checkout' ).submit();  
+				            	 	 var data = {
+									      
+									        transaction_id: event.transaction_id
+									    };
+				            	 	var checkUrl = \"".home_url().'?dhp-ajax=check_transaction'."\";
+				            	 	jQuery.ajax({
+										type:		'POST',
+										url:		checkUrl,
+										data:		data,
+										
+										success:	function( result ) {
+														console.log('Session destroyed');
+														if(result.success ){
+															var response = jQuery( 'form.checkout' ).submit(); 
+														}else{
+															window.location.href = result.data.redirect_url;
+														}
+														
+														
+													}
+									});
 					            },
 							    onSessionLockFailed: (event, checkout) => {
 							        console.log('session lock failed');
 							    },
 					            onSession: function(event, checkout) {
+					            	checkoutSession = checkout;
 					                console.log(\"session\", event.session);
 					                var ss = event.session;
 					                checkoutSessionData =  event.session;
@@ -1312,9 +1355,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 
 							        	}
-							        	if(!isSessionLocked){
-							        		checkout.lockSession();
-							        	}
+							        	// if(!isSessionLocked){
+							        	// 	checkout.lockSession();
+							        	// }
 							        	
 
 							        	
@@ -2407,15 +2450,15 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				'vat_amount'         => $order_tax_amount ,
 				'currency'           => 'NOK',
 				'merchant_reference' => '',
-				'shipping_address'   => array(
-					'first_name'   => (string) WC()->checkout()->get_value( 'billing_first_name' ),
-					'last_name'    => (string) WC()->checkout()->get_value( 'billing_last_name' ),
-					'address_line' => (string) WC()->checkout()->get_value( 'billing_address_1' ),
-					'postal_code'  => (string) WC()->checkout()->get_value( 'billing_postcode' ),
-					'postal_place' => (string) WC()->checkout()->get_value( 'billing_city' ),
-					'country'      => (string) WC()->checkout()->get_value( 'billing_country' ),
-					'email'        => (string) WC()->checkout()->get_value( 'billing_email' )
-				),
+				// 'shipping_address'   => array(
+				// 	'first_name'   => (string) WC()->checkout()->get_value( 'billing_first_name' ),
+				// 	'last_name'    => (string) WC()->checkout()->get_value( 'billing_last_name' ),
+				// 	'address_line' => (string) WC()->checkout()->get_value( 'billing_address_1' ),
+				// 	'postal_code'  => (string) WC()->checkout()->get_value( 'billing_postcode' ),
+				// 	'postal_place' => (string) WC()->checkout()->get_value( 'billing_city' ),
+				// 	'country'      => (string) WC()->checkout()->get_value( 'billing_country' ),
+				// 	'email'        => (string) WC()->checkout()->get_value( 'billing_email' )
+				// ),
 				'items'              => $this->order_lines,
 				'shipping_option'=>array(
 							
@@ -2446,29 +2489,49 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			)
 			
 		);
-		$billingPhone =  WC()->checkout()->get_value( 'billing_phone' );
-		if($billingPhone != ''){
-			$phone = (string) WC()->checkout()->get_value( 'billing_phone' );
-			// Add Norwegian Phone code is there in not in number to automatic fill up iframe
-			$phone = str_replace(' ', '', $phone); // remove space from Phone number if any
-			if(strpos($phone, '+47') === false){
-			   	$phone = '+47'.$phone;
+		// $billingPhone =  WC()->checkout()->get_value( 'billing_phone' );
+		// if($billingPhone != ''){
+		// 	$phone = (string) WC()->checkout()->get_value( 'billing_phone' );
+		// 	// Add Norwegian Phone code is there in not in number to automatic fill up iframe
+		// 	$phone = str_replace(' ', '', $phone); // remove space from Phone number if any
+		// 	if(strpos($phone, '+47') === false){
+		// 	   	$phone = '+47'.$phone;
 				
-			} 
-			$payload['order']['shipping_address']['phone_number'] = $phone;
-		}
+		// 	} 
+		// 	$payload['order']['shipping_address']['phone_number'] = $phone;
+		// }
 
-		if(WC()->checkout()->get_value( 'billing_company' ) !=''){
-			$payload['order']['shipping_address']['organization_number'] =  WC()->session->get( 'dintero_billing_vat');
-			$payload['order']['shipping_address']['business_name'] = (string) WC()->checkout()->get_value( 'billing_company' );
-		}
+		// if(WC()->checkout()->get_value( 'billing_company' ) !=''){
+			
+		// 	$payload['order']['shipping_address']['organization_number'] =  WC()->session->get( 'dintero_billing_vat');
+		// 	$payload['order']['shipping_address']['business_name'] = (string) WC()->checkout()->get_value( 'billing_company' );
+		// }
+
+		// $headers = array(
+		// 	 'Accept'        => 'application/json',
+		// 	 'Authorization' => 'Bearer ' . $access_token
+		// );
+		// $args = array(
+		//     'headers' => $headers,
+		//     'body'      => json_encode($payload),
+		//     'method'    => 'PUT'
+		// );
 
 		
-		$args = array(
-		    'headers' => $headers,
-		    'body'      => json_encode($payload),
-		    'method'    => 'PUT'
-		);
+		// echo '<pre>';
+		// //print_r($payload);
+		// echo $api_endpoint;
+		// $response = wp_remote_request( $api_endpoint, $args);
+
+		// // Retrieve the body's response if no errors found
+		// $response_body = wp_remote_retrieve_body( $response );
+		// $sessionDetail   = json_decode( $response_body, true );
+		// echo '<pre>';
+		// print_r($sessionDetail);
+		// exit;
+		// return $sessionDetail;
+
+
 		$curl = curl_init();
 
 		curl_setopt_array($curl, array(
@@ -2497,7 +2560,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		} else {
 		  
 		  $session   = json_decode( $response, true );
-		
+		 
 		  return $session;
 		 
 		}
