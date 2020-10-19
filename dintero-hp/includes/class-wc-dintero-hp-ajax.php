@@ -412,13 +412,6 @@ class WC_AJAX_HP {
 				$item->calculate_taxes($calculate_tax_for);
 
 				$order->add_item( $item );
-				if(count($couponCode)> 0){ // Add Coupon Code to Order
-					foreach($couponCode as $code){
-						$couponObj = new WC_Coupon($code);
-						$order->apply_coupon($couponObj);
-					}
-					
-				}
 				
 
 				$order->calculate_totals();
@@ -430,7 +423,14 @@ class WC_AJAX_HP {
 				$methodName = 'Dintero - '.$transaction['payment_product'];
 				$order->set_payment_method_title($methodName);
 				$order->save();
-
+				if(count($couponCode)> 0){ // Add Coupon Code to Order
+					foreach($couponCode as $code){
+						$couponObj = new WC_Coupon($code);
+						$order->apply_coupon($couponObj,false);
+					}
+					
+				}
+				$order->save();
 				// The text for the note
 				$orderNote = __("Order Created Via CallBack");
 

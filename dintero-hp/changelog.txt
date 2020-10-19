@@ -1,4 +1,7 @@
 *** WooCommerce Dintero Plugin Changelog ***
+
+2020.10.19
+  * Wrong discount with Coupon code issue in Callback order creation solved
 2020.10.06
   * Session Update only with Shipping Options
   * Improvement in Session lock
