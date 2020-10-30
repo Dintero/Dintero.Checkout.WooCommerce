@@ -1081,7 +1081,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$order_id = $this->get_order_id_from_session(); 
 
 		if ( $order_id ) {
-			$order_id = 'T12000001.4XCQyrQ94L8mm2JtvUAFYxA';
+			//$order_id = 'T12000001.4XCQyrQ94L8mm2JtvUAFYxA';
 			$sessionDetails = $this->get_dintero_session($order_id);
 			if($sessionDetails['error']){
 				$sessionExpired = true;
@@ -1134,7 +1134,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			echo( '</div>' );
 
 			$handle = 'dintero-checkout-web-sdk';
-			$src = 'https://assets.dintero.com/js/checkout-web-sdk@0.0.11/dist/checkout-web-sdk.umd.js';
+			$src = 'https://unpkg.com/@dintero/checkout-web-sdk@0.0.15/dist/checkout-web-sdk.umd.js';
 			$deps = array( 'jquery' );
 			$version = false;
 
@@ -1145,11 +1145,21 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$container_id =  'dhp-wrapper';
 
 			echo( "<script type=\"text/javascript\">
+					var dintero_url = \"".home_url().'?dhp-ajax=update_session'."\";
 					var emb = document.getElementById('dhp-embed');
 					var order_review = document.getElementById('" . wp_kses_post ( $container_id ) . "');
 					order_review.appendChild(emb);
 					var checkoutSessionData;
+					var checkoutSession;
 					jQuery('document').ready(function() {
+						jQuery( document ).on( 'updated_checkout', function(){
+							if(checkoutSession){
+								console.log('Checkout Session :'+checkoutSession);
+								checkoutSession.lockSession();
+							}
+							
+
+						});
 					    const container = document.getElementById(\"dintero-checkout-iframe\");
 					    if(typeof(dintero) != \"undefined\"){
 					    	dintero
@@ -1158,67 +1168,64 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					            sid: \"" . esc_attr( $id ) . "\",
 					            onPaymentAuthorized : function(event,checkout){
 					            	 
-					            	 	console.log(event.transaction_id);
 					            	 	jQuery('.loader').css('display','block');
 					            	 	jQuery('.loader').css('opacity','1');
+					            		
 
-					            	 	 var data = {
-										      
-										        transaction_id: event.transaction_id
-										    };
-					            	 	var checkUrl = \"".home_url().'?dhp-ajax=check_transaction'."\";
-					            	 	jQuery.ajax({
-											type:		'POST',
-											url:		checkUrl,
-											data:		data,
-											
-											success:	function( result ) {
-															console.log('Session destroyed');
-															if(result.success ){
-																var response = jQuery( 'form.checkout' ).submit(); 
-															}else{
-																window.location.href = result.data.redirect_url;
-															}
-															
-															
-														}
-										});
-					            	 	
+					            		var response = jQuery( 'form.checkout' ).submit();  
 
 					            		
 					            	},
-					            onPayment: function(event, checkout) {
-					                console.log(event.transaction_id);
-				            	 	jQuery('.loader').css('display','block');
-				            	 	jQuery('.loader').css('opacity','1');
-
-				            	 	 var data = {
-									      
-									        transaction_id: event.transaction_id
+					            onSessionCancel: (event, SessionCancel) => {
+							        console.log('href', event.href);
+							        checkout.destroy();
+							    },
+							    onSessionLocked: (event, checkout) => {
+							        console.log('pay_lock_id', event.pay_lock_id);
+							        console.log(checkout);
+							        //checkout.refreshSession();
+							        checkoutSession = checkout;
+							        var data = {
+									        action: 'create_order',
+									        post_data: checkoutSessionData,
+									        iframe_src: checkout.iframe.src
 									    };
-				            	 	var checkUrl = \"".home_url().'?dhp-ajax=check_transaction'."\";
-				            	 	jQuery.ajax({
+				            		var url = \"".home_url().'?dhp-ajax=update_session'."\";
+									    
+									jQuery.ajax({
 										type:		'POST',
-										url:		checkUrl,
+										url:		url,
 										data:		data,
 										
 										success:	function( result ) {
-														console.log('Session destroyed');
-														if(result.success ){
-															var response = jQuery( 'form.checkout' ).submit(); 
+														console.log('Success Called');
+														if(result.redirect_url){
+															window.location.href = result.redirect_url ;
 														}else{
-															window.location.href = result.data.redirect_url;
+															checkout.refreshSession();
 														}
 														
 														
 													}
 									});
+							    },
+							    onPayment: function(event, checkout) {
+					                // console.log('transaction_id', event.transaction_id);
+					                // console.log('href', event.href);
+					                // checkout.destroy();
+					                jQuery('.loader').css('display','block');
+				            	 	jQuery('.loader').css('opacity','1');
+				            		
+
+				            		var response = jQuery( 'form.checkout' ).submit();  
 					            },
+							    onSessionLockFailed: (event, checkout) => {
+							        console.log('session lock failed');
+							    },
 					            onSession: function(event, checkout) {
 					                console.log(\"session\", event.session);
 					                var ss = event.session;
 					                checkoutSessionData =  event.session;
-
 					                jQuery( '#billing_first_name' ).val(ss.order.shipping_address.first_name );
 									jQuery( '#billing_last_name' ).val(ss.order.shipping_address.last_name);
 									
@@ -1245,7 +1252,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 									}
 									jQuery( '#terms' ).prop( 'checked', true);
-									jQuery('#ship-to-different-address-checkbox').prop( 'checked', false );
+
 
 					                //jQuery('body').trigger('update_checkout' );
 					                console.log(ss.order.shipping_address.postal_code);
@@ -1260,7 +1267,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 								        		sc.value = ss.order.shipping_address.country;
 								        		sc.dispatchEvent(new Event(\"change\"));
 												jQuery('body').trigger('update_checkout' );
-											}
+											}	
 										}else{
 							        		if(bc){
 								        		bc.value = ss.order.shipping_address.country;
@@ -1269,9 +1276,16 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 											}
 
 							        	}
+
+							        	checkout.lockSession();
+
+							        	// Dont need to user update_session as we are using default WooCommerce Checout form
+					            		
+							        	
 					                }
 					            }
-					        });
+					        })
+					        ;
 						}
 					});
 				</script>" );
@@ -1837,7 +1851,107 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		}
 		return round( $total_amount );
 	}
+	/*
+	 * Update Session .
+	 */
+	public function update_session( $session_id ) {
+		$access_token = $this->get_access_token();
+		$api_endpoint = $this->checkout_endpoint . '/sessions/'.$session_id;
+		
 
+		$headers = array(
+			'content-type'        => 'application/json'
+		);
+		$load = array('session_id' => $session_id) ;
+		
+
+		$cart = WC()->cart;
+		
+		$totals = $cart->get_totals();
+		$order_tax_amount   = absint( strval( floatval( $totals['total_tax'] ) * 100 ) );
+
+		$this->process_cart();
+		$total_amount = $this->get_order_lines_total_amount();
+		$billingAddress = WC()->customer->get_billing();
+		
+		$order_total_amount = $total_amount;  
+		$payload = array(
+			'order' =>  array(
+				'amount'             => $order_total_amount + $this->get_shipping_amount() ,
+				'vat_amount'         => $order_tax_amount ,
+				'currency'           => 'NOK',
+				'merchant_reference' => '',
+			
+				'items'              => $this->order_lines,
+				'shipping_option'=>array(
+							
+									'id'=> $this->get_shipping_reference(),
+									'line_id'=>'shipping_method',
+									//"countries"=>array($order->get_shipping_country()),
+									'country'=> (string) WC()->checkout()->get_value( 'billing_country' ),
+									'amount'=> $this->get_shipping_amount(),
+									'vat_amount'=> $this->get_shipping_tax_amount(),
+									'vat'=> $this->get_shipping_tax_rate(),
+									'title'=>'Shipping: ' . $this->get_shipping_name(),
+									'description'=>'',
+									'delivery_method'=>'delivery',
+									'operator'=>'',
+									'operator_product_id'=>'',
+									'eta'=>array(
+											'relative'=>array(
+												'minutes_min'=>0,
+												'minutes_max'=>0
+											),
+											'absolute'=>array(
+												'starts_at'=>'',
+												'ends_at'=>''
+											)
+										),
+									)
+						
+			)
+			
+		);
+		
+		
+		$args = array(
+		    'headers' => $headers,
+		    'body'      => json_encode($payload),
+		    'method'    => 'PUT'
+		);
+		$curl = curl_init();
+
+		curl_setopt_array($curl, array(
+		  CURLOPT_URL => $api_endpoint,
+		  CURLOPT_RETURNTRANSFER => true,
+		  CURLOPT_ENCODING => "",
+		  CURLOPT_MAXREDIRS => 10,
+		  CURLOPT_TIMEOUT => 30,
+		  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+		  CURLOPT_CUSTOMREQUEST => "PUT",
+		  CURLOPT_POSTFIELDS => json_encode($payload),
+		  CURLOPT_HTTPHEADER => array(
+			    "authorization: Bearer ".$access_token,
+			   	"content-type: application/json"
+			    
+			  ),
+		));
+
+		$response = curl_exec($curl);
+		$err = curl_error($curl);
+
+		curl_close($curl);
+
+		if ($err) {
+		  echo "cURL Error #:" . $err;
+		} else {
+		  
+		  $session   = json_decode( $response, true );
+		
+		  return $session;
+		 
+		}
+	}
 
 	private function get_iframe(){
 		
