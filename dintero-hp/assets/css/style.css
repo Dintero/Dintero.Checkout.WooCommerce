@@ -288,7 +288,7 @@ div#order_review.woocommerce-checkout-review-order {
 }
 
 .checkout-box-dintero {
-    min-height: 100%;
+    /*min-height: 100%;*/
     box-sizing: border-box;
     -webkit-box-pack: center;
     justify-content: center;

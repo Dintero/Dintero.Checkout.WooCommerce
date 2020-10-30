@@ -1083,18 +1083,36 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			
 		}
 	
-		//$order_id = null;
+		$sessionExpired = false;
+		$order_id = $this->get_order_id_from_session(); 
+
 		if ( $order_id ) {
-			// Get Dintero order. create array and load Ongoing session 
-			$results  = array(
-						'result' => 1,
-						'id' => $order_id,
-						'url' => $this->checkout_endpoint.'/view/'.$order_id
-					);
+			//$order_id = 'T12000001.4XCQyrQ94L8mm2JtvUAFYx';
+			$sessionDetails = $this->get_dintero_session($order_id);
+			$expires_at = $sessionDetails['expires_at'];
+
+			$date = date('d/M/Y:H:i:s', time()); // CURRENT TIME
 			
-		}else{
+			$strTime = strtotime($expires_at);
+			$sessionExpiresAt = date('d/M/Y:H:i:s', $strTime); // Session Expires At 
+			
+			if($sessionExpiresAt <= $date){
+				$sessionExpired = true;
+				
+			}else{
+				// Get Dintero order. create array and load Ongoing session 
+				$results  = array(
+							'result' => 1,
+							'id' => $order_id,
+							'url' => $this->checkout_endpoint.'/view/'.$order_id
+						);
+			}
+			
+	
+		}
+
+		if($sessionExpired || !$order_id){
 			// Create New session 
-			
 			$results = $this->get_iframe();
 			if(isset($results['id'])){
 				$this->save_order_id_to_session($results['id']);
