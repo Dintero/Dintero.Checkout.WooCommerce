@@ -1081,8 +1081,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$order_id = $this->get_order_id_from_session(); 
 
 		if ( $order_id ) {
-			//$order_id = 'T12000001.4XCQyrQ94L8mm2JtvUAFYxA';
+			//$order_id = 'P11112230.4XD77f73egY7GN43qbZCnj';
 			$sessionDetails = $this->get_dintero_session($order_id);
+			
 			if($sessionDetails['error']){
 				$sessionExpired = true;
 
@@ -1093,7 +1094,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				
 				$strTime = strtotime($expires_at);
 				$sessionExpiresAt = date('d/M/Y:H:i:s', $strTime); // Session Expires At 
-				
+				foreach($sessionDetails['events'] as $event){
+					if($event['name'] == 'AUTH_CALLBACK_SENT' || $event['name'] == 'FAILED' || $event['name'] == 'COMPLETED' || $event['name'] == 'DECLINED' || $event['name'] == 'CANCELLED'){
+						$sessionExpired = true;
+					}
+				}
 				if($sessionExpiresAt <= $date){
 					$sessionExpired = true;
 					
