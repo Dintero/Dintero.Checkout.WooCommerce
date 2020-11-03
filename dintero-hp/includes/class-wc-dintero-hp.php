@@ -111,7 +111,7 @@ final class WC_Dintero_HP {
 		 // Template integrations
         add_action( 'woocommerce_cart_actions', array($this, 'cart_express_checkout_button'));
         add_action( 'woocommerce_widget_shopping_cart_buttons', array($this, 'cart_express_checkout_button'), 30);
-        add_action('woocommerce_before_checkout_form', array($this, 'before_checkout_form_express'), 5);
+        
 
        	add_action('woocommerce_before_cart' , array($this, 'cart_express_checkout_loader'));
 
@@ -677,7 +677,9 @@ final class WC_Dintero_HP {
 			if ( strpos( $url, $template_name ) !== false ) {
 				$start = strpos( $url, $template_name );
 				$first_part = substr( $url, $start + strlen( $template_name ) );
-				$order_id = substr( $first_part, 0, strpos( $first_part, '/' ) );
+				$orderUrl =  explode('?',$first_part); 
+                //$order_id = substr( $first_part, 0, strpos( $first_part, '/' ) );
+                $order_id = $orderUrl[0];
 
 				$order = wc_get_order( $order_id );
 

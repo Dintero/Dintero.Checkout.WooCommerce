@@ -1,4 +1,8 @@
 *** WooCommerce Dintero Plugin Changelog ***
+2020.11.03
+   * 'before_checkout_form_express' warning message fix
+   * probable redirect issue resolve
+   * 'dintero_cart_session' warning resolved 
 2020.10.30
   * checkout session validation and some Style fix
 2020.10.19

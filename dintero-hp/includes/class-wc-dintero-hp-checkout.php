@@ -2140,10 +2140,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$searializedData = trim(serialize(WC()->cart->get_cart()));
 			$transactionId = $response_array['id'];
 
-			global $wpdb;
-			$table_name = $wpdb->prefix . "dintero_cart_session";
-			$success = $wpdb->insert($table_name, array( 'session_value' => $searializedData,'transaction_id' => $transactionId) ); 
-
 			return array('result'=>1, 'msg'=>'', 'url'=>$response_array['url'], 'id'=>$response_array['id']);
 		}
 	}

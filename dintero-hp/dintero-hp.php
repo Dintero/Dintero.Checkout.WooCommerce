@@ -2,7 +2,7 @@
 /**
 Plugin Name: Dintero Checkout
 Description: Dintero Checkout - Express Checkout
-Version:     2020.10.30
+Version:     2020.11.03
 Author:      Dintero
 Author URI:  mailto:integration@dintero.com
 Text Domain: dintero-hp
