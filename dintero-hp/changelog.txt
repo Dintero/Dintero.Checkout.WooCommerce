@@ -3,6 +3,7 @@
    * 'before_checkout_form_express' warning message fix
    * probable redirect issue resolve
    * 'dintero_cart_session' warning resolved 
+   * expire time loop fixed
 2020.10.30
   * checkout session validation and some Style fix
 2020.10.19

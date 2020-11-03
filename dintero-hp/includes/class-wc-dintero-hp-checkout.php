@@ -1099,9 +1099,13 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 						$sessionExpired = true;
 					}
 				}
-				if($sessionExpiresAt <= $date){
+				
+				$current = new DateTime();
+				$expireAt = new DateTime($expires_at);
+				
+				
+				if($current >= $expireAt){ // Check If it expired
 					$sessionExpired = true;
-					
 				}else{
 					// Get Dintero order. create array and load Ongoing session 
 					$results  = array(
