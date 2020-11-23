@@ -1,10 +1,8 @@
 # Dintero.Checkout.WooCommerce
 
-Tested with WooCommerce 3.6, 3.7 & 3.8.
 
 Settings in Extension:
 When Authorized, you can choose if the Order status should be "Processing" or "On-hold". Default is "Processing". 
-
 
 
 
