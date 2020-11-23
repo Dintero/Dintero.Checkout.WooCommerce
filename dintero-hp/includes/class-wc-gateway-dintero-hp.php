@@ -18,6 +18,7 @@
  */
 class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 
+
 	/**
 	 * Class constructor.
 	 */
@@ -30,7 +31,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 		$this->init_settings();
 		$this->supports                         = array(
 			'products',
-			'refunds'
+			'refunds',
 		);
 		$this->title                            = $this->get_option( 'title' );
 		$this->description                      = $this->get_option( 'description' );
@@ -42,31 +43,46 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 		$this->client_secret                    = $this->test_mode ? $this->get_option( 'test_client_secret' ) : $this->get_option( 'production_client_secret' );
 		$this->profile_id                       = $this->test_mode ? $this->get_option( 'test_profile_id' ) : $this->get_option( 'production_profile_id' );
 		$this->checkout_logo_width              = $this->get_option( 'checkout_logo_width' ) ? $this->get_option( 'checkout_logo_width' ) : 600;
-		$this->default_order_status             = $this->get_option('default_order_status') ? $this->get_option('default_order_status') : 'wc-processing';
-		$this->manual_capture_status            = str_replace( 'wc-', '',
-			$this->get_option( 'manual_capture_status' ) );
-		$this->additional_manual_capture_status = str_replace( 'wc-', '',
-			$this->get_option( 'additional_manual_capture_status' ) );
-		$this->additional_cancel_status         = str_replace( 'wc-', '',
-			$this->get_option( 'additional_cancel_status' ) );
-		$this->additional_refund_status         = str_replace( 'wc-', '',
-			$this->get_option( 'additional_refund_status' ) );
+		$this->default_order_status             = $this->get_option( 'default_order_status' ) ? $this->get_option( 'default_order_status' ) : 'wc-processing';
+		$this->manual_capture_status            = str_replace(
+			'wc-',
+			'',
+			$this->get_option( 'manual_capture_status' )
+		);
+		$this->additional_manual_capture_status = str_replace(
+			'wc-',
+			'',
+			$this->get_option( 'additional_manual_capture_status' )
+		);
+		$this->additional_cancel_status         = str_replace(
+			'wc-',
+			'',
+			$this->get_option( 'additional_cancel_status' )
+		);
+		$this->additional_refund_status         = str_replace(
+			'wc-',
+			'',
+			$this->get_option( 'additional_refund_status' )
+		);
 		$this->api_endpoint                     = 'https://api.dintero.com/v1';
 		$this->checkout_endpoint                = 'https://checkout.dintero.com/v1';
 		$environment_character                  = $this->test_mode ? 'T' : 'P';
 		$this->oid                              = $environment_character . $this->get_option( 'account_id' );
 
 		// This action hook saves the settings
-		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array(
-			$this,
-			'process_admin_options'
-		) );
+		add_action(
+			'woocommerce_update_options_payment_gateways_' . $this->id,
+			array(
+				$this,
+				'process_admin_options',
+			)
+		);
 
 		if ( $this->callback_verification ) {
-			//Enable callback server-to-server verification
+			// Enable callback server-to-server verification
 			add_action( 'woocommerce_api_' . strtolower( get_class( $this ) ), array( $this, 'callback' ) );
 		} else {
-			//Use thank you page to check for transactions, only if callbacks are unavailable
+			// Use thank you page to check for transactions, only if callbacks are unavailable
 			add_action( 'woocommerce_thankyou', array( $this, 'callback' ), 1, 1 );
 		}
 
@@ -95,7 +111,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'label'       => __( 'Enable Dintero Hosted Page Gateway' ),
 				'type'        => 'checkbox',
 				'description' => '',
-				'default'     => 'no'
+				'default'     => 'no',
 			),
 			'title'                            => array(
 				'title'       => __( 'Title' ),
@@ -121,7 +137,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			'client_test_credentials'          => array(
 				'title'       => __( 'Client Test' ),
 				'type'        => 'title',
-				'description' => __( 'Generated under (SETTINGS >> API clients) in Dintero Backoffice.' )
+				'description' => __( 'Generated under (SETTINGS >> API clients) in Dintero Backoffice.' ),
 			),
 			'test_client_id'                   => array(
 				'title'       => __( 'Test Client ID' ),
@@ -173,7 +189,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			'checkout_settings'                => array(
 				'title'       => __( 'Checkout' ),
 				'type'        => 'title',
-				'description' => __( 'Checkout settings.' )
+				'description' => __( 'Checkout settings.' ),
 			),
 			'test_mode'                        => array(
 				'title'       => __( 'Test mode' ),
@@ -189,7 +205,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'type'        => 'checkbox',
 				'description' => __( 'Enabling this will send callback URL to the API and verify the transaction when a callback request received. Disabling this will verify the transaction using parameters returned to the return page.' ),
 				'default'     => 'yes',
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 			'checkout_logo_width'              => array(
 				'title'       => __( 'Dintero Checkout Logo Width (in pixels)' ),
@@ -201,9 +217,9 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			'capture_settings'                 => array(
 				'title'       => __( 'Payment Capture' ),
 				'type'        => 'title',
-				'description' => __( 'Payment Capture settings.' )
+				'description' => __( 'Payment Capture settings.' ),
 			),
-			'default_order_status' => array(
+			'default_order_status'             => array(
 				'title'       => __( 'Default Order Status' ),
 				'type'        => 'select',
 				'options'     => array(
@@ -212,11 +228,11 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				),
 				'default'     => 'wc-processing',
 				'description' => __( 'When payment Authorized.' ),
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
-			'manual_capture_settings' => array(
-				'title'       => __( 'Capture order when:' ),
-				'type'        => 'title',
+			'manual_capture_settings'          => array(
+				'title' => __( 'Capture order when:' ),
+				'type'  => 'title',
 			),
 			'manual_capture_status'            => array(
 				'title'       => __( 'Order status is changed to: ' ),
@@ -224,42 +240,42 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'options'     => wc_get_order_statuses(),
 				'default'     => 'wc-completed',
 				'description' => __( 'Select a status which the payment will be manually captured if the order status changed to it.' ),
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 			'additional_manual_capture_status' => array(
 				'title'       => __( 'Order status is changed to (additional): ' ),
 				'type'        => 'select',
 				'options'     => ( array(
-					                   - 1 => '--- Disable Additional Manual Capture Order Status ---'
-				                   ) + wc_get_order_statuses() ),
+					- 1 => '--- Disable Additional Manual Capture Order Status ---',
+				) + wc_get_order_statuses() ),
 				'default'     => -1,
 				'description' => __( 'Select an additional status which the payment will be manually captured if the order status changed to it.' ),
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 			'cancel_refund_settings'           => array(
-				'title'       => __( 'Cancel or refund order when:' ),
-				'type'        => 'title'
+				'title' => __( 'Cancel or refund order when:' ),
+				'type'  => 'title',
 			),
 			'additional_cancel_status'         => array(
 				'title'       => __( 'Order status is changed to:' ),
 				'type'        => 'select',
 				'options'     => ( array(
-					                   - 1 => '--- Disable Additional Cancellation Order Status ---'
-				                   ) + wc_get_order_statuses() ),
+					- 1 => '--- Disable Additional Cancellation Order Status ---',
+				) + wc_get_order_statuses() ),
 				'default'     => - 1,
 				'description' => __( 'Select an additional status that will be used to cancel the order. Status "Cancelled" will be always used to cancel the order.' ),
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 			'additional_refund_status'         => array(
 				'title'       => __( 'Order status is changed to (additional): ' ),
 				'type'        => 'select',
 				'options'     => ( array(
-					                   - 1 => '--- Disable Additional Refund Order Status ---'
-				                   ) + wc_get_order_statuses() ),
+					- 1 => '--- Disable Additional Refund Order Status ---',
+				) + wc_get_order_statuses() ),
 				'default'     => - 1,
 				'description' => __( 'Select an additional status that will be used to refund the order payment. Status "Refunded" will be always used to refund the order payment.' ),
-				'desc_tip'    => true
-			)
+				'desc_tip'    => true,
+			),
 		);
 	}
 
@@ -272,21 +288,24 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 		$headers = array(
 			'Content-type'  => 'application/json; charset=utf-8',
 			'Accept'        => 'application/json',
-			'Authorization' => 'Basic ' . base64_encode( $this->client_id . ':' . $this->client_secret )
+			'Authorization' => 'Basic ' . base64_encode( $this->client_id . ':' . $this->client_secret ),
 		);
 
 		$payload = array(
 			'grant_type' => 'client_credentials',
-			'audience'   => $api_endpoint . '/' . $this->oid
+			'audience'   => $api_endpoint . '/' . $this->oid,
 		);
 
-		$response = wp_remote_post( $api_endpoint . '/' . $this->oid . '/auth/token', array(
-			'method'    => 'POST',
-			'headers'   => $headers,
-			'body'      => wp_json_encode( $payload ),
-			'timeout'   => 90,
-			'sslverify' => false
-		) );
+		$response = wp_remote_post(
+			$api_endpoint . '/' . $this->oid . '/auth/token',
+			array(
+				'method'    => 'POST',
+				'headers'   => $headers,
+				'body'      => wp_json_encode( $payload ),
+				'timeout'   => 90,
+				'sslverify' => false,
+			)
+		);
 
 		// Retrieve the body's response if no errors found
 		$response_body  = wp_remote_retrieve_body( $response );
@@ -304,7 +323,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 * Creating checkout session and requesting payment page URL
 	 */
 	private function get_payment_page_url( $order ) {
-		if ( ! empty( $order ) AND $order instanceof WC_Order ) {
+		if ( ! empty( $order ) and $order instanceof WC_Order ) {
 			$order_id     = $order->get_id();
 			$access_token = $this->get_access_token();
 			$api_endpoint = $this->checkout_endpoint . '/sessions-profile';
@@ -323,10 +342,20 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				$line_id                = strval( $counter );
 				$item_total_amount      = absint( strval( floatval( $order_item->get_total() ) * 100 ) );
 				$item_tax_amount        = absint( strval( floatval( $order_item->get_total_tax() ) * 100 ) );
-				$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $order_item,
-						true ) ) * 100 ) );
-				$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
-						2 ) * 100 ) : 0;
+				$item_line_total_amount = absint(
+					strval(
+						floatval(
+							$order->get_line_total(
+								$order_item,
+								true
+							)
+						) * 100
+					)
+				);
+				$item_tax_percentage    = $item_total_amount ? ( round(
+					( $item_tax_amount / $item_total_amount ),
+					2
+				) * 100 ) : 0;
 				$item                   = array(
 					'id'          => 'item_' . $counter,
 					'description' => $order_item->get_name(),
@@ -334,7 +363,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 					'vat_amount'  => $item_tax_amount,
 					'vat'         => $item_tax_percentage,
 					'amount'      => $item_line_total_amount,
-					'line_id'     => $line_id
+					'line_id'     => $line_id,
 				);
 				array_push( $items, $item );
 			}
@@ -345,8 +374,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
 				$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
 				$item_line_total_amount = $item_total_amount + $item_tax_amount;
-				$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
-						2 ) * 100 ) : 0;
+				$item_tax_percentage    = $item_total_amount ? ( round(
+					( $item_tax_amount / $item_total_amount ),
+					2
+				) * 100 ) : 0;
 
 				$item = array(
 					'id'          => 'shipping',
@@ -355,7 +386,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 					'vat_amount'  => $item_tax_amount,
 					'vat'         => $item_tax_percentage,
 					'amount'      => $item_line_total_amount,
-					'line_id'     => $line_id
+					'line_id'     => $line_id,
 				);
 				array_push( $items, $item );
 			}
@@ -363,17 +394,17 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			$headers = array(
 				'Content-type'  => 'application/json; charset=utf-8',
 				'Accept'        => 'application/json',
-				'Authorization' => 'Bearer ' . $access_token
+				'Authorization' => 'Bearer ' . $access_token,
 			);
 
 			$payload = array(
 				'url'        => array(
 					'return_url'   => $return_url,
-					'callback_url' => $callback_url
+					'callback_url' => $callback_url,
 				),
 				'customer'   => array(
 					'email'        => $order->get_billing_email(),
-					'phone_number' => $order->get_billing_phone()
+					'phone_number' => $order->get_billing_phone(),
 				),
 				'order'      => array(
 					'amount'             => $order_total_amount,
@@ -386,7 +417,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 						'address_line' => $order->get_shipping_address_1(),
 						'postal_code'  => $order->get_shipping_postcode(),
 						'postal_place' => $order->get_shipping_city(),
-						'country'      => $order->get_shipping_country()
+						'country'      => $order->get_shipping_country(),
 					),
 					'billing_address'    => array(
 						'first_name'   => $order->get_billing_first_name(),
@@ -394,20 +425,23 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 						'address_line' => $order->get_billing_address_1(),
 						'postal_code'  => $order->get_billing_postcode(),
 						'postal_place' => $order->get_billing_city(),
-						'country'      => $order->get_billing_country()
+						'country'      => $order->get_billing_country(),
 					),
-					'items'              => $items
+					'items'              => $items,
 				),
-				'profile_id' => $this->profile_id
+				'profile_id' => $this->profile_id,
 			);
 
-			$response = wp_remote_post( $api_endpoint, array(
-				'method'    => 'POST',
-				'headers'   => $headers,
-				'body'      => wp_json_encode( $payload ),
-				'timeout'   => 90,
-				'sslverify' => false
-			) );
+			$response = wp_remote_post(
+				$api_endpoint,
+				array(
+					'method'    => 'POST',
+					'headers'   => $headers,
+					'body'      => wp_json_encode( $payload ),
+					'timeout'   => 90,
+					'sslverify' => false,
+				)
+			);
 
 			// Retrieve the body's response if no errors found
 			$response_body  = wp_remote_retrieve_body( $response );
@@ -429,12 +463,12 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( ! empty( $order ) AND $order instanceof WC_Order ) {
+		if ( ! empty( $order ) and $order instanceof WC_Order ) {
 			$payment_page_url = $this->get_payment_page_url( $order );
 
 			return array(
 				'result'   => 'success',
-				'redirect' => $payment_page_url
+				'redirect' => $payment_page_url,
 			);
 		}
 	}
@@ -448,15 +482,18 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 
 		$headers = array(
 			'Accept'        => 'application/json',
-			'Authorization' => 'Bearer ' . $access_token
+			'Authorization' => 'Bearer ' . $access_token,
 		);
 
-		$response = wp_remote_get( $api_endpoint . '/' . $transaction_id, array(
-			'method'    => 'GET',
-			'headers'   => $headers,
-			'timeout'   => 90,
-			'sslverify' => false
-		) );
+		$response = wp_remote_get(
+			$api_endpoint . '/' . $transaction_id,
+			array(
+				'method'    => 'GET',
+				'headers'   => $headers,
+				'timeout'   => 90,
+				'sslverify' => false,
+			)
+		);
 
 		// Retrieve the body's response if no errors found
 		$response_body = wp_remote_retrieve_body( $response );
@@ -469,7 +506,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 * Creating order receipt.
 	 */
 	private function create_receipt( $order ) {
-		if ( ! empty( $order ) AND $order instanceof WC_Order ) {
+		if ( ! empty( $order ) and $order instanceof WC_Order ) {
 			$order_id     = $order->get_id();
 			$access_token = $this->get_access_token();
 			$api_endpoint = $this->api_endpoint . '/accounts';
@@ -491,8 +528,16 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				$counter ++;
 				$line_id                = $counter;
 				$item_total_amount      = absint( strval( floatval( $order_item->get_total() ) * 100 ) );
-				$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $order_item,
-						true ) ) * 100 ) );
+				$item_line_total_amount = absint(
+					strval(
+						floatval(
+							$order->get_line_total(
+								$order_item,
+								true
+							)
+						) * 100
+					)
+				);
 
 				$item = array(
 					'id'           => 'item_' . $counter,
@@ -500,7 +545,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 					'quantity'     => $order_item->get_quantity(),
 					'gross_amount' => $item_line_total_amount,
 					'net_amount'   => $item_total_amount,
-					'line_id'      => $line_id
+					'line_id'      => $line_id,
 				);
 				array_push( $items, $item );
 			}
@@ -518,7 +563,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 					'quantity'     => 1,
 					'gross_amount' => $item_line_total_amount,
 					'net_amount'   => $item_total_amount,
-					'line_id'      => $line_id
+					'line_id'      => $line_id,
 				);
 				array_push( $items, $item );
 			}
@@ -526,7 +571,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			$headers = array(
 				'Content-type'  => 'application/json; charset=utf-8',
 				'Accept'        => 'application/json',
-				'Authorization' => 'Bearer ' . $access_token
+				'Authorization' => 'Bearer ' . $access_token,
 			);
 
 			$payload = array(
@@ -543,26 +588,28 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 					'net_amount'     => $order_net_amount,
 					'currency'       => $currency,
 					'order_number'   => strval( $order_id ),
-					'transaction_id' => $transaction_id
-				)
+					'transaction_id' => $transaction_id,
+				),
 			);
 
-			$response = wp_remote_post( $api_endpoint . '/' . $this->oid . '/receipts', array(
-				'method'    => 'POST',
-				'headers'   => $headers,
-				'body'      => wp_json_encode( $payload ),
-				'timeout'   => 90,
-				'sslverify' => false
-			) );
+			$response = wp_remote_post(
+				$api_endpoint . '/' . $this->oid . '/receipts',
+				array(
+					'method'    => 'POST',
+					'headers'   => $headers,
+					'body'      => wp_json_encode( $payload ),
+					'timeout'   => 90,
+					'sslverify' => false,
+				)
+			);
 
 			// Retrieve the body's response if no errors found
 			$response_body  = wp_remote_retrieve_body( $response );
 			$response_array = json_decode( $response_body, true );
 
-			if ( array_key_exists( 'receipts', $response_array ) AND
-			     count( $response_array['receipts'] ) AND
-			     array_key_exists( 'id', $response_array['receipts'][0] ) ) {
-
+			if ( array_key_exists( 'receipts', $response_array ) and
+				 count( $response_array['receipts'] ) and
+				 array_key_exists( 'id', $response_array['receipts'][0] ) ) {
 				$receipt_id = $response_array['receipts'][0]['id'];
 				$order->update_meta_data( 'receipt_id', $receipt_id );
 				$order->save();
@@ -581,8 +628,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 * Complete order, add transaction ID and note.
 	 *
 	 * @param WC_Order $order Order object.
-	 * @param string $transaction_id Transaction ID.
-	 * @param string $note Payment note.
+	 * @param string   $transaction_id Transaction ID.
+	 * @param string   $note Payment note.
 	 */
 	private function payment_complete( $order, $transaction_id = '', $note = '' ) {
 		$order->add_order_note( $note );
@@ -595,12 +642,12 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 * Hold order and add note.
 	 *
 	 * @param WC_Order $order Order object.
-	 * @param string $transaction_id Transaction ID.
-	 * @param string $reason Reason why the payment is on hold.
+	 * @param string   $transaction_id Transaction ID.
+	 * @param string   $reason Reason why the payment is on hold.
 	 */
 	private function process_authorization( $order, $transaction_id = '', $reason = '' ) {
 		$order->set_transaction_id( $transaction_id );
-		$order->update_status( $this->get_option('default_order_status'), $reason );
+		$order->update_status( $this->get_option( 'default_order_status' ), $reason );
 	}
 
 	/**
@@ -610,20 +657,17 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 */
 	public function check_status( $order_id, $previous_status, $current_status ) {
 
-		if ( $current_status === $this->manual_capture_status OR
-		     $current_status === $this->additional_manual_capture_status ) {
-
+		if ( $current_status === $this->manual_capture_status or
+			 $current_status === $this->additional_manual_capture_status ) {
 			$this->check_capture( $order_id );
 		} else {
-			if ( $current_status === 'cancelled' OR
-			     $current_status === $this->additional_cancel_status ) {
-
+			if ( $current_status === 'cancelled' or
+				 $current_status === $this->additional_cancel_status ) {
 				$this->cancel( $order_id );
 			}
 
-			if ( $current_status === 'refunded' OR
-			     $current_status === $this->additional_refund_status ) {
-
+			if ( $current_status === 'refunded' or
+				 $current_status === $this->additional_refund_status ) {
 				$this->process_refund( $order_id );
 			}
 		}
@@ -636,12 +680,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 */
 	private function cancel( $order_id ) {
 		$order = wc_get_order( $order_id );
-		if ( ! empty( $order ) AND
-		     $order instanceof WC_Order AND
-		     $order->get_transaction_id() AND
-		     'dintero-hp' === $order->get_payment_method() ) {
-
-
+		if ( ! empty( $order ) and
+			 $order instanceof WC_Order and
+			 $order->get_transaction_id() and
+			 'dintero-hp' === $order->get_payment_method() ) {
 			$transaction_id = $order->get_transaction_id();
 			$transaction    = $this->get_transaction( $transaction_id );
 			if ( ! array_key_exists( 'merchant_reference', $transaction ) ) {
@@ -649,33 +691,34 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			}
 			$transaction_order_id = absint( strval( $transaction['merchant_reference'] ) );
 
-			if ( $transaction_order_id === $order_id AND
-			     array_key_exists( 'status', $transaction ) AND
-			     $transaction['status'] === 'AUTHORIZED' ) {
-
+			if ( $transaction_order_id === $order_id and
+				 array_key_exists( 'status', $transaction ) and
+				 $transaction['status'] === 'AUTHORIZED' ) {
 				$access_token = $this->get_access_token();
 				$api_endpoint = $this->checkout_endpoint . '/transactions';
 
 				$headers = array(
 					'Content-type'  => 'application/json; charset=utf-8',
 					'Accept'        => 'application/json',
-					'Authorization' => 'Bearer ' . $access_token
+					'Authorization' => 'Bearer ' . $access_token,
 				);
 
-				$response = wp_remote_post( $api_endpoint . '/' . $transaction_id . '/void', array(
-					'method'    => 'POST',
-					'headers'   => $headers,
-					'timeout'   => 90,
-					'sslverify' => false
-				) );
+				$response = wp_remote_post(
+					$api_endpoint . '/' . $transaction_id . '/void',
+					array(
+						'method'    => 'POST',
+						'headers'   => $headers,
+						'timeout'   => 90,
+						'sslverify' => false,
+					)
+				);
 
 				// Retrieve the body's response if no errors found
 				$response_body  = wp_remote_retrieve_body( $response );
 				$response_array = json_decode( $response_body, true );
 
-				if ( array_key_exists( 'status', $response_array ) AND
-				     $response_array['status'] === 'AUTHORIZATION_VOIDED' ) {
-
+				if ( array_key_exists( 'status', $response_array ) and
+					 $response_array['status'] === 'AUTHORIZATION_VOIDED' ) {
 					$note = __( 'Transaction cancelled via Dintero. Transaction ID: ' ) . $transaction_id;
 					$order->add_order_note( $note );
 					wc_increase_stock_levels( $order_id );
@@ -687,19 +730,18 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	/**
 	 * Process a refund if supported.
 	 *
-	 * @param int $order_id Order ID.
-	 * @param float $amount Refund amount.
+	 * @param int    $order_id Order ID.
+	 * @param float  $amount Refund amount.
 	 * @param string $reason Refund reason.
 	 *
 	 * @return bool|WP_Error
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );
-		if ( ! empty( $order ) AND
-		     $order instanceof WC_Order AND
-		     $order->get_transaction_id() AND
-		     'dintero-hp' === $order->get_payment_method() ) {
-
+		if ( ! empty( $order ) and
+			 $order instanceof WC_Order and
+			 $order->get_transaction_id() and
+			 'dintero-hp' === $order->get_payment_method() ) {
 			$transaction_id = $order->get_transaction_id();
 			$transaction    = $this->get_transaction( $transaction_id );
 			if ( ! array_key_exists( 'merchant_reference', $transaction ) ) {
@@ -707,11 +749,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			}
 			$transaction_order_id = absint( strval( $transaction['merchant_reference'] ) );
 
-			if ( $transaction_order_id === $order_id AND
-			     array_key_exists( 'status', $transaction ) AND
-			     array_key_exists( 'amount', $transaction ) AND
-			     ( $transaction['status'] === 'CAPTURED' OR $transaction['status'] === 'PARTIALLY_REFUNDED' ) ) {
-
+			if ( $transaction_order_id === $order_id and
+				 array_key_exists( 'status', $transaction ) and
+				 array_key_exists( 'amount', $transaction ) and
+				 ( $transaction['status'] === 'CAPTURED' or $transaction['status'] === 'PARTIALLY_REFUNDED' ) ) {
 				$access_token = $this->get_access_token();
 				$api_endpoint = $this->checkout_endpoint . '/transactions';
 
@@ -726,36 +767,38 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				$items = array(
 					array(
 						'amount'  => $amount,
-						'line_id' => '1'
-					)
+						'line_id' => '1',
+					),
 				);
 
 				$headers = array(
 					'Content-type'  => 'application/json; charset=utf-8',
 					'Accept'        => 'application/json',
-					'Authorization' => 'Bearer ' . $access_token
+					'Authorization' => 'Bearer ' . $access_token,
 				);
 
 				$payload = array(
 					'amount' => $amount,
 					'reason' => $reason,
-					'items'  => $items
+					'items'  => $items,
 				);
 
-				$response = wp_remote_post( $api_endpoint . '/' . $transaction_id . '/refund', array(
-					'method'    => 'POST',
-					'headers'   => $headers,
-					'body'      => wp_json_encode( $payload ),
-					'timeout'   => 90,
-					'sslverify' => false
-				) );
+				$response = wp_remote_post(
+					$api_endpoint . '/' . $transaction_id . '/refund',
+					array(
+						'method'    => 'POST',
+						'headers'   => $headers,
+						'body'      => wp_json_encode( $payload ),
+						'timeout'   => 90,
+						'sslverify' => false,
+					)
+				);
 
 				// Retrieve the body's response if no errors found
 				$response_body  = wp_remote_retrieve_body( $response );
 				$response_array = json_decode( $response_body, true );
 
 				if ( array_key_exists( 'status', $response_array ) ) {
-
 					$note = '';
 					if ( $response_array['status'] === 'REFUNDED' ) {
 						$note = __( 'Payment refunded via Dintero. Transaction ID: ' ) . $transaction_id;
@@ -781,11 +824,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 */
 	private function check_capture( $order_id ) {
 		$order = wc_get_order( $order_id );
-		if ( ! empty( $order ) AND
-		     $order instanceof WC_Order AND
-		     $order->get_transaction_id() AND
-		     'dintero-hp' === $order->get_payment_method() ) {
-
+		if ( ! empty( $order ) and
+			 $order instanceof WC_Order and
+			 $order->get_transaction_id() and
+			 'dintero-hp' === $order->get_payment_method() ) {
 			$transaction_id = $order->get_transaction_id();
 			$transaction    = $this->get_transaction( $transaction_id );
 			if ( ! array_key_exists( 'merchant_reference', $transaction ) ) {
@@ -802,10 +844,9 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 * Capture Payment.
 	 */
 	private function capture( $order, $transaction = null ) {
-		if ( ! empty( $order ) AND
-		     $order instanceof WC_Order AND
-		     $order->get_transaction_id() ) {
-
+		if ( ! empty( $order ) and
+			 $order instanceof WC_Order and
+			 $order->get_transaction_id() ) {
 			$order_id = $order->get_id();
 
 			$transaction_id = $order->get_transaction_id();
@@ -815,10 +856,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 
 			$order_total_amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
 
-			if ( array_key_exists( 'status', $transaction ) AND
-			     array_key_exists( 'amount', $transaction ) AND
-			     $transaction['status'] === 'AUTHORIZED' AND
-			     $transaction['amount'] >= $order_total_amount ) {
+			if ( array_key_exists( 'status', $transaction ) and
+				 array_key_exists( 'amount', $transaction ) and
+				 $transaction['status'] === 'AUTHORIZED' and
+				 $transaction['amount'] >= $order_total_amount ) {
 				$access_token = $this->get_access_token();
 				$api_endpoint = $this->checkout_endpoint . '/transactions';
 
@@ -830,10 +871,20 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 					$line_id                = strval( $counter );
 					$item_total_amount      = absint( strval( floatval( $order_item->get_total() ) * 100 ) );
 					$item_tax_amount        = absint( strval( floatval( $order_item->get_total_tax() ) * 100 ) );
-					$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $order_item,
-							true ) ) * 100 ) );
-					$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
-							2 ) * 100 ) : 0;
+					$item_line_total_amount = absint(
+						strval(
+							floatval(
+								$order->get_line_total(
+									$order_item,
+									true
+								)
+							) * 100
+						)
+					);
+					$item_tax_percentage    = $item_total_amount ? ( round(
+						( $item_tax_amount / $item_total_amount ),
+						2
+					) * 100 ) : 0;
 					$item                   = array(
 						'id'          => 'item_' . $counter,
 						'description' => $order_item->get_name(),
@@ -841,7 +892,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 						'vat_amount'  => $item_tax_amount,
 						'vat'         => $item_tax_percentage,
 						'amount'      => $item_line_total_amount,
-						'line_id'     => $line_id
+						'line_id'     => $line_id,
 					);
 					array_push( $items, $item );
 				}
@@ -852,8 +903,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 					$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
 					$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
 					$item_line_total_amount = $item_total_amount + $item_tax_amount;
-					$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
-							2 ) * 100 ) : 0;
+					$item_tax_percentage    = $item_total_amount ? ( round(
+						( $item_tax_amount / $item_total_amount ),
+						2
+					) * 100 ) : 0;
 
 					$item = array(
 						'id'          => 'shipping',
@@ -862,7 +915,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 						'vat_amount'  => $item_tax_amount,
 						'vat'         => $item_tax_percentage,
 						'amount'      => $item_line_total_amount,
-						'line_id'     => $line_id
+						'line_id'     => $line_id,
 					);
 					array_push( $items, $item );
 				}
@@ -870,30 +923,32 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				$headers = array(
 					'Content-type'  => 'application/json; charset=utf-8',
 					'Accept'        => 'application/json',
-					'Authorization' => 'Bearer ' . $access_token
+					'Authorization' => 'Bearer ' . $access_token,
 				);
 
 				$payload = array(
 					'amount'            => $order_total_amount,
 					'capture_reference' => strval( $order_id ),
-					'items'             => $items
+					'items'             => $items,
 				);
 
-				$response = wp_remote_post( $api_endpoint . '/' . $transaction_id . '/capture', array(
-					'method'    => 'POST',
-					'headers'   => $headers,
-					'body'      => wp_json_encode( $payload ),
-					'timeout'   => 90,
-					'sslverify' => false
-				) );
+				$response = wp_remote_post(
+					$api_endpoint . '/' . $transaction_id . '/capture',
+					array(
+						'method'    => 'POST',
+						'headers'   => $headers,
+						'body'      => wp_json_encode( $payload ),
+						'timeout'   => 90,
+						'sslverify' => false,
+					)
+				);
 
 				// Retrieve the body's response if no errors found
 				$response_body  = wp_remote_retrieve_body( $response );
 				$response_array = json_decode( $response_body, true );
 
-				if ( array_key_exists( 'status', $response_array ) AND
-				     $response_array['status'] === 'CAPTURED' ) {
-
+				if ( array_key_exists( 'status', $response_array ) and
+					 $response_array['status'] === 'CAPTURED' ) {
 					$note = __( 'Payment captured via Dintero. Transaction ID: ' ) . $transaction_id;
 					$this->payment_complete( $order, $transaction_id, $note );
 				}
@@ -916,18 +971,15 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			$transaction_order_id = $transaction['merchant_reference'];
 			$order                = wc_get_order( $transaction_order_id );
 
-			if ( ! empty( $order ) AND $order instanceof WC_Order ) {
+			if ( ! empty( $order ) and $order instanceof WC_Order ) {
 				$amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
-				if ( array_key_exists( 'status', $transaction ) AND
-				     array_key_exists( 'amount', $transaction ) AND
-				     $transaction['amount'] === $amount ) {
-
+				if ( array_key_exists( 'status', $transaction ) and
+					 array_key_exists( 'amount', $transaction ) and
+					 $transaction['amount'] === $amount ) {
 					if ( $transaction['status'] === 'AUTHORIZED' ) {
-
 						$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
 						$this->process_authorization( $order, $transaction_id, $hold_reason );
 					} elseif ( $transaction['status'] === 'CAPTURED' ) {
-
 						$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
 						$this->payment_complete( $order, $transaction_id, $note );
 					}
