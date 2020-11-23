@@ -55,8 +55,10 @@ final class WC_Dintero_HP {
 	private function init_hooks() {
 		// Override template if Klarna Checkout page.
 		add_filter( 'wc_get_template', array( $this, 'override_template' ), 999, 2 );
-		add_action( 'wp_footer', array( $this, 'init_footer') );
-
+		if('yes' == $this->setting()->get('branding_enable')){
+            add_action( 'wp_footer', array( $this, 'init_footer') );
+        }
+        
 		$express_enable = $this->setting()->get('express_enable');
 		$embed_enable = $this->setting()->get('embed_enable');
 

@@ -93,6 +93,13 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		return self::$instance;
 	}
 
+	/*
+	*
+	* do nothing for Express
+	*/
+	public function callback(){
+		
+	}
 	/**
 	 * Cloning is forbidden.
 	 */

@@ -1,4 +1,9 @@
 *** WooCommerce Dintero Plugin Changelog ***
+2020.11.23
+   * warning removed from thankyou page
+   * removed reward options from backend setting
+   * add control to add/remove branding image in/from footer
+
 2020.11.03
    * 'before_checkout_form_express' warning message fix
    * probable redirect issue resolve
