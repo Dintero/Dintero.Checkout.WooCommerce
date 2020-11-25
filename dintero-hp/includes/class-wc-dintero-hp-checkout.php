@@ -1477,6 +1477,16 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				}
 			}
 		}
+		if(!$shipping_packages){
+			
+			$method_rate_id = WC()->session->get( 'chosen_shipping_methods' )[0];
+
+			$method_key_id = str_replace( ':', '_', $method_rate_id ); // Formating
+	        $option_name = 'woocommerce_'.$method_key_id.'_settings'; // Get the complete option slug
+	        
+	        $shipping_name = get_option( $option_name, true )['title'];
+			
+		}
 		if ( ! isset( $shipping_name ) ) {
 			$shipping_name = __( 'Shipping', 'dintero-checkout-for-woocommerce' );
 		}
@@ -1493,6 +1503,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	 * @return string $shipping_reference Reference for selected shipping method.
 	 */
 	public function get_shipping_reference() {
+		$shipping_reference = array();
 		$shipping_packages = WC()->shipping->get_packages();
 		foreach ( $shipping_packages as $i => $package ) {
 			$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
@@ -1500,7 +1511,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				$package_rates = $package['rates'];
 				foreach ( $package_rates as $rate_key => $rate_value ) {
 					if ( $rate_key === $chosen_method ) {
-						$shipping_reference = $rate_value->id;
+						$shipping_reference['id'] = $rate_value->id;
+						$shipping_reference['instance_id'] = $rate_value->instance_id;
 					}
 				}
 			}
@@ -1509,7 +1521,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$shipping_reference = __( 'Shipping', 'Dintero-checkout-for-woocommerce' );
 		}
 
-		return (string) $shipping_reference;
+		return $shipping_reference;
 	}
 
 	/**
@@ -1890,7 +1902,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$total_amount = $this->get_order_lines_total_amount();
 		$billingAddress = WC()->customer->get_billing();
 		
-		$order_total_amount = $total_amount;  
+		$order_total_amount = $total_amount; 
+		$selectedShippingReference = $this->get_shipping_reference(); 
 		$payload = array(
 			'order' =>  array(
 				'amount'             => $order_total_amount + $this->get_shipping_amount() ,
@@ -1901,7 +1914,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				'items'              => $this->order_lines,
 				'shipping_option'=>array(
 							
-									'id'=> $this->get_shipping_reference(),
+									'id'=> (string)$selectedShippingReference['id'],
 									'line_id'=>'shipping_method',
 									//"countries"=>array($order->get_shipping_country()),
 									'country'=> (string) WC()->checkout()->get_value( 'billing_country' ),
@@ -1912,7 +1925,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 									'description'=>'',
 									'delivery_method'=>'delivery',
 									'operator'=>'',
-									'operator_product_id'=>'',
+									'operator_product_id'=> (string)$selectedShippingReference['instance_id'],
 									'eta'=>array(
 											'relative'=>array(
 												'minutes_min'=>0,
@@ -2018,13 +2031,13 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$express_option = array();
 		if ( WC()->shipping->get_packages() && WC()->session->get( 'chosen_shipping_methods' )[0] )  {
 			$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
-
+			$selectedShippingReference = $this->get_shipping_reference();
 			$express_option = array(
 				'shipping_address_callback_url'=>$ship_callback_url,
 				'customer_types' => array("b2c"),
 				'shipping_options'=>array(
 						0=>array(
-								'id'=> $this->get_shipping_reference(),
+								'id'=> (string) $selectedShippingReference['id'],
 								'line_id'=>'shipping_method',
 								//"countries"=>array($order->get_shipping_country()),
 								'country'=> (string) WC()->checkout()->get_value( 'billing_country' ),
@@ -2035,7 +2048,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 								'description'=>'',
 								'delivery_method'=>'delivery',
 								'operator'=>'',
-								'operator_product_id'=>'',
+								'operator_product_id'=>(string) $selectedShippingReference['instance_id'],
 								'eta'=>array(
 										'relative'=>array(
 											'minutes_min'=>0,
@@ -2281,12 +2294,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 				if ($express) {
 					$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
-
+					$selectedShippingReference = $this->get_shipping_reference();
 					$express_option = array(
 						'shipping_address_callback_url'=>$ship_callback_url,
 						'shipping_options'=>array(
 								0=>array(
-										'id'=> $this->get_shipping_reference(),
+										'id'=> (string)$selectedShippingReference['id'],
 										'line_id'=>$line_id,
 										//"countries"=>array($order->get_shipping_country()),
 										'country'=>$order->get_shipping_country(),
@@ -2297,7 +2310,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 										'description'=>'',
 										'delivery_method'=>'delivery',
 										'operator'=>'',
-										'operator_product_id'=>'',
+										'operator_product_id'=>(string)$selectedShippingReference['instance_id'],
 										'eta'=>array(
 												'relative'=>array(
 													'minutes_min'=>0,

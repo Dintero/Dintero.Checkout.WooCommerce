@@ -1,4 +1,8 @@
 *** WooCommerce Dintero Plugin Changelog ***
+2020.11.25
+  * Instance id for shipping method, for callback order creation 
+  * Shipping name fix
+  
 2020.11.23
    * warning removed from thankyou page
    * removed reward options from backend setting

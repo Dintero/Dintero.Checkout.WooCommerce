@@ -408,6 +408,7 @@ class WC_AJAX_HP {
 				
 				$item->set_method_title($tempTitle[1] );
 				$item->set_method_id( $transaction['shipping_option']['id'] ); // set an existing Shipping method rate ID
+				$item->set_instance_id( $transaction['shipping_option']['operator_product_id'] ); // set an Shipping method  instance id
 				$item->set_total( $new_ship_price ); // (optional)
 				$item->calculate_taxes($calculate_tax_for);
 
