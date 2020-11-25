@@ -1,5 +1,8 @@
 *** WooCommerce Dintero Plugin Changelog ***
 2020.11.25
+  * Shipping name fix Improvement
+
+2020.11.25
   * Instance id for shipping method, for callback order creation 
   * Shipping name fix
   

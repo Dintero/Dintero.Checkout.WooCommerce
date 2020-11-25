@@ -1477,16 +1477,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				}
 			}
 		}
-		if(!$shipping_packages){
-			
-			$method_rate_id = WC()->session->get( 'chosen_shipping_methods' )[0];
-
-			$method_key_id = str_replace( ':', '_', $method_rate_id ); // Formating
-	        $option_name = 'woocommerce_'.$method_key_id.'_settings'; // Get the complete option slug
-	        
-	        $shipping_name = get_option( $option_name, true )['title'];
-			
-		}
+		
 		if ( ! isset( $shipping_name ) ) {
 			$shipping_name = __( 'Shipping', 'dintero-checkout-for-woocommerce' );
 		}
@@ -1901,7 +1892,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$this->process_cart();
 		$total_amount = $this->get_order_lines_total_amount();
 		$billingAddress = WC()->customer->get_billing();
-		
+		WC()->cart->calculate_shipping();
 		$order_total_amount = $total_amount; 
 		$selectedShippingReference = $this->get_shipping_reference(); 
 		$payload = array(
