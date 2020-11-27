@@ -1,4 +1,7 @@
 *** WooCommerce Dintero Plugin Changelog ***
+2020.11.27
+  * User agent added , WooCommerce version, Plugin Version
+
 2020.11.25
   * Shipping name fix Improvement
 
