@@ -952,7 +952,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$headers = array(
 			'Content-type'  => 'application/json; charset=utf-8',
 			'Accept'        => 'application/json',
-			'Authorization' => 'Basic ' . base64_encode( $this->client_id . ':' . $this->client_secret )
+			'Authorization' => 'Basic ' . base64_encode( $this->client_id . ':' . $this->client_secret ),
+			'Dintero-System-Name' => 'woocommerce',
+			'Dintero-System-Version' =>  WC()->version,
+			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
+			'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
 		);
 
 		$payload = array(
@@ -1879,7 +1883,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		
 
 		$headers = array(
-			'content-type'        => 'application/json'
+			'content-type'        => 'application/json',
+			'Dintero-System-Name' => 'woocommerce',
+			'Dintero-System-Version' =>  WC()->version,
+			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
+			'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
 		);
 		$load = array('session_id' => $session_id) ;
 		
@@ -2061,7 +2069,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$headers = array(
 			'Content-type'  => 'application/json; charset=utf-8',
 			'Accept'        => 'application/json',
-			'Authorization' => 'Bearer ' . $access_token
+			'Authorization' => 'Bearer ' . $access_token,
+			'Dintero-System-Name' => 'woocommerce',
+			'Dintero-System-Version' =>  WC()->version,
+			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
+			'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
 		);
 
 
@@ -2345,7 +2357,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$headers = array(
 				'Content-type'  => 'application/json; charset=utf-8',
 				'Accept'        => 'application/json',
-				'Authorization' => 'Bearer ' . $access_token
+				'Authorization' => 'Bearer ' . $access_token,
+				'Dintero-System-Name' => 'woocommerce',
+				'Dintero-System-Version' =>  WC()->version,
+				'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
+				'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
 			);
 
 
@@ -2471,7 +2487,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 		$headers = array(
 			'Accept'        => 'application/json',
-			'Authorization' => 'Bearer ' . $access_token
+			'Authorization' => 'Bearer ' . $access_token,
+			'Dintero-System-Name' => 'woocommerce',
+			'Dintero-System-Version' =>  WC()->version,
+			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
+			'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
 		);
 
 		$response = wp_remote_get( $api_endpoint . '/' . $transaction_id, array(
@@ -2502,7 +2522,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 		$headers = array(
 			'content-type'        => 'application/json',
-			'authorization' => 'Bearer ' . $access_token
+			'authorization' => 'Bearer ' . $access_token,
+			'Dintero-System-Name' => 'woocommerce',
+			'Dintero-System-Version' =>  WC()->version,
+			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
+			'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
 		);
 
 		$payload = array(
@@ -2565,7 +2589,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 		$headers = array(
 			'Accept'        => 'application/json',
-			'Authorization' => 'Bearer ' . $access_token
+			'Authorization' => 'Bearer ' . $access_token,
+			'Dintero-System-Name' => 'woocommerce',
+			'Dintero-System-Version' =>  WC()->version,
+			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
+			'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
 		);
 
 		$response = wp_remote_get( $api_endpoint . '/' . $sessionId, array(
@@ -2631,7 +2659,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				$headers = array(
 					'Content-type'  => 'application/json; charset=utf-8',
 					'Accept'        => 'application/json',
-					'Authorization' => 'Bearer ' . $access_token
+					'Authorization' => 'Bearer ' . $access_token,
+					'Dintero-System-Name' => 'woocommerce',
+					'Dintero-System-Version' =>  WC()->version,
+					'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
+					'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
 				);
 
 				$response = wp_remote_post( $api_endpoint . '/' . $transaction_id . '/void', array(
@@ -2706,7 +2738,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					'Content-type'  => 'application/json; charset=utf-8',
 					'Accept'        => 'application/json',
 					'User-Agent' => 'Dintero.Checkout.Woocomerce.1.2.1 (+https://github.com/Dintero/Dintero.Checkout.Woocomerce)',
-					'Authorization' => 'Bearer ' . $access_token
+					'Authorization' => 'Bearer ' . $access_token,
+					'Dintero-System-Name' => 'woocommerce',
+					'Dintero-System-Version' =>  WC()->version,
+					'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
+					'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
 				);
 
 				$payload = array(
@@ -2843,7 +2879,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				$headers = array(
 					'Content-type'  => 'application/json; charset=utf-8',
 					'Accept'        => 'application/json',
-					'Authorization' => 'Bearer ' . $access_token
+					'Authorization' => 'Bearer ' . $access_token,
+					'Dintero-System-Name' => 'woocommerce',
+					'Dintero-System-Version' =>  WC()->version,
+					'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
+					'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
 				);
 
 				$payload = array(
@@ -2935,7 +2975,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$headers = array(
 				'Content-type'  => 'application/json; charset=utf-8',
 				'Accept'        => 'application/json',
-				'Authorization' => 'Bearer ' . $access_token
+				'Authorization' => 'Bearer ' . $access_token,
+				'Dintero-System-Name' => 'woocommerce',
+				'Dintero-System-Version' =>  WC()->version,
+				'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
+				'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
 			);
 
 			$payload = array(
