@@ -1363,7 +1363,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 						        .embed({
 						            container,
 						            sid: \"" . esc_attr( $id ) . "\",
-                                    language: \"" . get_user_locale() . "\",
+						            language: \"" . get_user_locale() . "\",
 						            onSession: function(event, checkout) {
 						                console.log(\"session\", event.session);
 						                var ss = event.session;
