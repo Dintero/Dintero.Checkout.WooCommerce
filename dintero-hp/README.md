@@ -3,7 +3,7 @@ Author: Moogruppen AS
 Author URI: https://moogruppen.no/
 Contributors: moogruppen, dintero
 
-Tags: woocommerce, Payment, Checkout, Vipps, Visa, Mastercard, Invoice, Instalment, Installment, Swish, Gateway, payment, dintero, klarna, vipps, Betaling, nettbutikk
+Tags: woocommerce, Payment, Checkout, Vipps, Visa, Mastercard, Invoice, Instalment, Installment, Swish, Gateway, payment, dintero, Betalingsløsning, Checkout, Betaling, Vipps, Visa, Mastercard, Faktura, Delbetaling, Swish, Betalingsgateway, vipps, Betaling, nettbutikk
 Tested up to: 5.5.3
 WC tested up to: 4.7.1
 

@@ -1097,7 +1097,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 			}else{
 				$expires_at = $sessionDetails['expires_at'];
-				$expires_at = '2020-11-02T14:12:25.877Z';
+				
 				$date = date('d/M/Y:H:i:s', time()); // CURRENT TIME
 				
 				$strTime = strtotime($expires_at);
