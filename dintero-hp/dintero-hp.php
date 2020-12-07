@@ -2,7 +2,11 @@
 /**
 Plugin Name: Dintero Checkout
 Description: Dintero Checkout - Express Checkout
+<<<<<<< HEAD
 Version:     2020.12.07
+=======
+Version:     2020.11.27
+>>>>>>> 8b3351c197a470819e22c0ec6e545031b061fd8a
 Author:      Dintero
 Author URI:  mailto:integration@dintero.com
 Text Domain: dintero-hp
@@ -13,7 +17,11 @@ Domain Path: /languages
 
 defined( 'ABSPATH' ) || exit;
 
+<<<<<<< HEAD
 define( 'DINTERO_HP_VERSION', '2020.12.07' );
+=======
+define( 'DINTERO_HP_VERSION', '2020.11.27' );
+>>>>>>> 8b3351c197a470819e22c0ec6e545031b061fd8a
 
 if ( ! defined( 'DHP_PLUGIN_FILE' ) ) {
 	define( 'DHP_PLUGIN_FILE', __FILE__ );

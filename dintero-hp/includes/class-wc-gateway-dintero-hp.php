@@ -965,9 +965,11 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 		
 
 		$headers = array(
+
 			'Content-type'  => 'application/json; charset=utf-8',
 			'Accept'        => 'application/json',
 			'Authorization' => 'Bearer ' . $access_token,
+
 			'Dintero-System-Name' => 'woocommerce',
 			'Dintero-System-Version' =>  WC()->version,
 			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',

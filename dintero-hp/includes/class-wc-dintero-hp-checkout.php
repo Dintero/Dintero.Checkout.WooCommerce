@@ -1889,9 +1889,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		
 
 		$headers = array(
+
 			'Content-type'  => 'application/json; charset=utf-8',
 			'Accept'        => 'application/json',
 			'Authorization' => 'Bearer ' . $access_token,
+
 			'Dintero-System-Name' => 'woocommerce',
 			'Dintero-System-Version' =>  WC()->version,
 			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
@@ -2508,9 +2510,14 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		
 
 		$headers = array(
+<<<<<<< HEAD
 			'Content-type'  => 'application/json; charset=utf-8',
 			'Accept'        => 'application/json',
 			'Authorization' => 'Bearer ' . $access_token,
+=======
+			'content-type'        => 'application/json',
+			'authorization' => 'Bearer ' . $access_token,
+>>>>>>> 8b3351c197a470819e22c0ec6e545031b061fd8a
 			'Dintero-System-Name' => 'woocommerce',
 			'Dintero-System-Version' =>  WC()->version,
 			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',

@@ -1,4 +1,5 @@
 *** WooCommerce Dintero Plugin Changelog ***
+<<<<<<< HEAD
 2020.12.07
   * Shipping method and Instance Id Seperation for Callback Order creation
   * Update in Api request for Few API calls
@@ -6,6 +7,8 @@
   * Sanitized few fields for security enhancement
    
 
+=======
+>>>>>>> 8b3351c197a470819e22c0ec6e545031b061fd8a
 2020.11.27
   * User agent added , WooCommerce version, Plugin Version
 
