@@ -55,10 +55,12 @@ final class WC_Dintero_HP {
 	private function init_hooks() {
 		// Override template if Klarna Checkout page.
 		add_filter( 'wc_get_template', array( $this, 'override_template' ), 999, 2 );
-		if('yes' == $this->setting()->get('branding_enable')){
+
+        if('yes' == $this->setting()->get('branding_enable')){
             add_action( 'wp_footer', array( $this, 'init_footer') );
         }
-        
+		
+
 		$express_enable = $this->setting()->get('express_enable');
 		$embed_enable = $this->setting()->get('embed_enable');
 
@@ -113,7 +115,7 @@ final class WC_Dintero_HP {
 		 // Template integrations
         add_action( 'woocommerce_cart_actions', array($this, 'cart_express_checkout_button'));
         add_action( 'woocommerce_widget_shopping_cart_buttons', array($this, 'cart_express_checkout_button'), 30);
-        
+
 
        	add_action('woocommerce_before_cart' , array($this, 'cart_express_checkout_loader'));
 
@@ -213,7 +215,7 @@ final class WC_Dintero_HP {
                 function checkIfOrderNowExists(){
                     var url = 'dhp-ajax';
                     var home_url = '<?php echo home_url()?>';
-                    var transactionId = '<?php echo $_GET["transaction_id"] ?>';
+                    var transactionId = '<?php echo sanitize_text_field( wp_unslash( $_GET['transaction_id'] ) ); ?>';
                     // Dont need to user create_order as we are using default WooCommerce Checout form
                     var data = {
                             action: 'check_order_status',
@@ -272,7 +274,7 @@ final class WC_Dintero_HP {
     private function is_dintero_confirmation() {
         
         if ( is_checkout() && is_wc_endpoint_url( 'order-received' ) ) {
-            if (strpos($_SERVER['REQUEST_URI'], "error=cancelled") !== false){ // order Cancelled
+            if (strpos(sanitize_text_field( wp_unslash($_SERVER['REQUEST_URI'])), "error=cancelled") !== false){ // order Cancelled
                    $location = wc_get_cart_url();
                     wp_safe_redirect( $location );
                     exit;
@@ -430,13 +432,15 @@ final class WC_Dintero_HP {
 
     // Can't use wc-api for this, as that does not support DELETE . IOK 2018-05-18
     private function is_consent_removal () {
-        if ($_SERVER['REQUEST_METHOD'] != 'DELETE') return false;
+        if (sanitize_text_field( wp_unslash($_SERVER['REQUEST_METHOD'])) != 'DELETE') return false;
         if ( !get_option('permalink_structure')) {
-            if (@$_REQUEST['dintero-consent-removal']) return @$_REQUEST['callback'];
+            if (sanitize_text_field( wp_unslash($_REQUEST['dintero-consent-removal']))){
+                return sanitize_text_field( wp_unslash($_REQUEST['callback']));
+            } 
             return false;
         }
-        if (preg_match("!/dintero-consent-removal/([^/]*)!", $_SERVER['REQUEST_URI'], $matches)) {
-            return @$_REQUEST['callback'];
+        if (preg_match("!/dintero-consent-removal/([^/]*)!", sanitize_text_field( wp_unslash($_SERVER['REQUEST_URI'])), $matches)) {
+            return sanitize_text_field( wp_unslash($_REQUEST['callback']));
         }
         return false;
     }
@@ -533,16 +537,30 @@ final class WC_Dintero_HP {
 	 * Include script and style
 	 */
 	public function init_script() {
-		wp_enqueue_style( 'style', plugin_dir_url(__DIR__) . 'assets/css/style.css', array(), '1.0.07', 'all' );
+        //first check that woo exists to prevent fatal errors
+        if ( function_exists( 'is_woocommerce' ) ) {
+            if ( is_cart() || is_checkout() ) {
+        		wp_enqueue_style( 'style', plugin_dir_url(__DIR__) . 'assets/css/style.css', array(), '1.0.07', 'all' );
 
-		$handle = 'dhp-hp';
-		$src = plugin_dir_url(__DIR__) . 'assets/js/dintero_hp.js';
-		$deps = array( 'jquery' );
-		$version = false;
+        		$handle = 'dhp-hp';
+        		$src = plugin_dir_url(__DIR__) . 'assets/js/dintero_hp.js';
+        		$deps = array( 'jquery' );
+        		$version = false;
 
-		// Register the script
-		wp_register_script( $handle, $src, $deps, $version, true );
-		wp_enqueue_script( $handle);
+        		// Register the script
+        		wp_register_script( $handle, $src, $deps, $version, true );
+        		wp_enqueue_script( $handle);
+
+
+                $handle = 'dintero-checkout-web-sdk';
+                $src = plugin_dir_url(__DIR__) . 'assets/js/checkout-web-sdk.umd.js';
+                $deps = array( 'jquery' );
+                $version = false;
+                wp_register_script( $handle, $src, $deps, $version, true );
+                wp_enqueue_script( $handle);
+
+            }
+        }
 	}
 
 	/**
@@ -675,14 +693,17 @@ final class WC_Dintero_HP {
 	public function check_thankyou( $order_id ) {
 		if ( isset( $_SERVER['SERVER_NAME'] ) && isset( $_SERVER['REQUEST_URI'] ) && isset( $_REQUEST['key'] ) ) {
 			$url = sanitize_text_field( wp_unslash( $_SERVER['SERVER_NAME'] ) ) . sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+
 			$template_name = strpos( $url, '/order-received/' ) === false ? '/view-order/' : '/order-received/';
+
 			if ( strpos( $url, $template_name ) !== false ) {
 				$start = strpos( $url, $template_name );
 				$first_part = substr( $url, $start + strlen( $template_name ) );
-				$orderUrl =  explode('?',$first_part); 
-                //$order_id = substr( $first_part, 0, strpos( $first_part, '/' ) );
+                $orderUrl =  explode('?',$first_part); 
+				//$order_id = substr( $first_part, 0, strpos( $first_part, '/' ) );
                 $order_id = $orderUrl[0];
-
+               
+                
 				$order = wc_get_order( $order_id );
 
 				if ( ! empty( $order ) && $order instanceof WC_Order ) {

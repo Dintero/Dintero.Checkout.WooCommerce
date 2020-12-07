@@ -165,7 +165,7 @@ class WC_AJAX_HP {
 	}
 
 	public function check_transaction(){
-		$transaction_id = $_POST['transaction_id'];
+		$transaction_id = sanitize_text_field($_POST['transaction_id']);
 		
 		$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
 			
@@ -210,11 +210,11 @@ class WC_AJAX_HP {
 	}
 
 	public function update_shipping_postcode(){
-		$formData = $_POST['post_code'];
-		$posted_data['postcode'] = $_POST['post_code'];
+		$formData = sanitize_text_field($_POST['post_code']);
+		$posted_data['postcode'] = sanitize_text_field($_POST['post_code']);
 		$customer_data = array();
-		$customer_data['billing_postcode']  = $_POST['post_code'];
-		$customer_data['shipping_postcode'] = $_POST['post_code'];
+		$customer_data['billing_postcode']  = sanitize_text_field($_POST['post_code']);
+		$customer_data['shipping_postcode'] = sanitize_text_field($_POST['post_code']);
 		$country = 'NO';
 		$customer_data['billing_country']  = $country;
 			$customer_data['shipping_country'] = $country;
@@ -236,7 +236,7 @@ class WC_AJAX_HP {
 		if(!isset($_POST['transaction_id'])){
 			return false;
 		}
-		$transaction_id = $_POST['transaction_id'];
+		$transaction_id = sanitize_text_field($_POST['transaction_id']);
 
 		//$transaction_id = 'T12000001.4XmAg8326rD1rdYFepUBe4';
 		$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
@@ -304,7 +304,7 @@ class WC_AJAX_HP {
 
 
 			$order                = wc_get_order( $transaction_order_id );
-
+			
 			if(!$order && $transaction['merchant_reference_2'] == ''){
 				
 				$couponCode = array();
@@ -397,6 +397,8 @@ class WC_AJAX_HP {
 				    'city' => '', // Can be set (optional)
 				);
 
+
+
 				// Optionally, set a total shipping amount
 				$shippingAmountWithoutVat = $transaction['shipping_option']['amount'] - $transaction['shipping_option']['vat_amount'];
 				$new_ship_price =$shippingAmountWithoutVat / 100;
@@ -404,11 +406,17 @@ class WC_AJAX_HP {
 				// Get a new instance of the WC_Order_Item_Shipping Object
 				$item = new WC_Order_Item_Shipping();
 				$shippingTitle = $transaction['shipping_option']['title'] ;
+
 				$tempTitle = explode('Shipping:', $shippingTitle);
-				
+
+				// exploding id to get Method id and remove Instance Id (if any)
+				$tempMethodId = explode(':', $transaction['shipping_option']['id']);
+				$methodId = $tempMethodId[0];
+
 				$item->set_method_title($tempTitle[1] );
-				$item->set_method_id( $transaction['shipping_option']['id'] ); // set an existing Shipping method rate ID
-				$item->set_instance_id( $transaction['shipping_option']['operator_product_id'] ); // set an Shipping method  instance id
+				
+				$item->set_method_id( $methodId ); // set an existing Shipping method rate ID
+				$item->set_instance_id( $transaction['shipping_option']['operator_product_id'] ); // set an existing Shipping method instance ID
 				$item->set_total( $new_ship_price ); // (optional)
 				$item->calculate_taxes($calculate_tax_for);
 
@@ -432,6 +440,7 @@ class WC_AJAX_HP {
 					
 				}
 				$order->save();
+
 				// The text for the note
 				$orderNote = __("Order Created Via CallBack");
 
