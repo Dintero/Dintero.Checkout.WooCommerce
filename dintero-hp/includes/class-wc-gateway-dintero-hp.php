@@ -787,7 +787,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 
 		$embed_enable = WCDHP()->setting()->get('embed_enable');
 		
-
+		
 		if($embed_enable == 'yes' && !$isExpress){ // If its an Iframe
 			$redirect_url = $this->process_payment_handler( $order_id , true);
 			WC()->session->__unset('dintero_wc_order_id');
@@ -965,8 +965,9 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 		
 
 		$headers = array(
-			'content-type'        => 'application/json',
-			'authorization' => 'Bearer ' . $access_token,
+			'Content-type'  => 'application/json; charset=utf-8',
+			'Accept'        => 'application/json',
+			'Authorization' => 'Bearer ' . $access_token,
 			'Dintero-System-Name' => 'woocommerce',
 			'Dintero-System-Version' =>  WC()->version,
 			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
@@ -977,59 +978,14 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			'merchant_reference_2' => (string)$order_id
 		);
 		$url = $api_endpoint . '/' . $transaction_id;
-		// echo "Access Token :".$access_token.'<br />';
-		// echo $order_id;
-		// $response = wp_remote_post( $url, array(
-		// 	'method'    => 'PUT',
-		// 	'headers'   => $headers,
-		// 	'body'      => wp_json_encode($payload),
-		// 	'timeout'   => 90,
-		// 	'sslverify' => false
-		// ) );
-		$args = array(
-		    'headers' => $headers,
-		    'body'      => json_encode($payload),
-		    'method'    => 'PUT'
-		);
-		$curl = curl_init();
-
-		curl_setopt_array($curl, array(
-		  CURLOPT_URL => $url,
-		  CURLOPT_RETURNTRANSFER => true,
-		  CURLOPT_ENCODING => "",
-		  CURLOPT_MAXREDIRS => 10,
-		  CURLOPT_TIMEOUT => 30,
-		  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-		  CURLOPT_CUSTOMREQUEST => "PUT",
-		  CURLOPT_POSTFIELDS => json_encode($payload),
-		  CURLOPT_HTTPHEADER => array(
-			    "authorization: Bearer ".$access_token,
-			   	"content-type: application/json"
-			    
-			  ),
-		));
-
-		$response = curl_exec($curl);
-		$err = curl_error($curl);
-
-		curl_close($curl);
-
-		if ($err) {
-		  echo "cURL Error #:" . $err;
-		} else {
-		  
-		  $transaction   = json_decode( $response, true );
-
-		  return $transaction;
-		 
-		}
-		// $result =  wp_remote_request( $url, $args );
-		// // Retrieve the body's response if no errors found
-		// $response_body = wp_remote_retrieve_body( $result );
-		
-		// $transaction   = json_decode( $response_body, true );
-
-		// return $transaction;
+		$response = wp_remote_request( $url, array(
+			'method'    => 'PUT',
+			'headers'   => $headers,
+			'body'      => json_encode( $payload )
+		) );
+		$response_body  = wp_remote_retrieve_body( $response );
+		$transaction = json_decode( $response_body, true );
+		return $transaction;
 	}
 
 	/**
