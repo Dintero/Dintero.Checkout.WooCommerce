@@ -303,7 +303,7 @@ final class WC_Dintero_HP {
         }
         $buynow = __('Buy now with','dintero-hp');
         $title = __('Buy now with dintero', 'dintero-hp');
-        $logo = plugins_url('dinetro-hp/assets/images/dintero.png');
+        $logo = plugins_url('dintero-hp/assets/images/dintero.png');
         $message = "<span class='dinterobuynow'>" . $buynow . "</span>" . " <img class='inline vipps-logo negative' border=0 src='$logo' alt='Vipps'/>";
 
 # Extra classes, if passed IOK 2019-02-26
