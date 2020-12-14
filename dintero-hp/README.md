@@ -34,6 +34,10 @@ When you install Dintero checkout, you need to head to the settings page to star
 6. Start Selling!
 
 == Changelog ==
+2020.12.14
+
+  * Shipping address required field issue
+
 2020.12.07
   * Shipping method and Instance Id Seperation for Callback Order creation
   * Update in Api request for Few API calls
