@@ -1233,13 +1233,13 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					                console.log(\"session\", event.session);
 					                var ss = event.session;
 					                checkoutSessionData =  event.session;
-					                jQuery( '#billing_first_name' ).val(ss.order.shipping_address.first_name );
-									jQuery( '#billing_last_name' ).val(ss.order.shipping_address.last_name);
+					                jQuery( '#billing_first_name , #shipping_first_name' ).val(ss.order.shipping_address.first_name );
+									jQuery( '#billing_last_name , #shipping_last_name' ).val(ss.order.shipping_address.last_name);
 									
-									jQuery( '#billing_address_1' ).val( ss.order.shipping_address.address_line);
+									jQuery( '#billing_address_1 , #shipping_address_1' ).val( ss.order.shipping_address.address_line);
 									
-									jQuery( '#billing_city' ).val( ss.order.shipping_address.postal_place );
-									jQuery( '#billing_postcode' ).val( ss.order.shipping_address.postal_code );
+									jQuery( '#billing_city , #shipping_city' ).val( ss.order.shipping_address.postal_place );
+									jQuery( '#billing_postcode , #shipping_postcode' ).val( ss.order.shipping_address.postal_code );
 									jQuery( '#billing_phone' ).val( ss.order.shipping_address.phone_number);
 									jQuery( '#billing_email' ).val( ss.order.shipping_address.email );
 									jQuery( '#billing_country' ).val( ss.order.shipping_address.country.toUpperCase() );
