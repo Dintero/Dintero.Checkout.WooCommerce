@@ -334,6 +334,19 @@ class WC_AJAX_HP {
 					
 				}
 				
+				
+				$shippingOption =  array(
+										'0' => $transaction['shipping_option']['id']
+									);
+				// Create data for Hook
+				$data = array();
+				$data['term'] = 1;
+				$data['createaccount'] = 0;
+				
+				$data['shipping_method'] = $shippingOption;
+				$data['ship_to_different_address'] = '';
+				$data['woocommerce_checkout_update_totals'] = '';
+
 				if($transaction['shipping_address']['business_name']){ // if Business Checkout
 					$postMeta = get_post_meta( $order->get_id()) ;
 
@@ -342,6 +355,8 @@ class WC_AJAX_HP {
 					update_post_meta( $order->get_id(), '_shipping_company', sanitize_text_field($transaction['shipping_address']['business_name'] ) );
 					update_post_meta( $order->get_id(), '_billing_company', sanitize_text_field($transaction['shipping_address']['business_name'] ) );
 
+					$data['billing_vat'] = sanitize_text_field($transaction['shipping_address']['organization_number'] );
+					$data['billing_company'] = sanitize_text_field($transaction['shipping_address']['business_name'] );
 
 					$coName = $transaction['shipping_address']['co_address'];
 					$tempName = explode(" ",$coName);
@@ -354,11 +369,23 @@ class WC_AJAX_HP {
 					
 					$order->set_shipping_first_name( sanitize_text_field( $firstName) );
 					$order->set_shipping_last_name( sanitize_text_field( $lastName) );
+
+					$data['billing_first_name'] = sanitize_text_field($firstName);
+					$data['billing_last_name'] = sanitize_text_field($lastName);
+
+					$data['shipping_first_name'] = sanitize_text_field($firstName);
+					$data['shipping_last_name'] = sanitize_text_field($lastName);
 				}else{
 					$order->set_billing_first_name( sanitize_text_field($transaction['shipping_address']['first_name']));
 					$order->set_billing_last_name( sanitize_text_field( $transaction['shipping_address']['last_name']  ) );
 					$order->set_shipping_first_name( sanitize_text_field( $transaction['shipping_address']['first_name']) );
 					$order->set_shipping_last_name( sanitize_text_field( $transaction['shipping_address']['last_name']) );
+
+					$data['billing_first_name'] = sanitize_text_field($transaction['shipping_address']['first_name']);
+					$data['billing_last_name'] = sanitize_text_field($transaction['shipping_address']['last_name']);
+					
+					$data['shipping_first_name'] = sanitize_text_field($transaction['shipping_address']['first_name']);
+					$data['shipping_last_name'] = sanitize_text_field($transaction['shipping_address']['last_name']);
 
 				}
 
@@ -371,7 +398,13 @@ class WC_AJAX_HP {
 				$order->set_billing_postcode( sanitize_text_field( $transaction['shipping_address']['postal_code']  ) );
 				$order->set_billing_phone( sanitize_text_field( $transaction['shipping_address']['phone_number']) );
 				$order->set_billing_email( sanitize_text_field( $transaction['shipping_address']['email'] ) );
-
+				
+				$data['billing_country'] = sanitize_text_field($transaction['shipping_address']['country']);
+				$data['billing_address_1'] = sanitize_text_field( $transaction['shipping_address']['address_line'] );
+				$data['billing_city'] = sanitize_text_field( $transaction['shipping_address']['postal_place'] );
+				$data['billing_postcode'] = sanitize_text_field( $transaction['shipping_address']['postal_code'] );
+				$data['billing_phone'] = sanitize_text_field( $transaction['shipping_address']['phone_number'] );
+				$data['billing_email'] = sanitize_text_field( $transaction['shipping_address']['email'] );
 				
 
 
@@ -384,10 +417,15 @@ class WC_AJAX_HP {
 				update_post_meta( $order->get_id(), '_shipping_phone', sanitize_text_field($transaction['shipping_address']['phone_number'] ) );
 				update_post_meta( $order->get_id(), '_shipping_email', sanitize_text_field( $transaction['shipping_address']['email']  ) );
 
+				$data['shipping_country'] = sanitize_text_field($transaction['shipping_address']['country']);
+				$data['shipping_address_1'] = sanitize_text_field( $transaction['shipping_address']['address_line'] );
+				$data['shipping_city'] = sanitize_text_field( $transaction['shipping_address']['postal_place'] );
+				$data['shipping_postcode'] = sanitize_text_field( $transaction['shipping_address']['postal_code'] );
 				
-
+				
 				// Get the customer country code
 				$country_code = $order->get_shipping_country();
+				
 
 				// Set the array for tax calculations
 				$calculate_tax_for = array(
@@ -439,7 +477,21 @@ class WC_AJAX_HP {
 					}
 					
 				}
-				$order->save();
+				
+				$data['payment_method'] = 'dintero-hp';
+
+
+				/**
+				 * Action hook to adjust order before save.
+				 *
+				 * 
+				 */
+				do_action( 'woocommerce_checkout_create_order', $order, $data );
+
+				// Save the order.
+				$order_id = $order->save();
+				// Hook to update order meta
+				do_action( 'woocommerce_checkout_update_order_meta', $order_id, $data );
 
 				// The text for the note
 				$orderNote = __("Order Created Via CallBack");

@@ -37,6 +37,7 @@ When you install Dintero checkout, you need to head to the settings page to star
 2020.12.14
 
   * Shipping address required field issue
+  * Update order meta-data in callback
 
 2020.12.07
   * Shipping method and Instance Id Seperation for Callback Order creation
