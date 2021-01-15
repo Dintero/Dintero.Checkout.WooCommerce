@@ -1,4 +1,9 @@
 *** WooCommerce Dintero Plugin Changelog ***
+2021.01.15
+  * Firstname,lastname required issue fix
+  * jQuery Fix for document on load
+  * Button Image type added 
+
 2020.12.14
 
   * Shipping address required field issue

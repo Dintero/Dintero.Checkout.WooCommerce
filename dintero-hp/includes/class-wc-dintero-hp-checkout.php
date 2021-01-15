@@ -884,17 +884,16 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	 * @return array of data
 	 */
 	private function get_data() {
-		//$request = $this->test_mode == 'yes' ? $_REQUEST : $_POST;
-		$request = $_REQUEST;
+		
 
 		$skipped = array();
 		$data    = array(
-			'terms'                              => (int) isset( $request['terms'] ), // WPCS: input var ok, CSRF ok.
-			'createaccount'                      => (int) ! empty( $request['createaccount'] ), // WPCS: input var ok, CSRF ok.
-			'payment_method'                     => isset( $request['payment_method'] ) ? wc_clean( wp_unslash( $request['payment_method'] ) ) : '', // WPCS: input var ok, CSRF ok.
-			'shipping_method'                    => isset( $request['shipping_method'] ) ? wc_clean( wp_unslash( $request['shipping_method'] ) ) : '', // WPCS: input var ok, CSRF ok.
-			'ship_to_different_address'          => ! empty( $request['ship_to_different_address'] ) && ! wc_ship_to_billing_address_only(), // WPCS: input var ok, CSRF ok.
-			'woocommerce_checkout_update_totals' => isset( $request['woocommerce_checkout_update_totals'] ), // WPCS: input var ok, CSRF ok.
+			'terms'                              => (int) isset( $_REQUEST['terms'] ), // WPCS: input var ok, CSRF ok.
+			'createaccount'                      => (int) ! empty( $_REQUEST['createaccount'] ), // WPCS: input var ok, CSRF ok.
+			'payment_method'                     => isset( $_REQUEST['payment_method'] ) ? wc_clean( wp_unslash( $_REQUEST['payment_method'] ) ) : '', // WPCS: input var ok, CSRF ok.
+			'shipping_method'                    => isset( $_REQUEST['shipping_method'] ) ? wc_clean( wp_unslash( $_REQUEST['shipping_method'] ) ) : '', // WPCS: input var ok, CSRF ok.
+			'ship_to_different_address'          => ! empty( $_REQUEST['ship_to_different_address'] ) && ! wc_ship_to_billing_address_only(), // WPCS: input var ok, CSRF ok.
+			'woocommerce_checkout_update_totals' => isset( $_REQUEST['woocommerce_checkout_update_totals'] ), // WPCS: input var ok, CSRF ok.
 		);
 		foreach ( $this->get_checkout_fields() as $fieldset_key => $fieldset ) {
 			if ( $this->maybe_skip_fieldset( $fieldset_key, $data ) ) {
@@ -907,19 +906,19 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 				switch ( $type ) {
 					case 'checkbox':
-						$value = isset( $request[ $key ] ) ? 1 : ''; // WPCS: input var ok, CSRF ok.
+						$value = isset( $_REQUEST[ $key ] ) ? 1 : ''; // WPCS: input var ok, CSRF ok.
 						break;
 					case 'multiselect':
-						$value = isset( $request[ $key ] ) ? implode( ', ', wc_clean( wp_unslash( $request[ $key ] ) ) ) : ''; // WPCS: input var ok, CSRF ok.
+						$value = isset( $_REQUEST[ $key ] ) ? implode( ', ', wc_clean( wp_unslash( $_REQUEST[ $key ] ) ) ) : ''; // WPCS: input var ok, CSRF ok.
 						break;
 					case 'textarea':
-						$value = isset( $request[ $key ] ) ? wc_sanitize_textarea( wp_unslash( $request[ $key ] ) ) : ''; // WPCS: input var ok, CSRF ok.
+						$value = isset( $_REQUEST[ $key ] ) ? wc_sanitize_textarea( wp_unslash( $_REQUEST[ $key ] ) ) : ''; // WPCS: input var ok, CSRF ok.
 						break;
 					case 'password':
-						$value = isset( $request[ $key ] ) ? wp_unslash( $request[ $key ] ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
+						$value = isset( $_REQUEST[ $key ] ) ? wp_unslash( $_REQUEST[ $key ] ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
 						break;
 					default:
-						$value = isset( $request[ $key ] ) ? wc_clean( wp_unslash( $request[ $key ] ) ) : ''; // WPCS: input var ok, CSRF ok.
+						$value = isset( $_REQUEST[ $key ] ) ? wc_clean( wp_unslash( $_REQUEST[ $key ] ) ) : ''; // WPCS: input var ok, CSRF ok.
 						break;
 				}
 
@@ -1018,10 +1017,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 				echo( "<script type=\"text/javascript\">
 
-						jQuery('document').ready(function() {
+						document.addEventListener('DOMContentLoaded', function(event) { 
+						  //run plugin code
 							jQuery('.checkout-box-dintero ').html(\"".$html. "\");
-
 						});
+						
 
 						function savePostCode(){
 
@@ -1071,11 +1071,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			}else{
 				 $html = 'Skriv inn adressen din for å vise fraktalternativer. ';
 				 echo( "<script type=\"text/javascript\">
-
-						jQuery('document').ready(function() {
+				 		document.addEventListener('DOMContentLoaded', function(event) { 
+						  //run plugin code
 							jQuery('.checkout-box-dintero ').html(\"".$html. "\");
-
 						});
+						
 						
 					</script>
 					");
@@ -1159,8 +1159,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					order_review.appendChild(emb);
 					var checkoutSessionData;
 					var checkoutSession;
-					jQuery('document').ready(function() {
-						jQuery( document ).on( 'updated_checkout', function(){
+					document.addEventListener('DOMContentLoaded', function(event) { 
+					  	jQuery( document ).on( 'updated_checkout', function(){
 							if(checkoutSession){
 								console.log('Checkout Session :'+checkoutSession);
 								checkoutSession.lockSession();
@@ -1168,7 +1168,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 							
 
 						});
-					    const container = document.getElementById(\"dintero-checkout-iframe\");
+						const container = document.getElementById(\"dintero-checkout-iframe\");
 					    if(typeof(dintero) != \"undefined\"){
 					    	dintero
 					        .embed({
@@ -1294,6 +1294,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					        ;
 						}
 					});
+					
 				</script>" );
 		} else {
 			wp_kses_post( 'Error! ' . $msg );
@@ -1340,9 +1341,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 						var emb = document.getElementById('dhp-embed');
 						var order_review = document.getElementById('" . wp_kses_post ( $container_id ) . "');
 						order_review.appendChild(emb);
-
-						jQuery('document').ready(function() {
-						    const container = document.getElementById(\"dintero-checkout-iframe\");
+						document.addEventListener('DOMContentLoaded', function(event) { 
+						  //run plugin code
+							const container = document.getElementById(\"dintero-checkout-iframe\");
 						    if(typeof(dintero) != \"undefined\"){
 						    	dintero
 						        .embed({
@@ -1397,6 +1398,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 						        });
 							}
 						});
+						
 					</script>" );
 			} else {
 				wp_kses_post( 'Error! ' . $msg );
