@@ -196,16 +196,28 @@
 }
 
 /*Dintero express checkout*/
-.widget_shopping_cart a.button.dintero-express-checkout{
-    border: none;
-    padding: 0;
-    width: 142px;
-    height: 44px;
-    background-repeat: no-repeat;
+.site-header-cart .widget_shopping_cart a.button.dintero-express-checkout {
     background-color: #03435d;
-    background-position: center; 
-    display:block;
-    margin: 5px auto;
+    background-repeat: no-repeat;
+    height: 54px;
+    border: 1px solid #00e590;
+    background-size: contain;
+}
+
+.site-header-cart .widget_shopping_cart a.button.dintero-express-checkout.light {
+    background-color: #ffffff;
+    background-repeat: no-repeat;
+    height: 54px;
+    border: 1px solid #03435d;
+    background-size: 168px;
+    background-position: center;
+}
+.site-header-cart .widget_shopping_cart a.button.dintero-express-checkout:hover
+  background-color:#03435d;
+}
+
+.site-header-cart .widget_shopping_cart a.button.dintero-express-checkout.light:hover{
+  background-color:#ffffff;
 }
 .actions a.button.dintero-express-checkout {
     border: none;
