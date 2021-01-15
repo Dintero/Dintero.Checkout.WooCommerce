@@ -309,6 +309,18 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
+			'express_button_type'                        => array(
+				'title'       => __( 'Express Button Image Type:' ),
+				'label'       => __( 'Express Button Image Type' ),
+				'type'        => 'select',
+				'description' => __( 'Choose type of button shown for express in Cart ' ),
+				'options' => array(
+				        '0' => 'Dark',
+				        '1' => 'Light'
+				        //etc
+				 ),
+				'desc_tip'    => true,
+			),
 			// 'express_rewards'                        => array(
 			// 	'title'       => __( 'Enable Rewards:' ),
 			// 	'label'       => __( 'Enable Checkout Express Rewards' ),

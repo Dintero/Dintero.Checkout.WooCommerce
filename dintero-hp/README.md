@@ -3,7 +3,7 @@ Contributors: moogruppen, dintero
 Tags: woocommerce, Payment, Checkout, Vipps, Visa, Mastercard, Invoice, Instalment, Installment, Swish, Gateway, payment, dintero, Betalingsløsning, Checkout, Betaling, Vipps, Visa, Mastercard, Faktura, Delbetaling, Swish, Betalingsgateway, vipps, Betaling, nettbutikk
 Donate link: https://dintero.com
 Requires at least: 4.0
-Tested up to: 5.3.2
+Tested up to: 5.6
 Requires PHP: 5.6
 WC requires at least: 3.4.0
 WC tested up to: 4.0.0
@@ -33,7 +33,14 @@ When you install Dintero checkout, you need to head to the settings page to star
 5. Configure Dintero checkout with your credentials and select the mode you would like to use.
 6. Start Selling!
 
+
+
 == Changelog ==
+2021.01.15
+  * Firstname,lastname required issue fix
+  * jQuery Fix for document on load
+  * Button Image type added 
+
 2020.12.14
 
   * Shipping address required field issue

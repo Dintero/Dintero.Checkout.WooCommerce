@@ -53,7 +53,7 @@ final class WC_Dintero_HP {
 	 * Register all of the hooks related to plugin functionality.
 	 */
 	private function init_hooks() {
-		// Override template if Klarna Checkout page.
+		// Override template if Checkout page.
 		add_filter( 'wc_get_template', array( $this, 'override_template' ), 999, 2 );
 
         if('yes' == $this->setting()->get('branding_enable')){
@@ -86,7 +86,7 @@ final class WC_Dintero_HP {
 			add_action( 'dhp_checkout_shipping', array( $this, 'checkout_form_shipping' ) );
 		//}
 
-		if ( 'yes' == $express_enable && 'no' == $embed_enable ) {
+		if ( 'yes' == $embed_enable ) {
 			//make billing fields not required in checkout
 			add_filter( 'woocommerce_billing_fields', array( $this, 'wc_npr_filter_billing_fields' ), 10, 1 );
 
@@ -331,9 +331,22 @@ final class WC_Dintero_HP {
         $url = $this->express_checkout_url();
       	
         $url = wp_nonce_url($url,'express','sec');
-        $imgurl = plugins_url('dintero-hp/assets/images/dintero-express-btn.png');
+        $className = 'button dintero-express-checkout';
+        $imgurl = '';
+        //$imgurl = plugins_url('dintero-hp/assets/images/dintero-express-btn.png');
         $title = __('Buy now with Dintero!', 'dintero-hp');
-        $button = "<a href='#' class='button dintero-express-checkout' onclick='dintero_express_checkout();' title='$title'><img alt='$title' border=0 src='$imgurl'></a>";
+        $imageType  = WCDHP()->setting()->get('express_button_type');
+        if($imageType == 0){
+            // DARK
+            $imgurl = 'https://assets.dintero.com/logo/dintero-express-btn-dark.svg';
+            $className = $className.' dark';
+        }else{
+            // LIGHT
+            $imgurl = 'https://assets.dintero.com/logo/dintero-express-btn-light.svg';
+            $className = $className.' light';
+
+        }
+        $button = "<a href='#' class='".$className."' onclick='dintero_express_checkout();' title='$title' style='background-image: url(".$imgurl.");'></a>";
         $button = apply_filters('woo_vipps_cart_express_checkout_button', $button, $url);
        
 
@@ -467,7 +480,8 @@ final class WC_Dintero_HP {
             }
         } else {
             if (isset($_GET['DinteroSpecialPage'])) {
-                $method = @$specials[$_GET['DinteroSpecialPage']];
+                $data = sanitize_text_field( wp_unslash($_GET['DinteroSpecialPage']));
+                $method = @$specials[$data];
 
                 echo $method;
                 exit;

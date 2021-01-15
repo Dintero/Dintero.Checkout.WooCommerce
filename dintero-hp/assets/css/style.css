@@ -198,17 +198,42 @@
 /*Dintero express checkout*/
 
 .actions a.button.dintero-express-checkout {
-    background-color: transparent;
-    border: 1px solid #00ff80;
-    padding: .350em 1em;
-    border-radius: 25px;
+    border: none;
+    padding: 0;
+    border-radius: 30px;
+    width: 142px;
+    height: 44px;
+    margin: 0 0 0 30px;
+    background-repeat: no-repeat;
+    background-color: #03435d;
+    background-position: center;
+    float: right;
+    background-size: 150px;
 }
 
 .actions a.button.dintero-express-checkout img {
     width: 230px;
 }
 .actions a.button.dintero-express-checkout:hover {
-    background: #00ff80;
+    background-color: #03435d;
+}
+
+.actions a.button.dintero-express-checkout.light{
+    border: 1px solid #00ff80;
+    padding: 0;
+    border-radius: 30px;
+    width: 142px;
+    height: 44px;
+    margin: 0 0 0 30px;
+    background-repeat: no-repeat;
+    background-color: #ffffff;
+    background-position: center;
+    float: right;
+    background-size: 122px;
+}
+.actions a.button.dintero-express-checkout.light:hover{
+    border: 1px solid #00ff80;
+    background-color: #ffffff;
 }
 
 @media (max-width: 768px){
