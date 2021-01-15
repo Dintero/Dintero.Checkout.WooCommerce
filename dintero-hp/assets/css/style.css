@@ -196,7 +196,17 @@
 }
 
 /*Dintero express checkout*/
-
+.widget_shopping_cart a.button.dintero-express-checkout{
+    border: none;
+    padding: 0;
+    width: 142px;
+    height: 44px;
+    background-repeat: no-repeat;
+    background-color: #03435d;
+    background-position: center; 
+    display:block;
+    margin: 5px auto;
+}
 .actions a.button.dintero-express-checkout {
     border: none;
     padding: 0;
