@@ -288,7 +288,7 @@ final class WC_Dintero_HP {
 
         
     }
-     // Code that will generate various versions of the 'buy now with Vipps' button IOK 2018-09-27
+     // Code that will generate various versions of the 'buy now with Dintero' button IOK 2018-09-27
     public function get_buy_now_button($product_id,$variation_id=null,$sku=null,$disabled=false, $classes='') {
         $disabled = $disabled ? 'disabled' : '';
         $data = array();
@@ -304,7 +304,7 @@ final class WC_Dintero_HP {
         $buynow = __('Buy now with','dintero-hp');
         $title = __('Buy now with dintero', 'dintero-hp');
         $logo = plugins_url('dintero-hp/assets/images/dintero.png');
-        $message = "<span class='dinterobuynow'>" . $buynow . "</span>" . " <img class='inline vipps-logo negative' border=0 src='$logo' alt='Vipps'/>";
+        $message = "<span class='dinterobuynow'>" . $buynow . "</span>" . " <img class='inline dintero-logo negative' border=0 src='$logo' alt='Dintero'/>";
 
 # Extra classes, if passed IOK 2019-02-26
         if (is_array($classes)) {
@@ -312,7 +312,7 @@ final class WC_Dintero_HP {
         }
         if ($classes) $classes = " $classes";
 
-        $buttoncode .=  " class='single-product button vipps-buy-now $disabled$classes' title='$title'>$message</a>";
+        $buttoncode .=  " class='single-product button dintero-buy-now $disabled$classes' title='$title'>$message</a>";
         return apply_filters('woo_dintero_buy_now_button', $buttoncode, $product_id, $variation_id, $sku, $disabled);
     }
     public function cart_express_checkout_loader(){
@@ -347,7 +347,8 @@ final class WC_Dintero_HP {
 
         }
         $button = "<a href='#' class='".$className."' onclick='dintero_express_checkout();' title='$title' style='background-image: url(".$imgurl.");'></a>";
-        $button = apply_filters('woo_vipps_cart_express_checkout_button', $button, $url);
+
+        $button = apply_filters('woo_dintero_cart_express_checkout_button', $button, $url);
        
 
         echo $button;
@@ -379,7 +380,12 @@ final class WC_Dintero_HP {
 							});
         		}
         		
-        	</script>" );
+        	</script>
+           
+            " 
+
+
+        );
 
         	
     }
@@ -553,17 +559,19 @@ final class WC_Dintero_HP {
 	public function init_script() {
         //first check that woo exists to prevent fatal errors
         if ( function_exists( 'is_woocommerce' ) ) {
+            wp_enqueue_style( 'style', plugin_dir_url(__DIR__) . 'assets/css/style.css', array(), '1.0.07', 'all' );
+
+           
+
+            // Register the script
+            wp_register_script( $handle, $src, $deps, $version, true );
+            wp_enqueue_script( $handle);
             if ( is_cart() || is_checkout() ) {
-        		wp_enqueue_style( 'style', plugin_dir_url(__DIR__) . 'assets/css/style.css', array(), '1.0.07', 'all' );
-
-        		$handle = 'dhp-hp';
-        		$src = plugin_dir_url(__DIR__) . 'assets/js/dintero_hp.js';
-        		$deps = array( 'jquery' );
-        		$version = false;
-
-        		// Register the script
-        		wp_register_script( $handle, $src, $deps, $version, true );
-        		wp_enqueue_script( $handle);
+        		
+                $handle = 'dhp-hp';
+                $src = plugin_dir_url(__DIR__) . 'assets/js/dintero_hp.js';
+                $deps = array( 'jquery' );
+                $version = false;
 
 
                 $handle = 'dintero-checkout-web-sdk';
