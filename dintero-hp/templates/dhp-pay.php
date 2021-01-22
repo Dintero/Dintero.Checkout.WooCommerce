@@ -3,7 +3,7 @@
  * Dintero-HP Pay for order form
  *
  * Overrides /checkout/form-pay.php.
- * 
+ *
  * @package dintero-hp-pay-form
  */
 

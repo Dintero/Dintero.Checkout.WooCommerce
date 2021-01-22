@@ -60,7 +60,7 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-wc-dintero-hp.php';
 
 function run_dintero_hp() {
 	$plugin_basename = plugin_basename( __FILE__ );
-	$plugin = new Dintero_HP($plugin_basename);
+	$plugin          = new Dintero_HP( $plugin_basename );
 	$plugin->run();
 }
 run_dintero_hp();

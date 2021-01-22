@@ -32,8 +32,7 @@ if ( ! $tab_exists ) {
 		</ol>
 
 		<?php
-			//do_action( 'woocommerce_sections_' . $current_tab );
-
+			// do_action( 'woocommerce_sections_' . $current_tab );
 			self::show_messages();
 
 			do_action( 'woocommerce_settings_' . $current_tab );

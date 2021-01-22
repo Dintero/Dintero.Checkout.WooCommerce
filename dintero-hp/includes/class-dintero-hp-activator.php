@@ -24,7 +24,7 @@ class Dintero_HP_Activator {
 			return;
 		}
 		$default = array(
-			//options should be here
+			// options should be here
 		);
 		update_option( 'dintero_hp_option', $default );
 

@@ -23,12 +23,11 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 		$this->id    = 'dintero-hp';
 		$this->label = __( 'Dintero Checkout', 'woocommerce' );
 
-		//add_action( 'woocommerce_admin_field_payment_gateways', array( $this, 'payment_gateways_setting' ) );
-
+		// add_action( 'woocommerce_admin_field_payment_gateways', array( $this, 'payment_gateways_setting' ) );
 		$this->init_form_fields();
 		$this->init_settings();
 
-		parent::__construct();		
+		parent::__construct();
 	}
 
 	public function init_form_fields() {
@@ -55,71 +54,71 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 				'default'     => __( 'Pay through Dintero gateway.' ),
 				'desc_tip'    => true,
 			),*/
-			'account_id'                       => array(
+			'account_id'                    => array(
 				'title'       => __( 'Account ID:' ),
 				'type'        => 'text',
 				'description' => __( 'Found under (SETTINGS >> Account) in Dintero Backoffice.' ),
 				'default'     => '',
 				'desc_tip'    => true,
 			),
-			'client_test_credentials'          => array(
+			'client_test_credentials'       => array(
 				'title'       => __( 'Client Test:' ),
 				'type'        => 'title',
-				'description' => __( 'Generated under (SETTINGS >> API clients) in Dintero Backoffice.' )
+				'description' => __( 'Generated under (SETTINGS >> API clients) in Dintero Backoffice.' ),
 			),
-			'test_client_id'                   => array(
+			'test_client_id'                => array(
 				'title'       => __( 'Test Client ID:' ),
 				'type'        => 'text',
 				'description' => __( 'Generated under (SETTINGS >> API clients) in Dintero Backoffice.' ),
 				'default'     => '',
 				'desc_tip'    => true,
 			),
-			'test_client_secret'               => array(
+			'test_client_secret'            => array(
 				'title'       => __( 'Test Client Secret:' ),
 				'type'        => 'text',
 				'description' => __( 'Generated under (SETTINGS >> API clients) in Dintero Backoffice.' ),
 				'default'     => '',
 				'desc_tip'    => true,
 			),
-			'test_profile_id'                  => array(
+			'test_profile_id'               => array(
 				'title'       => __( 'Test Payment Profile ID:' ),
 				'type'        => 'text',
 				'description' => __( 'Test payment window profile ID. Found under (SETTINGS >> Payment windows) in Dintero Backoffice.' ),
 				'default'     => '',
 				'desc_tip'    => true,
 			),
-			'client_production_credentials'    => array(
+			'client_production_credentials' => array(
 				'title'       => __( 'Client Production:' ),
 				'type'        => 'title',
 				'description' => __( 'Generated under (SETTINGS >> API clients) in Dintero Backoffice.' ),
 			),
-			'production_client_id'             => array(
+			'production_client_id'          => array(
 				'title'       => __( 'Production Client ID:' ),
 				'type'        => 'text',
 				'description' => __( 'Generated under (SETTINGS >> API clients) in Dintero Backoffice.' ),
 				'default'     => '',
 				'desc_tip'    => true,
 			),
-			'production_client_secret'         => array(
+			'production_client_secret'      => array(
 				'title'       => __( 'Production Client Secret:' ),
 				'type'        => 'text',
 				'description' => __( 'Generated under (SETTINGS >> API clients) in Dintero Backoffice.' ),
 				'default'     => '',
 				'desc_tip'    => true,
 			),
-			'production_profile_id'            => array(
+			'production_profile_id'         => array(
 				'title'       => __( 'Production Payment Profile ID:' ),
 				'type'        => 'text',
 				'description' => __( 'Production payment window profile ID. Found under (SETTINGS >> Payment windows) in Dintero Backoffice.' ),
 				'default'     => '',
 				'desc_tip'    => true,
 			),
-			'checkout_settings'                => array(
+			'checkout_settings'             => array(
 				'title'       => __( 'Checkout:' ),
 				'type'        => 'title',
-				'description' => __( 'Checkout settings.' )
+				'description' => __( 'Checkout settings.' ),
 			),
-			'test_mode'                        => array(
+			'test_mode'                     => array(
 				'title'       => __( 'Test mode:' ),
 				'label'       => __( 'Enable Test Mode' ),
 				'type'        => 'checkbox',
@@ -127,13 +126,13 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
-			'callback_verification'            => array(
+			'callback_verification'         => array(
 				'title'       => __( 'Callback URL Verification:' ),
 				'label'       => __( 'Enable Callback URL Server-to-Server Verification' ),
 				'type'        => 'checkbox',
 				'description' => __( 'Enabling this will send callback URL to the API and verify the transaction when a callback request received. Disabling this will verify the transaction using parameters returned to the return page.' ),
 				'default'     => 'yes',
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 			/*
 			'checkout_logo_width'              => array(
@@ -159,17 +158,17 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 				'description' => __( 'When payment Authorized.' ),
 				'desc_tip'    => true
 			),*/
-			'manual_capture_settings' => array(
-				'title'       => __( 'Capture order when:' ),
-				'type'        => 'title',
+			'manual_capture_settings'       => array(
+				'title' => __( 'Capture order when:' ),
+				'type'  => 'title',
 			),
-			'manual_capture_status'            => array(
+			'manual_capture_status'         => array(
 				'title'       => __( 'Order status is changed to: ' ),
 				'type'        => 'select',
 				'options'     => wc_get_order_statuses(),
 				'default'     => 'wc-completed',
 				'description' => __( 'Select a status which the payment will be manually captured if the order status changed to it.' ),
-				'desc_tip'    => true
+				'desc_tip'    => true,
 			),
 			/*
 			'additional_manual_capture_status' => array(
@@ -209,9 +208,9 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 			'embed_settings'                => array(
 				'title'       => __( 'Embedding Dintero Checkout:' ),
 				'type'        => 'title',
-				'description' => ''
+				'description' => '',
 			),
-			'embed_enable'                        => array(
+			'embed_enable'                  => array(
 				'title'       => __( 'Enable:' ),
 				'label'       => __( 'Enable Embed Checkout' ),
 				'type'        => 'checkbox',
@@ -219,12 +218,12 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
-			'express_settings'                => array(
+			'express_settings'              => array(
 				'title'       => __( 'Checkout Express' ),
 				'type'        => 'title',
-				'description' => ''
+				'description' => '',
 			),
-			'express_enable'                        => array(
+			'express_enable'                => array(
 				'title'       => __( 'Enable:' ),
 				'label'       => __( 'Enable Checkout Express' ),
 				'type'        => 'checkbox',
@@ -232,7 +231,7 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
-			'express_rewards'                        => array(
+			'express_rewards'               => array(
 				'title'       => __( 'Enable Rewards:' ),
 				'label'       => __( 'Enable Checkout Express Rewards' ),
 				'type'        => 'checkbox',
@@ -240,7 +239,7 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
-			'express_shopping_price'                        => array(
+			'express_shopping_price'        => array(
 				'title'       => __( 'Show Shopping Price:' ),
 				'label'       => __( 'Show/Hide Shipping Price' ),
 				'type'        => 'checkbox',
@@ -251,26 +250,26 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 			'branding_title'                => array(
 				'title'       => __( 'Branding:' ),
 				'type'        => 'title',
-				'description' => ''
+				'description' => '',
 			),
-			'branding_subtitle_footer'                => array(
+			'branding_subtitle_footer'      => array(
 				'title'       => __( 'Footer:' ),
 				'type'        => 'subtitle',
-				'description' => ''
+				'description' => '',
 			),
-			'branding_footer_url'            => array(
+			'branding_footer_url'           => array(
 				'title'       => __( 'URL:' ),
 				'type'        => 'text',
-				'description' => __( 'You can change color & size in Dintero Backoffice. Paste the new URL here:<br />Preview:<div>' . $this->get_icon_footer() . '</div>'),
+				'description' => __( 'You can change color & size in Dintero Backoffice. Paste the new URL here:<br />Preview:<div>' . $this->get_icon_footer() . '</div>' ),
 				'default'     => '',
 				'desc_tip'    => false,
 			),
-			'branding_subtitle_checkout'                => array(
+			'branding_subtitle_checkout'    => array(
 				'title'       => __( 'In Checkout:' ),
 				'type'        => 'subtitle',
-				'description' => ''
+				'description' => '',
 			),
-			'branding_checkout_url'            => array(
+			'branding_checkout_url'         => array(
 				'title'       => __( 'URL:' ),
 				'type'        => 'text',
 				'description' => __( 'You can change color & size in Dintero Backoffice. Paste the new URL here:<br />Preview:<div>' . $this->get_icon_checkout() . '</div>' ),
@@ -326,7 +325,7 @@ class WC_Dintero_HP_Settings_Checkout extends WC_Dintero_HP_Settings_Page {
 	/**
 	 * Output the settings.
 	 */
-	public function output() {		
+	public function output() {
 		$this->admin_options();
 
 		$settings = $this->get_settings();

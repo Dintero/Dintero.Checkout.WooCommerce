@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
  * WC_Ajax class.
  */
 class WC_AJAX_HP {
-	public $separate_sales_tax = false;
+	public $separate_sales_tax            = false;
 	public static $isOnGoingPushOperation = false;
 	/**
 	 * Hook in ajax handlers.
@@ -81,7 +81,7 @@ class WC_AJAX_HP {
 		}
 
 		$action = $wp_query->get( 'dhp-ajax' );
-		
+
 		if ( $action ) {
 			self::wc_ajax_headers();
 			$action = sanitize_text_field( $action );
@@ -111,7 +111,7 @@ class WC_AJAX_HP {
 			'destroy_session',
 			'update_shipping_postcode',
 			'check_transaction',
-			'test'
+			'test',
 		);
 
 		foreach ( $ajax_events_nopriv as $ajax_event ) {
@@ -127,30 +127,28 @@ class WC_AJAX_HP {
 	 * Testing function
 	 */
 	public static function test() {
-		$orders = wc_get_orders( array(
-						    'transaction_id' => 'T12000001.4XrEWRnfPBEsp34LEmBzdP'
-						)
-		 			);
+		$orders = wc_get_orders(
+			array(
+				'transaction_id' => 'T12000001.4XrEWRnfPBEsp34LEmBzdP',
+			)
+		);
 		echo '<pre>';
-		print_r($orders);
+		print_r( $orders );
 		exit;
 	}
 
 	public static function embed_checkout() {
-		//check_ajax_referer( 'embed-checkout', 'security' );
-
+		// check_ajax_referer( 'embed-checkout', 'security' );
 		$test = WCDHP()->checkout()->process_checkout();
 	}
 
 	public static function express_checkout() {
-		//check_ajax_referer( 'express-checkout', 'security' );
-
-		$test = WCDHP()->checkout()->process_checkout(true);
+		// check_ajax_referer( 'express-checkout', 'security' );
+		$test = WCDHP()->checkout()->process_checkout( true );
 	}
 
 	public static function embed_pay() {
-		//check_ajax_referer( 'embed-checkout', 'security' );
-
+		// check_ajax_referer( 'embed-checkout', 'security' );
 		$test = WCDHP()->checkout()->pay_action();
 	}
 
@@ -164,33 +162,32 @@ class WC_AJAX_HP {
 		return apply_filters( 'woocommerce_get_return_url', $return_url, $order );
 	}
 
-	public function check_transaction(){
-		$transaction_id = sanitize_text_field($_POST['transaction_id']);
-		
+	public function check_transaction() {
+		$transaction_id = sanitize_text_field( $_POST['transaction_id'] );
+
 		$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
-			
-		$transaction_order_id = trim($transaction['merchant_reference']);
-		if($transaction_order_id == '' && isset($transaction['merchant_reference_2'])){
-			$transaction_order_id = trim($transaction['merchant_reference_2']);
+
+		$transaction_order_id = trim( $transaction['merchant_reference'] );
+		if ( $transaction_order_id == '' && isset( $transaction['merchant_reference_2'] ) ) {
+			$transaction_order_id = trim( $transaction['merchant_reference_2'] );
 		}
 
+		$order = wc_get_order( $transaction_order_id );
 
-		$order                = wc_get_order( $transaction_order_id );
-	
-		if(!$order){
+		if ( ! $order ) {
 			wp_send_json_success(
 				array(
-					'msg'  => 'Order Doesnot exist'
-					
+					'msg' => 'Order Doesnot exist',
+
 				)
 			);
-		}else{
-			$url = apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order );
-			$redirectUrl = $url.'&transaction_id='.$transaction_id;
+		} else {
+			$url         = apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order );
+			$redirectUrl = $url . '&transaction_id=' . $transaction_id;
 			wp_send_json_error(
 				array(
-					'redirect_url'  => $redirectUrl
-					
+					'redirect_url' => $redirectUrl,
+
 				)
 			);
 
@@ -198,25 +195,25 @@ class WC_AJAX_HP {
 
 	}
 
-	public function destroy_session(){
-		//WC()->session->reload_checkout = true;
-		WC()->session->__unset('dintero_wc_order_id');
+	public function destroy_session() {
+		// WC()->session->reload_checkout = true;
+		WC()->session->__unset( 'dintero_wc_order_id' );
 		wp_send_json_success(
 			array(
-				'success'  => true
-				
+				'success' => true,
+
 			)
 		);
 	}
 
-	public function update_shipping_postcode(){
-		$formData = sanitize_text_field($_POST['post_code']);
-		$posted_data['postcode'] = sanitize_text_field($_POST['post_code']);
-		$customer_data = array();
-		$customer_data['billing_postcode']  = sanitize_text_field($_POST['post_code']);
-		$customer_data['shipping_postcode'] = sanitize_text_field($_POST['post_code']);
-		$country = 'NO';
-		$customer_data['billing_country']  = $country;
+	public function update_shipping_postcode() {
+		$formData                              = sanitize_text_field( $_POST['post_code'] );
+		$posted_data['postcode']               = sanitize_text_field( $_POST['post_code'] );
+		$customer_data                         = array();
+		$customer_data['billing_postcode']     = sanitize_text_field( $_POST['post_code'] );
+		$customer_data['shipping_postcode']    = sanitize_text_field( $_POST['post_code'] );
+		$country                               = 'NO';
+		$customer_data['billing_country']      = $country;
 			$customer_data['shipping_country'] = $country;
 		WC()->customer->set_props( $customer_data );
 		WC()->customer->save();
@@ -226,240 +223,223 @@ class WC_AJAX_HP {
 		WC()->session->reload_checkout = true;
 		wp_send_json_success(
 			array(
-				'success'  => true
-				
+				'success' => true,
+
 			)
 		);
 		wp_die();
 	}
-	public function check_order_status(){
-		if(!isset($_POST['transaction_id'])){
+	public function check_order_status() {
+		if ( ! isset( $_POST['transaction_id'] ) ) {
 			return false;
 		}
-		$transaction_id = sanitize_text_field($_POST['transaction_id']);
+		$transaction_id = sanitize_text_field( $_POST['transaction_id'] );
 
-		//$transaction_id = 'T12000001.4XmAg8326rD1rdYFepUBe4';
+		// $transaction_id = 'T12000001.4XmAg8326rD1rdYFepUBe4';
 		$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
 
-		$transaction_order_id = trim($transaction['merchant_reference']);
-		if($transaction_order_id == '' && isset($transaction['merchant_reference_2'])){
-			$transaction_order_id = trim($transaction['merchant_reference_2']);
+		$transaction_order_id = trim( $transaction['merchant_reference'] );
+		if ( $transaction_order_id == '' && isset( $transaction['merchant_reference_2'] ) ) {
+			$transaction_order_id = trim( $transaction['merchant_reference_2'] );
 		}
 
-		$order                = wc_get_order( $transaction_order_id );
+		$order = wc_get_order( $transaction_order_id );
 
-		if($order){
-            $location = $order->get_checkout_order_received_url();
-            $location = $location.'&merchant_reference='.$transaction_order_id.'&transaction_id='.$transaction_id;
-           	
-            $return = array(
-                'message' => __( 'order created', 'textdomain' ),
-                'redirect_url' => $location,
-                
-            );
-            wp_send_json_success($return);
+		if ( $order ) {
+			$location = $order->get_checkout_order_received_url();
+			$location = $location . '&merchant_reference=' . $transaction_order_id . '&transaction_id=' . $transaction_id;
 
-        }
+			$return = array(
+				'message'      => __( 'order created', 'textdomain' ),
+				'redirect_url' => $location,
+
+			);
+			wp_send_json_success( $return );
+
+		}
 	}
 
-	public function update_session(){
-		
+	public function update_session() {
+
 		if ( apply_filters( 'dhp_check_if_needs_payment', true ) ) {
-	        if ( ! WC()->cart->needs_payment() ) {
-	            $redirectUrl = wc_get_checkout_url();
-	            $result = array(
-					'success' => false,
-					'redirect_url' => $redirectUrl
+			if ( ! WC()->cart->needs_payment() ) {
+				$redirectUrl = wc_get_checkout_url();
+				$result      = array(
+					'success'      => false,
+					'redirect_url' => $redirectUrl,
 				);
-	            wp_send_json($result);
-	        }
-        }
+				wp_send_json( $result );
+			}
+		}
 		$sessionId = WC()->session->get( 'dintero_wc_order_id' );
-		$session = WCDHP()->checkout()->update_session($sessionId);
-		$result = array(
-			'success' => true
+		$session   = WCDHP()->checkout()->update_session( $sessionId );
+		$result    = array(
+			'success' => true,
 		);
-		wp_send_json($result);
-		
+		wp_send_json( $result );
+
 	}
 	/*
 	* The function can create order in woocommerce
 	* This funtion is used for backup callback if order does not get created in first instance
 	*
 	*/
-	public function dhp_create_order(){
-		
-		
+	public function dhp_create_order() {
+
 		if ( ! empty( $_GET['transaction_id'] ) ) {
-			
 
 			$transaction_id = sanitize_text_field( wp_unslash( $_GET['transaction_id'] ) );
-			
+
 			$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
-			
-			$transaction_order_id = trim($transaction['merchant_reference']);
-			if($transaction_order_id == '' && isset($transaction['merchant_reference_2'])){
-				$transaction_order_id = trim($transaction['merchant_reference_2']);
+
+			$transaction_order_id = trim( $transaction['merchant_reference'] );
+			if ( $transaction_order_id == '' && isset( $transaction['merchant_reference_2'] ) ) {
+				$transaction_order_id = trim( $transaction['merchant_reference_2'] );
 			}
 
+			$order = wc_get_order( $transaction_order_id );
 
-			$order                = wc_get_order( $transaction_order_id );
-			
-			if(!$order && $transaction['merchant_reference_2'] == ''){
-				
+			if ( ! $order && $transaction['merchant_reference_2'] == '' ) {
+
 				$couponCode = array();
-				$items = $transaction['items'];
-				$order = wc_create_order( array( 'status' => 'pending' ) );
+				$items      = $transaction['items'];
+				$order      = wc_create_order( array( 'status' => 'pending' ) );
 				$order->set_transaction_id( $transaction_id );
 				$order->save();
-				foreach ($items as $product) {
+				foreach ( $items as $product ) {
 					$id = $product['id'];
-					if($id && get_product( $id )){
-						
-						$args = array(
-								'total'   => $product['amount'] / 100
-					      );
-						$order->add_product(get_product( $id ),$product['quantity']);
+					if ( $id && get_product( $id ) ) {
 
-						if(isset($product['discount_lines'])){
-							foreach($product['discount_lines'] as $discountLines){
+						$args = array(
+							'total' => $product['amount'] / 100,
+						);
+						$order->add_product( get_product( $id ), $product['quantity'] );
+
+						if ( isset( $product['discount_lines'] ) ) {
+							foreach ( $product['discount_lines'] as $discountLines ) {
 								$couponCode[] = $discountLines['description'];
 							}
-							
-							//$order->apply_coupon( $couponCode );  // TO DO to add coupon code
-						}
-						
-					}
 
-					
+							// $order->apply_coupon( $couponCode );  // TO DO to add coupon code
+						}
+					}
 				}
-				
-				
-				$shippingOption =  array(
-										'0' => $transaction['shipping_option']['id']
-									);
+
+				$shippingOption = array(
+					'0' => $transaction['shipping_option']['id'],
+				);
 				// Create data for Hook
-				$data = array();
-				$data['term'] = 1;
+				$data                  = array();
+				$data['term']          = 1;
 				$data['createaccount'] = 0;
-				
-				$data['shipping_method'] = $shippingOption;
-				$data['ship_to_different_address'] = '';
+
+				$data['shipping_method']                    = $shippingOption;
+				$data['ship_to_different_address']          = '';
 				$data['woocommerce_checkout_update_totals'] = '';
 
-				if($transaction['shipping_address']['business_name']){ // if Business Checkout
-					$postMeta = get_post_meta( $order->get_id()) ;
+				if ( $transaction['shipping_address']['business_name'] ) { // if Business Checkout
+					$postMeta = get_post_meta( $order->get_id() );
 
-					update_post_meta( $order->get_id(), '_shipping_vat_number', sanitize_text_field($transaction['shipping_address']['organization_number'] ) );
+					update_post_meta( $order->get_id(), '_shipping_vat_number', sanitize_text_field( $transaction['shipping_address']['organization_number'] ) );
 
-					update_post_meta( $order->get_id(), '_shipping_company', sanitize_text_field($transaction['shipping_address']['business_name'] ) );
-					update_post_meta( $order->get_id(), '_billing_company', sanitize_text_field($transaction['shipping_address']['business_name'] ) );
+					update_post_meta( $order->get_id(), '_shipping_company', sanitize_text_field( $transaction['shipping_address']['business_name'] ) );
+					update_post_meta( $order->get_id(), '_billing_company', sanitize_text_field( $transaction['shipping_address']['business_name'] ) );
 
-					$data['billing_vat'] = sanitize_text_field($transaction['shipping_address']['organization_number'] );
-					$data['billing_company'] = sanitize_text_field($transaction['shipping_address']['business_name'] );
+					$data['billing_vat']     = sanitize_text_field( $transaction['shipping_address']['organization_number'] );
+					$data['billing_company'] = sanitize_text_field( $transaction['shipping_address']['business_name'] );
 
-					$coName = $transaction['shipping_address']['co_address'];
-					$tempName = explode(" ",$coName);
-					
+					$coName   = $transaction['shipping_address']['co_address'];
+					$tempName = explode( ' ', $coName );
+
 					$firstName = $tempName[0];
-					$lastName = str_replace($tempName[0],"",$coName);
-					
-					$order->set_billing_first_name( sanitize_text_field($firstName));
-					$order->set_billing_last_name( sanitize_text_field( $lastName) );
-					
-					$order->set_shipping_first_name( sanitize_text_field( $firstName) );
-					$order->set_shipping_last_name( sanitize_text_field( $lastName) );
+					$lastName  = str_replace( $tempName[0], '', $coName );
 
-					$data['billing_first_name'] = sanitize_text_field($firstName);
-					$data['billing_last_name'] = sanitize_text_field($lastName);
+					$order->set_billing_first_name( sanitize_text_field( $firstName ) );
+					$order->set_billing_last_name( sanitize_text_field( $lastName ) );
 
-					$data['shipping_first_name'] = sanitize_text_field($firstName);
-					$data['shipping_last_name'] = sanitize_text_field($lastName);
-				}else{
-					$order->set_billing_first_name( sanitize_text_field($transaction['shipping_address']['first_name']));
-					$order->set_billing_last_name( sanitize_text_field( $transaction['shipping_address']['last_name']  ) );
-					$order->set_shipping_first_name( sanitize_text_field( $transaction['shipping_address']['first_name']) );
-					$order->set_shipping_last_name( sanitize_text_field( $transaction['shipping_address']['last_name']) );
+					$order->set_shipping_first_name( sanitize_text_field( $firstName ) );
+					$order->set_shipping_last_name( sanitize_text_field( $lastName ) );
 
-					$data['billing_first_name'] = sanitize_text_field($transaction['shipping_address']['first_name']);
-					$data['billing_last_name'] = sanitize_text_field($transaction['shipping_address']['last_name']);
-					
-					$data['shipping_first_name'] = sanitize_text_field($transaction['shipping_address']['first_name']);
-					$data['shipping_last_name'] = sanitize_text_field($transaction['shipping_address']['last_name']);
+					$data['billing_first_name'] = sanitize_text_field( $firstName );
+					$data['billing_last_name']  = sanitize_text_field( $lastName );
+
+					$data['shipping_first_name'] = sanitize_text_field( $firstName );
+					$data['shipping_last_name']  = sanitize_text_field( $lastName );
+				} else {
+					$order->set_billing_first_name( sanitize_text_field( $transaction['shipping_address']['first_name'] ) );
+					$order->set_billing_last_name( sanitize_text_field( $transaction['shipping_address']['last_name'] ) );
+					$order->set_shipping_first_name( sanitize_text_field( $transaction['shipping_address']['first_name'] ) );
+					$order->set_shipping_last_name( sanitize_text_field( $transaction['shipping_address']['last_name'] ) );
+
+					$data['billing_first_name'] = sanitize_text_field( $transaction['shipping_address']['first_name'] );
+					$data['billing_last_name']  = sanitize_text_field( $transaction['shipping_address']['last_name'] );
+
+					$data['shipping_first_name'] = sanitize_text_field( $transaction['shipping_address']['first_name'] );
+					$data['shipping_last_name']  = sanitize_text_field( $transaction['shipping_address']['last_name'] );
 
 				}
 
-				
-				
-
-				$order->set_billing_country( sanitize_text_field($transaction['shipping_address']['country']) );
+				$order->set_billing_country( sanitize_text_field( $transaction['shipping_address']['country'] ) );
 				$order->set_billing_address_1( sanitize_text_field( $transaction['shipping_address']['address_line'] ) );
 				$order->set_billing_city( sanitize_text_field( $transaction['shipping_address']['postal_place'] ) );
-				$order->set_billing_postcode( sanitize_text_field( $transaction['shipping_address']['postal_code']  ) );
-				$order->set_billing_phone( sanitize_text_field( $transaction['shipping_address']['phone_number']) );
+				$order->set_billing_postcode( sanitize_text_field( $transaction['shipping_address']['postal_code'] ) );
+				$order->set_billing_phone( sanitize_text_field( $transaction['shipping_address']['phone_number'] ) );
 				$order->set_billing_email( sanitize_text_field( $transaction['shipping_address']['email'] ) );
-				
-				$data['billing_country'] = sanitize_text_field($transaction['shipping_address']['country']);
-				$data['billing_address_1'] = sanitize_text_field( $transaction['shipping_address']['address_line'] );
-				$data['billing_city'] = sanitize_text_field( $transaction['shipping_address']['postal_place'] );
-				$data['billing_postcode'] = sanitize_text_field( $transaction['shipping_address']['postal_code'] );
-				$data['billing_phone'] = sanitize_text_field( $transaction['shipping_address']['phone_number'] );
-				$data['billing_email'] = sanitize_text_field( $transaction['shipping_address']['email'] );
-				
 
+				$data['billing_country']   = sanitize_text_field( $transaction['shipping_address']['country'] );
+				$data['billing_address_1'] = sanitize_text_field( $transaction['shipping_address']['address_line'] );
+				$data['billing_city']      = sanitize_text_field( $transaction['shipping_address']['postal_place'] );
+				$data['billing_postcode']  = sanitize_text_field( $transaction['shipping_address']['postal_code'] );
+				$data['billing_phone']     = sanitize_text_field( $transaction['shipping_address']['phone_number'] );
+				$data['billing_email']     = sanitize_text_field( $transaction['shipping_address']['email'] );
 
 				$order->set_shipping_country( sanitize_text_field( $transaction['shipping_address']['country'] ) );
 				$order->set_shipping_address_1( sanitize_text_field( $transaction['shipping_address']['address_line'] ) );
-				
-				$order->set_shipping_city( sanitize_text_field( $transaction['shipping_address']['postal_place']) );
-				
-				$order->set_shipping_postcode( sanitize_text_field( $transaction['shipping_address']['postal_code'] ) );
-				update_post_meta( $order->get_id(), '_shipping_phone', sanitize_text_field($transaction['shipping_address']['phone_number'] ) );
-				update_post_meta( $order->get_id(), '_shipping_email', sanitize_text_field( $transaction['shipping_address']['email']  ) );
 
-				$data['shipping_country'] = sanitize_text_field($transaction['shipping_address']['country']);
+				$order->set_shipping_city( sanitize_text_field( $transaction['shipping_address']['postal_place'] ) );
+
+				$order->set_shipping_postcode( sanitize_text_field( $transaction['shipping_address']['postal_code'] ) );
+				update_post_meta( $order->get_id(), '_shipping_phone', sanitize_text_field( $transaction['shipping_address']['phone_number'] ) );
+				update_post_meta( $order->get_id(), '_shipping_email', sanitize_text_field( $transaction['shipping_address']['email'] ) );
+
+				$data['shipping_country']   = sanitize_text_field( $transaction['shipping_address']['country'] );
 				$data['shipping_address_1'] = sanitize_text_field( $transaction['shipping_address']['address_line'] );
-				$data['shipping_city'] = sanitize_text_field( $transaction['shipping_address']['postal_place'] );
-				$data['shipping_postcode'] = sanitize_text_field( $transaction['shipping_address']['postal_code'] );
-				
-				
+				$data['shipping_city']      = sanitize_text_field( $transaction['shipping_address']['postal_place'] );
+				$data['shipping_postcode']  = sanitize_text_field( $transaction['shipping_address']['postal_code'] );
+
 				// Get the customer country code
 				$country_code = $order->get_shipping_country();
-				
 
 				// Set the array for tax calculations
 				$calculate_tax_for = array(
-				    'country' => $country_code,
-				    'state' => '', // Can be set (optional)
-				    'postcode' => '', // Can be set (optional)
-				    'city' => '', // Can be set (optional)
+					'country'  => $country_code,
+					'state'    => '', // Can be set (optional)
+					'postcode' => '', // Can be set (optional)
+					'city'     => '', // Can be set (optional)
 				);
-
-
 
 				// Optionally, set a total shipping amount
 				$shippingAmountWithoutVat = $transaction['shipping_option']['amount'] - $transaction['shipping_option']['vat_amount'];
-				$new_ship_price =$shippingAmountWithoutVat / 100;
+				$new_ship_price           = $shippingAmountWithoutVat / 100;
 
 				// Get a new instance of the WC_Order_Item_Shipping Object
-				$item = new WC_Order_Item_Shipping();
-				$shippingTitle = $transaction['shipping_option']['title'] ;
+				$item          = new WC_Order_Item_Shipping();
+				$shippingTitle = $transaction['shipping_option']['title'];
 
-				$tempTitle = explode('Shipping:', $shippingTitle);
+				$tempTitle = explode( 'Shipping:', $shippingTitle );
 
 				// exploding id to get Method id and remove Instance Id (if any)
-				$tempMethodId = explode(':', $transaction['shipping_option']['id']);
-				$methodId = $tempMethodId[0];
+				$tempMethodId = explode( ':', $transaction['shipping_option']['id'] );
+				$methodId     = $tempMethodId[0];
 
-				$item->set_method_title($tempTitle[1] );
-				
+				$item->set_method_title( $tempTitle[1] );
+
 				$item->set_method_id( $methodId ); // set an existing Shipping method rate ID
 				$item->set_instance_id( $transaction['shipping_option']['operator_product_id'] ); // set an existing Shipping method instance ID
 				$item->set_total( $new_ship_price ); // (optional)
-				$item->calculate_taxes($calculate_tax_for);
+				$item->calculate_taxes( $calculate_tax_for );
 
 				$order->add_item( $item );
-				
 
 				$order->calculate_totals();
 
@@ -467,24 +447,20 @@ class WC_AJAX_HP {
 				$payment_method     = $available_gateways['dintero-hp'];
 				$order->set_payment_method( $payment_method );
 				// Set the payment product used for transaction
-				$methodName = 'Dintero - '.$transaction['payment_product'];
-				$order->set_payment_method_title($methodName);
+				$methodName = 'Dintero - ' . $transaction['payment_product'];
+				$order->set_payment_method_title( $methodName );
 				$order->save();
-				if(count($couponCode)> 0){ // Add Coupon Code to Order
-					foreach($couponCode as $code){
-						$couponObj = new WC_Coupon($code);
-						$order->apply_coupon($couponObj,false);
+				if ( count( $couponCode ) > 0 ) { // Add Coupon Code to Order
+					foreach ( $couponCode as $code ) {
+						$couponObj = new WC_Coupon( $code );
+						$order->apply_coupon( $couponObj, false );
 					}
-					
 				}
-				
-				$data['payment_method'] = 'dintero-hp';
 
+				$data['payment_method'] = 'dintero-hp';
 
 				/**
 				 * Action hook to adjust order before save.
-				 *
-				 * 
 				 */
 				do_action( 'woocommerce_checkout_create_order', $order, $data );
 
@@ -494,7 +470,7 @@ class WC_AJAX_HP {
 				do_action( 'woocommerce_checkout_update_order_meta', $order_id, $data );
 
 				// The text for the note
-				$orderNote = __("Order Created Via CallBack");
+				$orderNote = __( 'Order Created Via CallBack' );
 
 				// Add the note
 				$order->add_order_note( $orderNote );
@@ -502,10 +478,9 @@ class WC_AJAX_HP {
 				if ( ! empty( $order ) && $order instanceof WC_Order ) {
 					$amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
 					if ( array_key_exists( 'status', $transaction ) &&
-						 array_key_exists( 'amount', $transaction )) {
+						 array_key_exists( 'amount', $transaction ) ) {
 
 						WC()->session->set( 'order_awaiting_payment', null );
-						
 
 						if ( 'AUTHORIZED' === $transaction['status'] ) {
 
@@ -515,19 +490,18 @@ class WC_AJAX_HP {
 
 							$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
 							self::payment_complete( $order, $transaction_id, $note );
-						}elseif('ON_HOLD' === $transaction['status'] ){
+						} elseif ( 'ON_HOLD' === $transaction['status'] ) {
 							$hold_reason = __( 'The payment is put on on-hold for manual review. The status of the payment will be updated when the manual review is finished. Transaction ID: ' ) . $transaction_id;
 							self::on_hold_order( $order, $transaction_id, $hold_reason );
-						}elseif('FAILED' === $transaction['status'] ){
+						} elseif ( 'FAILED' === $transaction['status'] ) {
 							$hold_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;
 							self::failed_order( $order, $transaction_id, $hold_reason );
 						}
-
 					}
 				}
-				$transaction = WCDHP()->checkout()->update_transaction($transaction_id, $order->get_id());
+				$transaction                  = WCDHP()->checkout()->update_transaction( $transaction_id, $order->get_id() );
 				self::$isOnGoingPushOperation = false;
-			}elseif($order && $order->get_status() == 'on-hold'){
+			} elseif ( $order && $order->get_status() == 'on-hold' ) {
 				if ( 'AUTHORIZED' === $transaction['status'] ) {
 
 					$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
@@ -536,15 +510,13 @@ class WC_AJAX_HP {
 
 					$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
 					self::payment_complete( $order, $transaction_id, $note );
-				}elseif('FAILED' === $transaction['status'] ){
+				} elseif ( 'FAILED' === $transaction['status'] ) {
 					$hold_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;
 					self::failed_order( $order, $transaction_id, $hold_reason );
 				}
 			}
-
-
 		}
-	
+
 	}
 
 	/*
@@ -553,53 +525,48 @@ class WC_AJAX_HP {
 	*
 	*/
 
-	public static function create_order(){
+	public static function create_order() {
 
-		WC()->session->__unset('dintero_wc_order_id');
+		WC()->session->__unset( 'dintero_wc_order_id' );
 		$cart = WC()->cart;
-		//$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
-		
+		// $transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
 		try {
 
-			
-
-			$country = WC()->checkout()->get_value( 'shipping_country' );
-			$postcode = WC()->checkout()->get_value( 'shipping_postcode' );
-			$city = WC()->checkout()->get_value( 'shipping_city' );
+			$country      = WC()->checkout()->get_value( 'shipping_country' );
+			$postcode     = WC()->checkout()->get_value( 'shipping_postcode' );
+			$city         = WC()->checkout()->get_value( 'shipping_city' );
 			$addressline1 = WC()->checkout()->get_value( 'shipping_address_1' );
-			
-			
-			if($country != 'NO'){ // Checks if there is No Shippingn Country in Customer Session
 
-				 WC()->customer->set_shipping_country('NO');
+			if ( $country != 'NO' ) { // Checks if there is No Shippingn Country in Customer Session
+
+				 WC()->customer->set_shipping_country( 'NO' );
 				 WC()->cart->calculate_totals();
 			}
 
 			$order = wc_create_order( array( 'status' => 'pending' ) );
 
-			$order->set_billing_first_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_first_name' ) ));
-			$order->set_billing_last_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_last_name' )  ) );
+			$order->set_billing_first_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_first_name' ) ) );
+			$order->set_billing_last_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_last_name' ) ) );
 			$order->set_billing_country( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_country' ) ) );
 			$order->set_billing_address_1( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_address_1' ) ) );
 			$order->set_billing_city( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_city' ) ) );
 			$order->set_billing_postcode( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_postcode' ) ) );
-			$order->set_billing_phone( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_phone' )) );
+			$order->set_billing_phone( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_phone' ) ) );
 			$order->set_billing_email( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_email' ) ) );
 
-			$order->set_shipping_first_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_first_name' )  ) );
+			$order->set_shipping_first_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_first_name' ) ) );
 			$order->set_shipping_last_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_last_name' ) ) );
 			$order->set_shipping_country( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_country' ) ) );
 			$order->set_shipping_address_1( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_address_1' ) ) );
-			
+
 			$order->set_shipping_city( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_city' ) ) );
-			
+
 			$order->set_shipping_postcode( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_postcode' ) ) );
 			update_post_meta( $order->get_id(), '_shipping_phone', sanitize_text_field( WC()->checkout()->get_value( 'shipping_phone' ) ) );
-			update_post_meta( $order->get_id(), '_shipping_email', sanitize_text_field( WC()->checkout()->get_value( 'shipping_email' )  ) );
-
+			update_post_meta( $order->get_id(), '_shipping_email', sanitize_text_field( WC()->checkout()->get_value( 'shipping_email' ) ) );
 
 			$order->set_created_via( 'dintero_checkout' );
-			$order->set_currency( sanitize_text_field( $currency ));
+			$order->set_currency( sanitize_text_field( $currency ) );
 			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 
 			$available_gateways = WC()->payment_gateways->payment_gateways();
@@ -613,17 +580,13 @@ class WC_AJAX_HP {
 			$order->set_cart_tax( WC()->cart->get_cart_contents_tax() + WC()->cart->get_fee_tax() );
 			$order->set_shipping_tax( WC()->cart->get_shipping_tax() );
 			$order->set_total( WC()->cart->get_total( 'edit' ) );
-			//$order->apply_coupon($coupon_code);
-			//$order->set_transaction_id( $transaction_id );
-
+			// $order->apply_coupon($coupon_code);
+			// $order->set_transaction_id( $transaction_id );
 			WC()->checkout()->create_order_line_items( $order, WC()->cart );
 			WC()->checkout()->create_order_fee_lines( $order, WC()->cart );
 			WC()->checkout()->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
 			WC()->checkout()->create_order_tax_lines( $order, WC()->cart );
 			WC()->checkout()->create_order_coupon_lines( $order, WC()->cart );
-
-			
-			
 
 			/**
 			 * Added to simulate WCs own order creation.
@@ -635,112 +598,99 @@ class WC_AJAX_HP {
 			// Save the order.
 			$order_id = $order->save();
 
-			if($order_id){
+			if ( $order_id ) {
 				do_action( 'woocommerce_checkout_update_order_meta', $order_id, array() );
-				$result = $payment_method->process_payment( $order_id ,true);
-				wp_send_json($result);
-				
-				
-			}
-			
-	
-            //wp_send_json_success($return);
+				$result = $payment_method->process_payment( $order_id, true );
+				wp_send_json( $result );
 
-		}catch ( Exception $e ) {
+			}
+
+			// wp_send_json_success($return);
+		} catch ( Exception $e ) {
 			return new WP_Error( 'checkout-error', $e->getMessage() );
 		}
-
 
 	}
 
 	public static function express_pay() {
-		//check_ajax_referer( 'express-checkout', 'security' );
-
-		$test = WCDHP()->checkout()->pay_action(true);
+		// check_ajax_referer( 'express-checkout', 'security' );
+		$test = WCDHP()->checkout()->pay_action( true );
 	}
 
 	/**
-	* TO DO , Create call back method to create order if something goes wrong
-	*/
+	 * TO DO , Create call back method to create order if something goes wrong
+	 */
 
 
-	public static function dhp_update_ord_emded(){
-		
+	public static function dhp_update_ord_emded() {
+
 	}
 	/**
 	 * Update order status post back
 	 */
 	public static function dhp_update_ord() {
 		if ( ! empty( $_GET['transaction_id'] ) ) {
-			
-			$transaction_id = sanitize_text_field( wp_unslash( $_GET['transaction_id'] ) );
-			
-			$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
-			
-			$transaction_order_id = $transaction['merchant_reference'];
-			
 
-			$order                = wc_get_order( $transaction_order_id );
+			$transaction_id = sanitize_text_field( wp_unslash( $_GET['transaction_id'] ) );
+
+			$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
+
+			$transaction_order_id = $transaction['merchant_reference'];
+
+			$order     = wc_get_order( $transaction_order_id );
 			$isExpress = false;
 
-			if($transaction['shipping_option']['id'] == 'shipping_express'){
+			if ( $transaction['shipping_option']['id'] == 'shipping_express' ) {
 				$isExpress = true;
 
-				if($transaction['shipping_address']['business_name']){ // if Business Checkout
-					$postMeta = get_post_meta( $order->get_id()) ;
+				if ( $transaction['shipping_address']['business_name'] ) { // if Business Checkout
+					$postMeta = get_post_meta( $order->get_id() );
 
-					update_post_meta( $order->get_id(), '_shipping_vat_number', sanitize_text_field($transaction['shipping_address']['organization_number'] ) );
+					update_post_meta( $order->get_id(), '_shipping_vat_number', sanitize_text_field( $transaction['shipping_address']['organization_number'] ) );
 
-					update_post_meta( $order->get_id(), '_shipping_company', sanitize_text_field($transaction['shipping_address']['business_name'] ) );
-					update_post_meta( $order->get_id(), '_billing_company', sanitize_text_field($transaction['shipping_address']['business_name'] ) );
+					update_post_meta( $order->get_id(), '_shipping_company', sanitize_text_field( $transaction['shipping_address']['business_name'] ) );
+					update_post_meta( $order->get_id(), '_billing_company', sanitize_text_field( $transaction['shipping_address']['business_name'] ) );
 
+					$coName   = $transaction['shipping_address']['co_address'];
+					$tempName = explode( ' ', $coName );
 
-					$coName = $transaction['shipping_address']['co_address'];
-					$tempName = explode(" ",$coName);
-					
 					$firstName = $tempName[0];
-					$lastName = str_replace($tempName[0],"",$coName);
-					
-					$order->set_billing_first_name( sanitize_text_field($firstName));
-					$order->set_billing_last_name( sanitize_text_field( $lastName) );
-					
-					$order->set_shipping_first_name( sanitize_text_field( $firstName) );
-					$order->set_shipping_last_name( sanitize_text_field( $lastName) );
-				}else{
-					$order->set_billing_first_name( sanitize_text_field($transaction['shipping_address']['first_name']));
-					$order->set_billing_last_name( sanitize_text_field( $transaction['shipping_address']['last_name']  ) );
-					$order->set_shipping_first_name( sanitize_text_field( $transaction['shipping_address']['first_name']) );
-					$order->set_shipping_last_name( sanitize_text_field( $transaction['shipping_address']['last_name']) );
+					$lastName  = str_replace( $tempName[0], '', $coName );
+
+					$order->set_billing_first_name( sanitize_text_field( $firstName ) );
+					$order->set_billing_last_name( sanitize_text_field( $lastName ) );
+
+					$order->set_shipping_first_name( sanitize_text_field( $firstName ) );
+					$order->set_shipping_last_name( sanitize_text_field( $lastName ) );
+				} else {
+					$order->set_billing_first_name( sanitize_text_field( $transaction['shipping_address']['first_name'] ) );
+					$order->set_billing_last_name( sanitize_text_field( $transaction['shipping_address']['last_name'] ) );
+					$order->set_shipping_first_name( sanitize_text_field( $transaction['shipping_address']['first_name'] ) );
+					$order->set_shipping_last_name( sanitize_text_field( $transaction['shipping_address']['last_name'] ) );
 
 				}
 
-				
-				
-
-				$order->set_billing_country( sanitize_text_field($transaction['shipping_address']['country']) );
+				$order->set_billing_country( sanitize_text_field( $transaction['shipping_address']['country'] ) );
 				$order->set_billing_address_1( sanitize_text_field( $transaction['shipping_address']['address_line'] ) );
 				$order->set_billing_city( sanitize_text_field( $transaction['shipping_address']['postal_place'] ) );
-				$order->set_billing_postcode( sanitize_text_field( $transaction['shipping_address']['postal_code']  ) );
-				$order->set_billing_phone( sanitize_text_field( $transaction['shipping_address']['phone_number']) );
+				$order->set_billing_postcode( sanitize_text_field( $transaction['shipping_address']['postal_code'] ) );
+				$order->set_billing_phone( sanitize_text_field( $transaction['shipping_address']['phone_number'] ) );
 				$order->set_billing_email( sanitize_text_field( $transaction['shipping_address']['email'] ) );
-
-				
-
 
 				$order->set_shipping_country( sanitize_text_field( $transaction['shipping_address']['country'] ) );
 				$order->set_shipping_address_1( sanitize_text_field( $transaction['shipping_address']['address_line'] ) );
-				
-				$order->set_shipping_city( sanitize_text_field( $transaction['shipping_address']['postal_place']) );
-				
+
+				$order->set_shipping_city( sanitize_text_field( $transaction['shipping_address']['postal_place'] ) );
+
 				$order->set_shipping_postcode( sanitize_text_field( $transaction['shipping_address']['postal_code'] ) );
-				update_post_meta( $order->get_id(), '_shipping_phone', sanitize_text_field($transaction['shipping_address']['phone_number'] ) );
-				update_post_meta( $order->get_id(), '_shipping_email', sanitize_text_field( $transaction['shipping_address']['email']  ) );
+				update_post_meta( $order->get_id(), '_shipping_phone', sanitize_text_field( $transaction['shipping_address']['phone_number'] ) );
+				update_post_meta( $order->get_id(), '_shipping_email', sanitize_text_field( $transaction['shipping_address']['email'] ) );
 
 				$order->save();
 			}
-			$methodName = 'Dintero - '.$transaction['payment_product'];
-			$order->set_payment_method_title($methodName);
-			
+			$methodName = 'Dintero - ' . $transaction['payment_product'];
+			$order->set_payment_method_title( $methodName );
+
 			if ( ! empty( $order ) && $order instanceof WC_Order ) {
 				$amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
 				if ( array_key_exists( 'status', $transaction ) &&
@@ -748,7 +698,7 @@ class WC_AJAX_HP {
 					 $transaction['amount'] === $amount ) {
 
 					WC()->session->set( 'order_awaiting_payment', null );
-					
+
 					if ( 'AUTHORIZED' === $transaction['status'] ) {
 
 						$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
@@ -761,7 +711,7 @@ class WC_AJAX_HP {
 				}
 			}
 
-			if (true || ! $return_page ) {
+			if ( true || ! $return_page ) {
 				exit;
 			}
 		}
@@ -876,7 +826,7 @@ class WC_AJAX_HP {
 	 * @return integer $shipping_tax_amount Tax amount for selected shipping method.
 	 */
 	public function get_shipping_tax_amount() {
-		
+
 		if ( self::separate_sales_tax ) {
 			$shipping_tax_amount = 0;
 		} else {
@@ -888,56 +838,42 @@ class WC_AJAX_HP {
 	}
 
 
-	
+
 
 	/**
 	 * Update order shipping address post back
 	 */
 	public static function dhp_update_ship() {
 
-		
-
-		$str11 = 'ph';
-		$str12 = 'p:';
-		$str2 = '/';
-		$str3 = 'input';
+		$str11       = 'ph';
+		$str12       = 'p:';
+		$str2        = '/';
+		$str3        = 'input';
 		$posted_data = file_get_contents( $str11 . $str12 . $str2 . $str2 . $str3 );
 
-		
+		$posted_data = trim( stripslashes( $posted_data ) );
+		$posted_arr  = json_decode( $posted_data, true );
 
-		$posted_data = trim(stripslashes($posted_data));
-		$posted_arr = json_decode($posted_data, true);
-			
-		
-
-		
-
-		
 		$customer_data = array();
 
-		
-
-		if (is_array($posted_arr) && isset($posted_arr['order']) && isset($posted_arr['order']['shipping_address'])) {
-			$o = $posted_arr['order'];
-			$a = $posted_arr['order']['shipping_address'];
+		if ( is_array( $posted_arr ) && isset( $posted_arr['order'] ) && isset( $posted_arr['order']['shipping_address'] ) ) {
+			$o                       = $posted_arr['order'];
+			$a                       = $posted_arr['order']['shipping_address'];
 			$shipping_options_posted = $posted_arr['order']['shipping_option'];
 
-		
-
-			$first_name = isset($a['first_name']) ? $a['first_name'] : '';
-			$last_name = isset($a['last_name']) ? $a['last_name'] : '';
-			$company = isset($a['company']) ? $a['company'] : '';
-			$addr1 = isset($a['address_line']) ? $a['address_line'] : '';
-			$addr2 = isset($a['address_line_2']) ? $a['address_line_2'] : '';
-			$city = isset($a['city']) ? $a['city'] : '';
-			$state = isset($a['postal_place']) ? $a['postal_place'] : '';
-			$postal = isset($a['postal_code']) ? $a['postal_code'] : '';
-			$country = isset($a['country']) ? $a['country'] : '';
-			$email = isset($a['email']) ? $a['email'] : '';
-			$phone_number = isset($a['phone_number']) ? $a['phone_number'] : '';
+			$first_name   = isset( $a['first_name'] ) ? $a['first_name'] : '';
+			$last_name    = isset( $a['last_name'] ) ? $a['last_name'] : '';
+			$company      = isset( $a['company'] ) ? $a['company'] : '';
+			$addr1        = isset( $a['address_line'] ) ? $a['address_line'] : '';
+			$addr2        = isset( $a['address_line_2'] ) ? $a['address_line_2'] : '';
+			$city         = isset( $a['city'] ) ? $a['city'] : '';
+			$state        = isset( $a['postal_place'] ) ? $a['postal_place'] : '';
+			$postal       = isset( $a['postal_code'] ) ? $a['postal_code'] : '';
+			$country      = isset( $a['country'] ) ? $a['country'] : '';
+			$email        = isset( $a['email'] ) ? $a['email'] : '';
+			$phone_number = isset( $a['phone_number'] ) ? $a['phone_number'] : '';
 
 			// below code does not reflect changes in Checkout Onject as it cannot be access in callback
-
 			if ( isset( $email ) ) {
 				$customer_data['billing_email'] = $email;
 			}
@@ -947,47 +883,44 @@ class WC_AJAX_HP {
 				$customer_data['shipping_postcode'] = $phone_number;
 			}
 
-			if ( isset( $first_name) ) {
+			if ( isset( $first_name ) ) {
 				$customer_data['billing_first_name']  = $first_name;
 				$customer_data['shipping_first_name'] = $first_name;
 			}
 
-			if ( isset( $last_name) ) {
+			if ( isset( $last_name ) ) {
 				$customer_data['billing_last_name']  = $last_name;
 				$customer_data['shipping_last_name'] = $last_name;
 			}
 
 			if ( isset( $country ) ) {
-				
+
 				$customer_data['billing_country']  = $country;
 				$customer_data['shipping_country'] = $country;
 			}
-			//WC()->session->set( 'chosen_shipping_methods',  $chosen_shipping_methods  );
+			// WC()->session->set( 'chosen_shipping_methods',  $chosen_shipping_methods  );
 			WC()->customer->set_props( $customer_data );
 			WC()->customer->save();
 
 			WC()->cart->calculate_shipping();
 			WC()->cart->calculate_totals();
 
-			
-			//$shipping_options_posted['amount'] = self::get_shipping_amount();
+			// $shipping_options_posted['amount'] = self::get_shipping_amount();
 			$shipping_amount = number_format( WC()->cart->shipping_total + WC()->cart->shipping_tax_total, wc_get_price_decimals(), '.', '' ) * 100;
 			exit;  // Exit here as it d
 			$shipping_options_posted['amount'] = $shipping_amount;
-			$shipping_options = array(
-									0=> $shipping_options_posted
-								);
+			$shipping_options                  = array(
+				0 => $shipping_options_posted,
+			);
 
-			$shipping_arr = array('shipping_options'=>$shipping_options);
-			
-			
-			wp_send_json($shipping_arr);
+			$shipping_arr = array( 'shipping_options' => $shipping_options );
 
-			
+			wp_send_json( $shipping_arr );
+
 		} else {
 			wp_kses_post( $msg );
 		}
-		
+
 		exit();
 	}
 
@@ -995,8 +928,8 @@ class WC_AJAX_HP {
 	 * Complete order, add transaction ID and note.
 	 *
 	 * @param WC_Order $order Order object.
-	 * @param string $transaction_id Transaction ID.
-	 * @param string $note Payment note.
+	 * @param string   $transaction_id Transaction ID.
+	 * @param string   $note Payment note.
 	 */
 	public static function payment_complete( $order, $transaction_id = '', $note = '' ) {
 		$order->add_order_note( $note );
@@ -1010,57 +943,53 @@ class WC_AJAX_HP {
 	 * Pricess order and add note.
 	 *
 	 * @param WC_Order $order Order object.
-	 * @param string $transaction_id Transaction ID.
-	 * @param string $reason Reason why the payment is on hold.
+	 * @param string   $transaction_id Transaction ID.
+	 * @param string   $reason Reason why the payment is on hold.
 	 */
 	private static function process_authorization( $order, $transaction_id = '', $reason = '' ) {
 		$order->set_transaction_id( $transaction_id );
-		
-		$default_order_status = WC_Dintero_HP_Admin_Settings::get_option('default_order_status');
-		if (!$default_order_status) {
+
+		$default_order_status = WC_Dintero_HP_Admin_Settings::get_option( 'default_order_status' );
+		if ( ! $default_order_status ) {
 			$default_order_status = 'wc-processing';
 		}
 
 		$order->update_status( $default_order_status, $reason );
-		
+
 	}
 
 	/**
 	 * Hold order and add note.
 	 *
 	 * @param WC_Order $order Order object.
-	 * @param string $transaction_id Transaction ID.
-	 * @param string $reason Reason why the payment is on hold.
+	 * @param string   $transaction_id Transaction ID.
+	 * @param string   $reason Reason why the payment is on hold.
 	 */
 	private static function on_hold_order( $order, $transaction_id = '', $reason = '' ) {
 		$order->set_transaction_id( $transaction_id );
-		
-		
+
 		$default_order_status = 'wc-on-hold';
-		
 
 		$order->update_status( $default_order_status, $reason );
-		
+
 	}
 	/**
 	 * Failed order and add note.
 	 *
 	 * @param WC_Order $order Order object.
-	 * @param string $transaction_id Transaction ID.
-	 * @param string $reason Reason why the payment is on hold.
+	 * @param string   $transaction_id Transaction ID.
+	 * @param string   $reason Reason why the payment is on hold.
 	 */
 	private static function failed_order( $order, $transaction_id = '', $reason = '' ) {
 		$order->set_transaction_id( $transaction_id );
-		
-		
+
 		$default_order_status = 'wc-failed';
-		
 
 		$order->update_status( $default_order_status, $reason );
-		
+
 	}
 
-	
+
 }
 
 WC_AJAX_HP::init();

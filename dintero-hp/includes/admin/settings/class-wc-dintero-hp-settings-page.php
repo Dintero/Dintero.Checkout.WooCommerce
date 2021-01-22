@@ -49,15 +49,15 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 		 */
 		public function __construct() {
 			$this->add_scripts();
-			//add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
-			//add_action( 'woocommerce_sections_' . $this->id, array( $this, 'output_sections' ) );
+			// add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
+			// add_action( 'woocommerce_sections_' . $this->id, array( $this, 'output_sections' ) );
 			add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
 			add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
 			add_action( 'woocommerce_update_options_' . $this->id, array( $this, 'process_admin_options' ) );
 		}
 
 		private function add_scripts() {
-			$suffix       = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 			wp_register_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), WC_VERSION );
 			wp_enqueue_style( 'woocommerce_admin_styles' );
@@ -690,7 +690,7 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 						<input class="wc_input_decimal input-text regular-input ' . esc_attr( $data['class'] ) . '" type="text" name="' . esc_attr( $field_key ) . '" id="' . esc_attr( $field_key ) . '" style="' . esc_attr( $data['css'] ) . '" value="' . esc_attr( wc_format_localized_decimal( $this->get_option( $key ) ) ) . '" placeholder="' . esc_attr( $data['placeholder'] ) . '" ' . disabled( $data['disabled'], true ) . ' ' . wp_kses_post( $this->get_custom_attribute_html( $data ) ) . ' />' . wp_kses_post( $this->get_description_html( $data ) ) . '
 					</fieldset>
 				</td>
-			</tr>' );			
+			</tr>' );
 		}
 
 		/**
@@ -866,7 +866,7 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 			foreach ( (array) $data['options'] as $option_key => $option_value ) {
 				echo( '<option value="' . esc_attr( $option_key ) . '" ' . selected( (string) $option_key, esc_attr( $this->get_option( $key ) ) ) . '>' . esc_attr( $option_value ) . '</option>' );
 			}
-						
+
 			echo( '</select>' . wp_kses_post( $this->get_description_html( $data ) ) . '
 					</fieldset>
 				</td>
@@ -990,7 +990,7 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 				echo( '<p>' . wp_kses_post( $data['description'] ) . '</p>' );
 			}
 
-			echo( '<table class="form-table">' );			
+			echo( '<table class="form-table">' );
 		}
 
 		/**
@@ -1056,7 +1056,8 @@ if ( ! class_exists( 'WC_Dintero_HP_Settings_Page', false ) ) :
 		 */
 		public function validate_textarea_field( $key, $value ) {
 			$value = is_null( $value ) ? '' : $value;
-			return wp_kses( trim( stripslashes( $value ) ),
+			return wp_kses(
+				trim( stripslashes( $value ) ),
 				array_merge(
 					array(
 						'iframe' => array(

@@ -22,6 +22,24 @@ Refund orders:
 - Partial refund: Click on "Refund" button, then choose items to refund.
 NB! Please verify in Dintero Backoffice when doing partial refunds. 
 
+## Develop
 
+### Linting
 
+We use [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer) to check the syntax of the PHP and HTML written.
+
+The code will automatically be checked on pull requests.
+
+#### Running lint locally
+```
+docker run -it --rm -v $(pwd):/app willhallonline/wordpress-phpcs:alpine --extensions=php phpcs dintero-hp/
+```
+
+To automatically fix the code, run:
+
+```
+docker run -it --rm -v $(pwd):/app willhallonline/wordpress-phpcs:alpine phpcbf --extensions=php dintero-hp/
+```
+
+Note: All errors can't be automatically fixed. 
 

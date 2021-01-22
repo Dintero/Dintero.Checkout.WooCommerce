@@ -39,7 +39,7 @@ if ( ! class_exists( 'WC_Dintero_HP_Admin_Settings', false ) ) :
 		private static $messages = array();
 
 		public function __construct() {
-			
+
 		}
 
 		/**
@@ -129,7 +129,7 @@ if ( ! class_exists( 'WC_Dintero_HP_Admin_Settings', false ) ) :
 			do_action( 'woocommerce_dhp_settings_start' );
 
 			wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings' . $suffix . '.js', array( 'jquery', 'wp-util', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'selectWoo' ), WC()->version, true );
-			
+
 			wp_localize_script(
 				'woocommerce_settings',
 				'woocommerce_settings_params',
@@ -142,8 +142,7 @@ if ( ! class_exists( 'WC_Dintero_HP_Admin_Settings', false ) ) :
 			);
 
 			// Get tabs for the settings page.
-			//$tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
-
+			// $tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
 			include dirname( __FILE__ ) . '/views/html-admin-settings.php';
 		}
 
@@ -552,7 +551,7 @@ if ( ! class_exists( 'WC_Dintero_HP_Admin_Settings', false ) ) :
 							'sort_order'       => 'ASC',
 							'show_option_none' => ' ',
 							'class'            => $value['class'],
-							//'echo'             => false,
+							// 'echo'             => false,
 							'selected'         => absint( $value['value'] ),
 							'post_status'      => 'publish,private,draft',
 						);
@@ -567,12 +566,12 @@ if ( ! class_exists( 'WC_Dintero_HP_Admin_Settings', false ) ) :
 								<label><?php echo esc_html( $value['title'] ); ?> <?php wp_kses_post( $tooltip_html ); // WPCS: XSS ok. ?></label>
 							</th>
 							<td class="forminp">
-								<?php 
-								//$p = wp_dropdown_pages( $args );
+								<?php
+								// $p = wp_dropdown_pages( $args );
 								apply_filters( 'wp_dropdown_pages', $p, $args );
 								$a = str_replace( ' id=', ' data-placeholder="' . esc_attr__( 'Select a page&hellip;', 'woocommerce' ) . '" style="' . $value['css'] . '" class="' . $value['class'] . '" id=', $p );
 								wp_kses_post( $a );
-								wp_kses_post( $description ); 
+								wp_kses_post( $description );
 								?>
 							</td>
 						</tr>
@@ -630,10 +629,10 @@ if ( ! class_exists( 'WC_Dintero_HP_Admin_Settings', false ) ) :
 									}
 									?>
 								</select> 
-								<?php 
-								if ( $description ) { 
-									wp_kses_post( $description ); 
-								} 
+								<?php
+								if ( $description ) {
+									wp_kses_post( $description );
+								}
 								?>
 								<br /><a class="select_all button" href="#"><?php esc_html_e( 'Select all', 'woocommerce' ); ?></a> <a class="select_none button" href="#"><?php esc_html_e( 'Select none', 'woocommerce' ); ?></a>
 							</td>

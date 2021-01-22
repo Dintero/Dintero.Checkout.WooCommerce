@@ -84,7 +84,6 @@ class Dintero_HP {
 	 *
 	 * Create an instance of the loader which will be used to register the hooks
 	 * with WordPress.
-	 *
 	 */
 	private function load_dependencies() {
 
@@ -99,12 +98,11 @@ class Dintero_HP {
 
 	/**
 	 * Register all of the hooks related to plugin functionality.
-	 *
 	 */
 	private function define_hooks() {
 		$this->loader->add_action( 'woocommerce_after_register_post_type', $this, 'init_gateway_class' );
 		$this->loader->add_filter( 'woocommerce_payment_gateways', $this, 'add_payment_gateway_class' );
-		//Redirect to order cancelled page if response has an error
+		// Redirect to order cancelled page if response has an error
 		$this->loader->add_action( 'template_redirect', $this, 'check_response', 1 );
 	}
 
@@ -118,7 +116,6 @@ class Dintero_HP {
 
 	/**
 	 * Load the payment gateway class after post types are registered.
-	 *
 	 */
 	public function init_gateway_class() {
 		/**
@@ -133,13 +130,11 @@ class Dintero_HP {
 	 * @return    array     WooCommerce payment methods
 	 */
 	public function add_payment_gateway_class( $methods ) {
-		//$embed_enable = WCDHP()->setting()->get('embed_enable');
-		//$express_enable = WCDHP()->setting()->get('express_enable');
-
-		//if ( 'yes' != $express_enable || 'yes' != $embed_enable ) {
+		// $embed_enable = WCDHP()->setting()->get('embed_enable');
+		// $express_enable = WCDHP()->setting()->get('express_enable');
+		// if ( 'yes' != $express_enable || 'yes' != $embed_enable ) {
 			$methods[] = 'WC_Gateway_Dintero_HP';
-		//}
-
+		// }
 		return $methods;
 	}
 
@@ -174,7 +169,6 @@ class Dintero_HP {
 
 	/**
 	 * Check response on order received page.
-	 *
 	 */
 	public function check_response() {
 		global $wp;

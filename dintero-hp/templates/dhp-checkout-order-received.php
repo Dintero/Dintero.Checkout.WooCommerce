@@ -3,7 +3,6 @@
  * Checkout fallback order received page, used when WC checkout form submission fails.
  *
  * Overrides /checkout/thankyou.php.
- *
  */
 
 if ( ! WC()->session->get( 'dhp_wc_order_id' ) ) {

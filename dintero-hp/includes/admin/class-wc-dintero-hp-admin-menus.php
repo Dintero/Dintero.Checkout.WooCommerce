@@ -32,18 +32,16 @@ class WC_Dintero_HP_Admin_Menus {
 	 * Add menu item.
 	 */
 	public function settings_menu() {
-		//$settings_page = add_submenu_page( 'woocommerce', __( 'Dintero Checkout Settings', 'woocommerce' ), __( 'Dintero Checkout Settings', 'woocommerce' ), 'manage_woocommerce', 'wc-dintero-settings', array( $this, 'settings_page' ) );
-
-		//add_action( 'load-' . $settings_page, array( $this, 'settings_page_init' ) );
+		// $settings_page = add_submenu_page( 'woocommerce', __( 'Dintero Checkout Settings', 'woocommerce' ), __( 'Dintero Checkout Settings', 'woocommerce' ), 'manage_woocommerce', 'wc-dintero-settings', array( $this, 'settings_page' ) );
+		// add_action( 'load-' . $settings_page, array( $this, 'settings_page_init' ) );
 	}
 
 	/**
 	 * Loads gateways and shipping methods into memory for use within settings.
 	 */
 	public function settings_page_init() {
-		//WC()->payment_gateways();
-		//WC()->shipping();
-
+		// WC()->payment_gateways();
+		// WC()->shipping();
 		// Include settings pages.
 		WC_Dintero_HP_Admin_Settings::get_settings_pages();
 
@@ -59,7 +57,7 @@ class WC_Dintero_HP_Admin_Menus {
 			WC_Dintero_HP_Admin_Settings::add_message( wp_kses_post( wp_unslash( $_GET['wc_message'] ) ) ); // WPCS: input var okay, CSRF ok.
 		}
 
-		//do_action( 'woocommerce_dhp_settings_page_init' );
+		// do_action( 'woocommerce_dhp_settings_page_init' );
 	}
 
 	/**

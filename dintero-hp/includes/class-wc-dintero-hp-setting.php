@@ -17,7 +17,7 @@ class WC_Dintero_HP_Setting extends WC_Settings_API {
 	 *
 	 * @var WC_Dintero_HP_Setting|null
 	 */
-	protected static $instance = null;	
+	protected static $instance = null;
 
 	/**
 	 * Class constructor.

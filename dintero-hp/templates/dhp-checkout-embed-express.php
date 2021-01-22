@@ -46,9 +46,9 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 <?php do_action( 'dhp_after_checkout_form' ); ?>
 <script type="text/javascript">
 	jQuery( document.body ).on( 'updated_shipping_method', function(){
-	 	 // Code stuffs
+		  // Code stuffs
 
-	  	// has the function initialized after the event trigger?
-	  	console.log('on updated_shipping_method: function fired'); 
+		  // has the function initialized after the event trigger?
+		  console.log('on updated_shipping_method: function fired'); 
 	});
 </script>
