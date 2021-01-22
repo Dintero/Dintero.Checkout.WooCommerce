@@ -13,26 +13,32 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Author: Moogruppen AS
 Author URI: https://moogruppen.no/
 
-Dintero Checkout provides friction less checkout experience.
+Dintero Checkout provides a frictionless checkout experience.
 
 == Description ==
-Dintero Checkout provides friction less checkout experience.
 
-**NB! You must have a [dintero.com](https://www.dintero.com) account and API credentials to use this plugin.**
+Dintero Checkout provides a frictionless checkout experience, offering card payments, invoice, installments and mobile payment solutions.
 
+With this plugin, you can embed or redirect our checkout in your WooCommerce install, handle captures and refunds and customize to your liking.
+
+**Getting started**
+
+1. Go to [onboarding.dintero.com](https://onboarding.dintero.com/) to sign up for a Dintero account.
+2. Get your payment method application approved by Dintero.
+3. Create your [API keys](https://docs.dintero.com/docs/checkout-client.html)
+4. Install the plugin on your website.
 
 == Installation ==
 
-When you install Dintero checkout, you need to head to the settings page to start configuring dintero to your specifications.
+When you install Dintero Checkout, you need to head to the settings page to start configuring dintero to your specifications.
 
-1. Upload `dintero-hp` to the `/wp-content/plugins/` directory or install through Wordpress
+1. Install the plugin from [wordpress.org](https://wordpress.org/plugins/dintero-checkout-express/)
 2. Activate the plugin
-3. Go to Dashboard >WooCommerce > Settings > Payments
-4. Click on Dintero to get the dintero setting window
+3. Go to Dashboard > WooCommerce > Settings > Payments
+4. Click on Dintero to get to the Dintero Settings Window
 4. Enter your Dintero API credentials
 5. Configure Dintero checkout with your credentials and select the mode you would like to use.
 6. Start Selling!
-
 
 
 == Changelog ==
