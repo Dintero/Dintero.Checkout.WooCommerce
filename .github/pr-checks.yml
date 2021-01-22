@@ -1,0 +1,34 @@
+name: KCO CI
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  phpcs:
+    name: phpcs
+    runs-on: ubuntu-latest
+    container:
+      image: php:7.0.0-apache
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v2
+        with:
+          path: main
+      - name: Install Packages
+        run: |
+          echo "Update package lists."
+          apt-get update
+          echo "Install base packages."
+          apt-get install -y build-essential libssl-dev gnupg libfreetype6-dev libjpeg62-turbo-dev libmcrypt-dev libicu-dev libxml2-dev vim wget unzip
+      - name: Install Composer
+        run: |
+          echo "Install composer."
+          curl -sS https://getcomposer.org/installer | php
+          mv composer.phar /usr/local/bin/composer
+      - name: Install phpcs
+        run: |
+          composer global require woocommerce/woocommerce-sniffs
+      - name: Run phpcs Coding Standards
+        run: |
+          ~/.config/composer/vendor/bin/phpcs main --standard=WordPress --extensions=php --ignore=/tests
