@@ -42,6 +42,14 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 
 == Changelog ==
+
+2021.02.04
+  * Rounding error fix
+  * Css fix for the redirected payment order review
+  * Session lock removed from on session load
+  * Css fix for Cart Mini
+  * Branding image on checkout issue
+
 2021.01.15
   * Firstname,lastname required issue fix
   * jQuery Fix for document on load

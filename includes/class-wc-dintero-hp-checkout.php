@@ -416,7 +416,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			}
 
 			$w_str = $width && is_numeric($width) ? ' width="' . $width . '"' : '';
-			$icon_url = '<img src="' . esc_attr( $icon_url ) . '" alt="Dintero Logo"' . $w_str . ' />';
+			$icon_url = '<img src="' . esc_attr( $icon_url ) . '" alt="Dintero Logo" />';
 		}
 
 		return $icon_url;
@@ -1180,7 +1180,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					        .embed({
 					            container,
 					            sid: \"" . esc_attr( $id ) . "\",
-					            language: \"" . str_replace("_", "-", get_user_locale()) . "\",
 					            onPaymentAuthorized : function(event,checkout){
 					            	 
 					            	 	jQuery('.loader').css('display','block');
@@ -1359,7 +1358,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 						        .embed({
 						            container,
 						            sid: \"" . esc_attr( $id ) . "\",
-						            language: \"" . str_replace("_", "-", get_user_locale()) . "\",
+						           
 						            onSession: function(event, checkout) {
 						                console.log(\"session\", event.session);
 						                var ss = event.session;
