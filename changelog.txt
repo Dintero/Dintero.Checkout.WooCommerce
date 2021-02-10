@@ -1,5 +1,5 @@
 *** WooCommerce Dintero Plugin Changelog ***
-2021.02.04
+2021.02.10
   * Rounding error fix
   * Css fix for the redirected payment order review
   * Session lock removed from on session load

@@ -43,7 +43,7 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
-2021.02.04
+2021.02.10
   * Rounding error fix
   * Css fix for the redirected payment order review
   * Session lock removed from on session load
