@@ -71,27 +71,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 		}
 
 		add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
-		//$transaction_id = sanitize_text_field( wp_unslash( $_GET['transaction_id'] ));
-
-		// //$transaction = $this->get_transaction( $transaction_id );
-		// $query_args = array(
-		// 	'fields'      => 'ids',
-		// 	'post_type'   => wc_get_order_types(),
-		// 	'post_status' => array_keys( wc_get_order_statuses() ),
-		// 	'meta_key'    => '_wc_dintero_transaction_id',
-		// 	'meta_value'  => $transaction_id,
-		// );
-		// $orders = get_posts( $query_args );
-		// $order_id = $orders[0];
-		// echo $order_id;
-		// //$response = $this->update_transaction($transaction_id, $order_id);
-		// $transaction = $this->get_transaction($transaction_id );
-		// echo '<pre>';
-		// print_r($transaction);
-		// exit;
-		// // print_r($transaction);
-		// echo $this->get_access_token();
-		//  exit;
+		
 		
 	}
 
@@ -102,8 +82,12 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 */
 	public function get_icon() {
 		$icon_url  = 'https://checkout.dintero.com/v1/branding/profiles/' . $this->profile_id . '/variant/colors/color/cecece/width/' . $this->checkout_logo_width . '/dintero_left_frame.svg';
-		$icon_html = '<img src="' . esc_attr( $icon_url ) . '" alt="Dintero Logo" />';
+		
 
+
+
+		//$icon_html = '<img src="' . esc_attr( $icon_url ) . '" alt="Dintero Logo" />';
+		$icon_html = $this->get_icon_checkout();
 		return apply_filters( 'woocommerce_gateway_icon', $icon_html, $this->id );
 	}
 

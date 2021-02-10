@@ -1,166 +1,166 @@
 .dhp_container {
-	margin: 25px 10px 15px;
-	position: relative;
-	padding: 25px 10px 15px;
-	border: 1px solid #ddd;
-	clear: both;
-	/*background-color: rgba(255,255,255,1);*/
+    margin: 25px 10px 15px;
+    position: relative;
+    padding: 25px 10px 15px;
+    border: 1px solid #ddd;
+    clear: both;
+    /*background-color: rgba(255,255,255,1);*/
 }
 
 #payment .dhp_container {
-	margin-top: 100px;
+    margin-top: 100px;
 }
 
 #order_review.no-payments .wc_payment_methods,
 #dhp-order-review.no-payments .wc_payment_methods,
 #dhp-wrapper.embexp .wc_payment_methods {
-	display: none;
+    display: none;
 }
 
 #dhp-wrapper.embexp {
-	border: 1px solid #eee;
-	padding: 5px;
+    border: 1px solid #eee;
+    padding: 5px;
 }
 
 #order_review.no-payments #place_order,
 #dhp-order-review.no-payments #place_order {
-	display: none;
+    display: none;
 }
 
 .dhp_container>label {
-	position: absolute;
-	top: -12px;
-	left: 10px;
-	/*background-color: #fff;*/
+    position: absolute;
+    top: -12px;
+    left: 10px;
+    /*background-color: #fff;*/
 }
 
 .dhp_container .dhp_checkout {
-	display: flex;
-	width: 100%;
+    display: flex;
+    width: 100%;
 }
 
 .dhp_container .dhp_checkout>div {
-	width: 50%;
-	max-width: 335px;
-	text-align: center;
-	margin: 15px auto 15px;
-	padding: 0px;
+    width: 50%;
+    max-width: 335px;
+    text-align: center;
+    margin: 15px auto 15px;
+    padding: 0px;
 }
 
 .dhp_container .dhp_checkout>div:nth-child(2n){
-	margin: 15px 0px 15px 5px;
+    margin: 15px 0px 15px 5px;
 }
 
 .dhp_container .dhp_checkout a {
-	text-decoration: none;
-	border-radius: 5px;
-	border: 1px solid #ddd;
-	/*background-color: rgba(255,255,255,1);*/
-	display: block;
-	padding: 10px 0px;
+    text-decoration: none;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    /*background-color: rgba(255,255,255,1);*/
+    display: block;
+    padding: 10px 0px;
 }
 
 .dhp_container .dhp_checkout a:hover {
-	/*background-color: rgba(200,200,200,0.8);*/
+    /*background-color: rgba(200,200,200,0.8);*/
 }
 
 .dhp_container .dhp_checkout .dhp_ebch a {
-	background-color: rgba(7,70,96,1);
-	border: 1px solid rgba(7,70,96,1);
-	color: #fff;
+    background-color: rgba(7,70,96,1);
+    border: 1px solid rgba(7,70,96,1);
+    color: #fff;
 }
 
 .dhp_container .dhp_checkout .dhp_ebch a:hover {
-	background-color: rgba(7,70,96,1);
-	border: 1px solid rgba(0,0,0,1);
+    background-color: rgba(7,70,96,1);
+    border: 1px solid rgba(0,0,0,1);
 }
 
 .dhp_container .dhp_checkout .dhp_exch a {
-	background-color: rgba(13,230,149,1);
-	border: 1px solid rgba(13,230,149,1);
-	color: #fff;
+    background-color: rgba(13,230,149,1);
+    border: 1px solid rgba(13,230,149,1);
+    color: #fff;
 }
 
 .dhp_container .dhp_checkout .dhp_exch a:hover {
-	background-color: rgba(13,230,149,1);
-	border: 1px solid rgba(0,0,0,1);
+    background-color: rgba(13,230,149,1);
+    border: 1px solid rgba(0,0,0,1);
 }
 
 .dhp_checkout_logo {
-	text-align: center;
+    text-align: center;
 }
 
 .dhp_checkout_logo img {
-	width: 600px;
-	max-width: 100%;
-	margin: auto;
+    width: 600px;
+    max-width: 100%;
+    margin: auto;
 }
 
 .dhp_footer_logo {
-	text-align: center;
-	padding: 15px;
+    text-align: center;
+    padding: 15px;
 }
 
 .dhp_footer_logo img {
-	max-height: 100px;
-	max-width: 100%;
-	margin: auto;
-	width: auto;
+    max-height: 100px;
+    max-width: 100%;
+    margin: auto;
+    width: auto;
 }
 
 .woocommerce-checkout #customer_details {
-	padding-bottom: 25px;
+    padding-bottom: 25px;
 }
 
 .woocommerce-checkout.dhp-exp #customer_details {
-	display: none;
+    display: none;
 }
 
 .dhp-hide {
-	display: none;
+    display: none;
 }
 
 .dhp-checkout-tab {
-	display: flex;
-	margin-bottom: 25px;
+    display: flex;
+    margin-bottom: 25px;
 }
 
 .dhp-checkout-tab>div {
-	flex: auto;
-	border: 1px solid #e8e8e8;
-	text-align: center;
-	padding: 10px 10px;
-	background-repeat: no-repeat;
-	background-size: 95% 95%;
-	background-position: center center;
-	height: 50px;
-	cursor: pointer;
+    flex: auto;
+    border: 1px solid #e8e8e8;
+    text-align: center;
+    padding: 10px 10px;
+    background-repeat: no-repeat;
+    background-size: 95% 95%;
+    background-position: center center;
+    height: 50px;
+    cursor: pointer;
 }
 
 .dhp-checkout-tab>div:hover {
-	border-top: 1px solid rgb(150,150,150);
+    border-top: 1px solid rgb(150,150,150);
 }
 
 .dhp-checkout-tab>div.active {
-	border-top: 1px solid rgb(150,150,150);
-	border-bottom: 1px solid rgb(255,255,255);
-	font-weight: bold;
-	color: #000;
+    border-top: 1px solid rgb(150,150,150);
+    border-bottom: 1px solid rgb(255,255,255);
+    font-weight: bold;
+    color: #000;
 }
 
 #dhp-embed .dhp-logo {
-	text-align: center;
-	width: auto;
+    text-align: center;
+    width: auto;
     margin: auto;
 }
 
 #dhp-embed .dhp-logo img {
-	width: auto;
+    width: auto;
     margin: auto;
 }
 
 #dhp-others {
-	display: none;
+    display: none;
 }
 .loader .loader-inner {
     position: fixed;
@@ -181,44 +181,22 @@
     opacity: 0;
 }
 @media (max-width: 375px) {
-	.dhp_container .dhp_checkout {
-		display: inherit;
-	}
+    .dhp_container .dhp_checkout {
+        display: inherit;
+    }
 
-	.dhp_container .dhp_checkout>div {
-		width: auto;
-		margin: 15px 5px 15px 5px;
-	}
+    .dhp_container .dhp_checkout>div {
+        width: auto;
+        margin: 15px 5px 15px 5px;
+    }
 
-	.dhp_container .dhp_checkout>div:nth-child(2n) {
-		margin: 15px 5px 15px 5px;
-	}
+    .dhp_container .dhp_checkout>div:nth-child(2n) {
+        margin: 15px 5px 15px 5px;
+    }
 }
 
 /*Dintero express checkout*/
-.site-header-cart .widget_shopping_cart a.button.dintero-express-checkout {
-    background-color: #03435d;
-    background-repeat: no-repeat;
-    height: 54px;
-    border: 1px solid #00e590;
-    background-size: contain;
-}
 
-.site-header-cart .widget_shopping_cart a.button.dintero-express-checkout.light {
-    background-color: #ffffff;
-    background-repeat: no-repeat;
-    height: 54px;
-    border: 1px solid #03435d;
-    background-size: 168px;
-    background-position: center;
-}
-.site-header-cart .widget_shopping_cart a.button.dintero-express-checkout:hover
-  background-color:#03435d;
-}
-
-.site-header-cart .widget_shopping_cart a.button.dintero-express-checkout.light:hover{
-  background-color:#ffffff;
-}
 .actions a.button.dintero-express-checkout {
     border: none;
     padding: 0;
@@ -259,13 +237,13 @@
 }
 
 @media (max-width: 768px){
-	.actions a.button.dintero-express-checkout{
-		display: inline-block !important;
-    	width: auto !important;
-	}
+    .actions a.button.dintero-express-checkout{
+        display: inline-block !important;
+        width: auto !important;
+    }
 }
 @media (max-width: 375px){
-	.actions a.button.dintero-express-checkout{margin-top: 10px;}
+    .actions a.button.dintero-express-checkout{margin-top: 10px;}
 }
 form.checkout.woocommerce-checkout.dhp-exp {
     display: block;
@@ -282,7 +260,7 @@ form.checkout.woocommerce-checkout.dhp-exp {}
     border: none;
 }
 
-div#order_review.woocommerce-checkout-review-order {
+.dhp-exp div#order_review.woocommerce-checkout-review-order {
     display: inline-block;
     width: 40%;
 }
