@@ -1,22 +1,21 @@
-# Dintero Checkout
-
-**Contributors**: moogruppen, dintero<br>
-**Tags**: woocommerce, Payment, Checkout, Vipps, Visa, Mastercard, Invoice, Instalment, Installment, Swish, Gateway, payment, dintero, Betalingsløsning, Checkout, Betaling, Vipps, Visa, Mastercard, Faktura, Delbetaling, Swish, Betalingsgateway, vipps, Betaling, nettbutikk <br>
-**Donate link**: https://dintero.com <br>
-**Requires at least**: 4.0<br>
-**Tested up to**: 5.6<br>
-**Requires PHP**: 5.6<br>
-**WC requires at least**: 3.4.0<br>
-**WC tested up to**: 4.0.0<br>
-**Stable tag**: trunk<br>
-**License**: GPLv3 or later<br>
-**License** URI: http://www.gnu.org/licenses/gpl-3.0.html <br>
-**Author**: Moogruppen AS<br>
-**Author** URI: https://moogruppen.no/ <br>
+=== Dintero Checkout ===
+Contributors: moogruppen, dintero
+Tags: woocommerce, Payment, Checkout, Vipps, Visa, Mastercard, Invoice, Instalment, Installment, Swish, Gateway, payment, dintero, Betalingsløsning, Checkout, Betaling, Vipps, Visa, Mastercard, Faktura, Delbetaling, Swish, Betalingsgateway, vipps, Betaling, nettbutikk
+Donate link: https://dintero.com
+Requires at least: 4.0
+Tested up to: 5.6
+Requires PHP: 5.6
+WC requires at least: 3.4.0
+WC tested up to: 4.0.0
+Stable tag: trunk
+License: GPLv3 or later
+License URI: http://www.gnu.org/licenses/gpl-3.0.html
+Author: Moogruppen AS
+Author URI: https://moogruppen.no/
 
 Dintero Checkout provides a frictionless checkout experience.
 
-## Description
+== Description ==
 
 Dintero Checkout provides a frictionless checkout experience, offering card payments, invoice, installments and mobile payment solutions.
 
@@ -42,7 +41,7 @@ When you install Dintero Checkout, you need to head to the settings page to star
 6. Start Selling!
 
 
-## Changelog
+== Changelog ==
 
 2021.02.10
   * Rounding error fix
