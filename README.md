@@ -29,7 +29,7 @@ With this plugin, you can embed or redirect our checkout in your WooCommerce ins
 3. Create your [API keys](https://docs.dintero.com/docs/checkout-client.html)
 4. Install the plugin on your website.
 
-== Installation ==
+## Installation
 
 When you install Dintero Checkout, you need to head to the settings page to start configuring dintero to your specifications.
 
