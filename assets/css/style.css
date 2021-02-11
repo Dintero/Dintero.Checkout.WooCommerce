@@ -274,6 +274,7 @@ form.checkout.woocommerce-checkout.dhp-exp {}
       width: 100%;
   }
 
+  .dhp-exp div#order_review.woocommerce-checkout-review-order,
   div#order_review.woocommerce-checkout-review-order {
       width: 100%;
   }
