@@ -1,5 +1,5 @@
 *** WooCommerce Dintero Plugin Changelog ***
-2021.02.11
+2021.02.12
   * Move order review before checkout on mobile
 
 2021.02.10
