@@ -20,7 +20,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 <form name="checkout" class="checkout woocommerce-checkout">
 <?php do_action( 'dhp_before_wrapper' ); ?>
-	<div id="order_review" class="woocommerce-checkout-review-order ritesh">
+	<div id="order_review" class="woocommerce-checkout-review-order">
 		<?php woocommerce_order_review(); ?>
 	</div>
 	<div id="dhp-wrapper" class='embexp col2-set'>
