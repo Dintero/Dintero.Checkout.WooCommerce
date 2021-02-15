@@ -44,6 +44,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 ## Changelog
 
+2021.02.15
+
+* Fix VAT rounding error
+
 2021.02.12
 
 * Move order review before checkout on mobile

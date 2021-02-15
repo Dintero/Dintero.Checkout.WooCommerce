@@ -1662,8 +1662,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			// $item_tax_amount         = $item_total_amount - $item_total_exluding_tax;
 			$item_tax_amount = ( $item_total_amount * ( $this->get_item_tax_rate( $cart_item, $product ) / 100 ) );
 		}
-
-		return round( $cart_item['line_tax'],2 ) * 100;
+		return round(round( $cart_item['line_tax'],2 ) * 100);
 	}
 
 	/**
