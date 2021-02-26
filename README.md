@@ -44,6 +44,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 ## Changelog
 
+2021.02.27
+
+* Setting to limit customer types
+
 2021.02.15
 
 * Fix VAT rounding error

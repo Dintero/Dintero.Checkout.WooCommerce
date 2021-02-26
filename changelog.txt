@@ -1,4 +1,8 @@
 *** WooCommerce Dintero Plugin Changelog ***
+2021.02.27
+
+  * Setting to limit customer types
+
 2021.02.15
 
   * Fix VAT rounding error
