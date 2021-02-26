@@ -321,6 +321,24 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			// 	'default'     => 'yes',
 			// 	'desc_tip'    => true,
 			// ),
+            'express_customer_types_title' => array(
+                'title'       => __( 'Customer types:' ),
+                'type'        => 'title',
+                'description' => ''
+            ),
+            'express_customer_types'                        => array(
+                'title'       => __( 'Express Customer Types:' ),
+                'label'       => __( 'Express Customer Types' ),
+                'type'        => 'select',
+                'description' => __( 'Choose available customer types used in Checkout Express ' ),
+                'options' => array(
+                    'both' => 'Consumers and businesses',
+                    'b2c' => 'Consumers only',
+                    'b2b' => 'Businesses only'
+                ),
+                'default' => 'both',
+                'desc_tip'    => true,
+            ),
 			'branding_title'                => array(
 				'title'       => __( 'Branding:' ),
 				'type'        => 'title',
@@ -539,6 +557,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 
 			$express_enable = WCDHP()->setting()->get('express_enable');
 			$embed_enable = WCDHP()->setting()->get('embed_enable');
+			$express_customer_types = WCDHP()->setting()->get('express_customer_types');
 
 			if($isExpress == true){
 				$express_enable = 'yes';
@@ -649,9 +668,17 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 
 				if ($isExpress) {
 					$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
-
+                    $customer_types = array();
+                    if ($express_customer_types == 'b2c') {
+                        array_push($customer_types, 'b2c');
+                    } else if ($express_customer_types == 'b2b') {
+                        array_push($customer_types, 'b2b');
+                    } else {
+                        array_push($customer_types, 'b2b', 'b2c');
+                    }
 					$express_option = array(
 						'shipping_address_callback_url'=>$ship_callback_url,
+						'customer_types'=>$customer_types,
 						'shipping_options'=>array(
 								0=>array(
 										'id'=>'shipping_express',
