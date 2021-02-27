@@ -2877,8 +2877,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					$note = __( 'Payment captured via Dintero. Transaction ID: ' ) . $transaction_id;
 					WC_AJAX_HP::payment_complete( $order, $transaction_id, $note );
 				} else {
-                    $note = __( 'Payment capture failed at Dintero. Transaction ID: ' ) . $transaction_id;
-                    $order->add_order_note( $note );
+					$note = __( 'Payment capture failed at Dintero. Transaction ID: ' ) . $transaction_id;
+					$order->add_order_note( $note );
                 }
 			}
 		}

@@ -1538,9 +1538,9 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 					$note = __( 'Payment captured via Dintero. Transaction ID: ' ) . $transaction_id;
 					$this->payment_complete( $order, $transaction_id, $note );
 				} else {
-                    $note = __( 'ayment capture failed at Dintero. Transaction ID: ' ) . $transaction_id;
-                    $order->add_order_note( $note );
-                }
+					$note = __( 'Payment capture failed at Dintero. Transaction ID: ' ) . $transaction_id;
+					$order->add_order_note( $note );
+				}
 			}
 		}
 	}
