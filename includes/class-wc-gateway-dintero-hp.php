@@ -1385,8 +1385,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 
 					return true;
 				} else {
-					$note = __( 'Payment refund failed at Dintero. Transaction ID: ' ) . $transaction_id;
-					$order->add_order_note( $note );
+					$note = __('Payment refund failed at Dintero. Transaction ID: ') . $transaction_id;
+					$order->add_order_note($note);
 				}
 
 				return false;
@@ -1533,16 +1533,16 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				// Retrieve the body's response if no errors found
 				$response_body  = wp_remote_retrieve_body( $response );
 				$response_array = json_decode( $response_body, true );
-				
 
-				if ( array_key_exists( 'status', $response_array ) &&
-                    ('CAPTURED' === $response_array['status'] || 'PARTIALLY_CAPTURED' === $response_array['status'])) {
 
-					$note = __( 'Payment captured via Dintero. Transaction ID: ' ) . $transaction_id;
-					$this->payment_complete( $order, $transaction_id, $note );
+				if (array_key_exists('status', $response_array) &&
+					('CAPTURED' === $response_array['status'] || 'PARTIALLY_CAPTURED' === $response_array['status'])) {
+
+					$note = __('Payment captured via Dintero. Transaction ID: ') . $transaction_id;
+					$this->payment_complete($order, $transaction_id, $note);
 				} else {
-					$note = __( 'Payment capture failed at Dintero. Transaction ID: ' ) . $transaction_id;
-					$order->add_order_note( $note );
+					$note = __('Payment capture failed at Dintero. Transaction ID: ') . $transaction_id;
+					$order->add_order_note($note);
 				}
 			}
 		}
