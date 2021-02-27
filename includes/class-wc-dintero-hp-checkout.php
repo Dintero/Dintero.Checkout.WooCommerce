@@ -2871,12 +2871,15 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				$response_body  = wp_remote_retrieve_body( $response );
 				$response_array = json_decode( $response_body, true );
 
-				if ( array_key_exists( 'status', $response_array ) &&
-					 'CAPTURED' === $response_array['status'] ) {
+                if ( array_key_exists( 'status', $response_array ) &&
+                    ('CAPTURED' === $response_array['status'] || 'PARTIALLY_CAPTURED' === $response_array['status'])) {
 
 					$note = __( 'Payment captured via Dintero. Transaction ID: ' ) . $transaction_id;
 					WC_AJAX_HP::payment_complete( $order, $transaction_id, $note );
-				}
+				} else {
+                    $note = __( 'Payment capture failed at Dintero. Transaction ID: ' ) . $transaction_id;
+                    $order->add_order_note( $note );
+                }
 			}
 		}
 	}
