@@ -2743,6 +2743,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					$order->add_order_note( $note );
 
 					return true;
+				} else {
+					$note = __( 'Payment refund failed at Dintero. Transaction ID: ' ) . $transaction_id;
+					$order->add_order_note( $note );
 				}
 
 				return false;

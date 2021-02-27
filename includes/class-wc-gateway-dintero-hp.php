@@ -1384,6 +1384,9 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 					$order->add_order_note( $note );
 
 					return true;
+				} else {
+					$note = __( 'Payment refund failed at Dintero. Transaction ID: ' ) . $transaction_id;
+					$order->add_order_note( $note );
 				}
 
 				return false;
