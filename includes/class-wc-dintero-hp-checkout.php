@@ -2176,9 +2176,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				var dRequestId = " . json_encode($response_trace_id) . ";
 				var dResponseBody = " . json_encode($response_body) . ";
 				var now = new Date().toISOString();
-	        	var errorObj = { statusCode: dResponseCode, request_id: dRequestId, body: dResponseBody, timestamp: now };
-	        	console.log('dintero: error creating session, copy this and send to integration@dintero.com:', 'statusCode: ' + dResponseCode, 'request_id: ' + dRequestId , 'timestamp: ' + now);  
-	        	console.log('dintero: extended error information:', errorObj);  
+				var errorObj = { statusCode: dResponseCode, request_id: dRequestId, body: dResponseBody, timestamp: now };
+				console.log('dintero: error creating session, copy this and send to integration@dintero.com:', 'statusCode: ' + dResponseCode, 'request_id: ' + dRequestId , 'timestamp: ' + now);  
+				console.log('dintero: extended error information:', errorObj);  
 			</script>" );
 			return array('result'=>2, 'msg'=>$msg);
 		} else {
