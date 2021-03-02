@@ -1991,8 +1991,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$api_endpoint = $this->checkout_endpoint . '/sessions-profile';
 
 		$return_url   = $this->get_return_url( );
-		
-		//$callback_url = home_url() . '?dhp-ajax=dhp_update_ord_emded';
+        $express_customer_types = WCDHP()->setting()->get('express_customer_types');
+
+        //$callback_url = home_url() . '?dhp-ajax=dhp_update_ord_emded';
 		$callback_url = home_url() . '?dhp-ajax=dhp_create_order&delay_callback=180';
 		$cart = WC()->cart;
 
@@ -2032,9 +2033,17 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		if ( WC()->shipping->get_packages() && WC()->session->get( 'chosen_shipping_methods' )[0] )  {
 			$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
 			$selectedShippingReference = $this->get_shipping_reference();
+            $customer_types = array();
+            if ($express_customer_types == 'b2c') {
+                array_push($customer_types, 'b2c');
+            } else if ($express_customer_types == 'b2b') {
+                array_push($customer_types, 'b2b');
+            } else {
+                array_push($customer_types, 'b2b', 'b2c');
+            }
 			$express_option = array(
 				'shipping_address_callback_url'=>$ship_callback_url,
-				'customer_types' => array("b2c"),
+				'customer_types' => $customer_types,
 				'shipping_options'=>array(
 						0=>array(
 								'id'=> (string) $selectedShippingReference['id'],
@@ -2183,6 +2192,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$return_url   = $this->get_return_url( $order );
 			$callback_url = home_url() . '?dhp-ajax=dhp_update_ord';
 
+            $express_customer_types = WCDHP()->setting()->get('express_customer_types');
+
 			$order_total_amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
 			$order_tax_amount   = absint( strval( floatval( $order->get_total_tax() ) * 100 ) );
 
@@ -2296,9 +2307,18 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				if ($express) {
 					$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
 					$selectedShippingReference = $this->get_shipping_reference();
+                    $customer_types = array();
+                    if ($express_customer_types == 'b2c') {
+                        array_push($customer_types, 'b2c');
+                    } else if ($express_customer_types == 'b2b') {
+                        array_push($customer_types, 'b2b');
+                    } else {
+                        array_push($customer_types, 'b2b', 'b2c');
+                    }
 					$express_option = array(
 						'shipping_address_callback_url'=>$ship_callback_url,
-						'shipping_options'=>array(
+						'customer_types'=>$customer_types,
+                        'shipping_options'=>array(
 								0=>array(
 										'id'=> (string)$selectedShippingReference['id'],
 										'line_id'=>$line_id,
