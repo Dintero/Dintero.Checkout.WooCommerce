@@ -451,4 +451,8 @@ form.checkout.woocommerce-checkout.dhp-exp {}
 /*Fixes*/
 div#dhp-embed {
     width: 100%;
-}  
+}
+
+.dintero-error-message {
+    color: #ff052f;
+}

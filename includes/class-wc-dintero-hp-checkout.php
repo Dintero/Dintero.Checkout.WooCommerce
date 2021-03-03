@@ -2164,10 +2164,23 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 		// Retrieve the body's response if no errors found
 		$response_body  = wp_remote_retrieve_body( $response );
+		$response_trace_id = wp_remote_retrieve_header( $response, 'request-id');
+		$response_code = wp_remote_retrieve_response_code( $response );
 		$response_array = json_decode( $response_body, true );
 		
 		if ( ! array_key_exists( 'url', $response_array ) ) {
 			$msg = isset($response_array['error']) && isset($response_array['error']['message']) ? $response_array['error']['message'] : 'Unknown Error';
+			echo '<p class="dintero-error-message">Problems creating payment, please contact Dintero with this message: ' . $response_trace_id . ', ';
+			echo 'by sending an email to: <a href="mailto:integration@dintero.com&subject=WooCommerce%20session%20creation%20failed%20for%20' . $this->account_id  . '&body=Session%20creation%20failed%20with%20request_id%20' . $response_trace_id . '">integration@dintero.com</a>. ';
+			echo( "<script type=\"text/javascript\">
+				var dResponseCode = " . $response_code . "; 
+				var dRequestId = " . json_encode($response_trace_id) . ";
+				var dResponseBody = " . json_encode($response_body) . ";
+				var now = new Date().toISOString();
+				var errorObj = { statusCode: dResponseCode, request_id: dRequestId, body: dResponseBody, timestamp: now };
+				console.log('dintero: error creating session, copy this and send to integration@dintero.com:', 'statusCode: ' + dResponseCode, 'request_id: ' + dRequestId , 'timestamp: ' + now);  
+				console.log('dintero: extended error information:', errorObj);  
+			</script>" );
 			return array('result'=>2, 'msg'=>$msg);
 		} else {
 			$searializedData = trim(serialize(WC()->cart->get_cart()));

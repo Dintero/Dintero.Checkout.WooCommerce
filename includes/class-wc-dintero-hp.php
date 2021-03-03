@@ -373,7 +373,8 @@ final class WC_Dintero_HP {
 												if(result.redirect){
 													window.location = result.redirect ;
 												}else{
-													alert(result.message);
+													console.log('Error creating session, contact integration@dintero.com', result);
+													alert('Error creating session, contact integration@dintero.com');
 												}
 											}
 							});
