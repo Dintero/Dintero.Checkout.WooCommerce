@@ -2170,7 +2170,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		
 		if ( ! array_key_exists( 'url', $response_array ) ) {
 			$msg = isset($response_array['error']) && isset($response_array['error']['message']) ? $response_array['error']['message'] : 'Unknown Error';
-			echo '<p class="errorMessage">Problems creating payment, please contact the store with this message: ' . $response_trace_id . '</p>';
+			echo '<p class="dintero-error-message">Problems creating payment, please contact Dintero with this message: ' . $response_trace_id . ', ';
+			echo 'by sending an email to: <a href="mailto:integration@dintero.com&subject=WooCommerce%20session%20creation%20failed%20for%20' . $this->account_id  . '&body=Session%20creation%20failed%20with%20request_id%20' . $response_trace_id . '">integration@dintero.com</a>. ';
 			echo( "<script type=\"text/javascript\">
 				var dResponseCode = " . $response_code . "; 
 				var dRequestId = " . json_encode($response_trace_id) . ";
