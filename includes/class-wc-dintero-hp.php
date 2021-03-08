@@ -595,8 +595,10 @@ final class WC_Dintero_HP {
 	public function init_script() {
         //first check that woo exists to prevent fatal errors
         if ( function_exists( 'is_woocommerce' ) ) {
-            if ( is_cart() || is_checkout() ) {
-        		wp_enqueue_style( 'style', plugin_dir_url(__DIR__) . 'assets/css/style.css', array(), '1.0.07', 'all' );
+			wp_enqueue_style( 'style', plugin_dir_url(__DIR__) . 'assets/css/global-style.css', array(), '1.0.07', 'all' );
+
+			if ( is_cart() || is_checkout() ) {
+				wp_enqueue_style( 'style', plugin_dir_url(__DIR__) . 'assets/css/style.css', array(), '1.0.07', 'all' );
 
         		$handle = 'dhp-hp';
         		$src = plugin_dir_url(__DIR__) . 'assets/js/dintero_hp.js';

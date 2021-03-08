@@ -1,0 +1,11 @@
+.dhp_footer_logo {
+    text-align: center;
+    padding: 15px;
+}
+
+.dhp_footer_logo img {
+    max-height: 100px;
+    max-width: 100%;
+    margin: auto;
+    width: auto;
+}
