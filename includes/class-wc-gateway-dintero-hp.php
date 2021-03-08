@@ -605,6 +605,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			$shipping_option = array();
 			$express_option = array();
 
+			echo("foo");
+
 			if ( count( $order->get_shipping_methods() ) > 0 ) {
 				$counter ++;
 				$line_id                = strval( $counter );
