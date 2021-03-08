@@ -599,7 +599,7 @@ class WC_AJAX_HP {
 
 
 			$order->set_created_via( 'dintero_checkout' );
-			$order->set_currency( sanitize_text_field( $currency ));
+			$order->set_currency( get_woocommerce_currency());
 			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 
 			$available_gateways = WC()->payment_gateways->payment_gateways();
@@ -686,16 +686,17 @@ class WC_AJAX_HP {
 			if($transaction['shipping_option']['id'] == 'shipping_express'){
 				$isExpress = true;
 
-				if($transaction['shipping_address']['business_name']){ // if Business Checkout
+				$shipping_address = $transaction['shipping_address'];
+				if(array_key_exists('business_name', $shipping_address)) { // if Business Checkout
 					$postMeta = get_post_meta( $order->get_id()) ;
 
-					update_post_meta( $order->get_id(), '_shipping_vat_number', sanitize_text_field($transaction['shipping_address']['organization_number'] ) );
+					update_post_meta( $order->get_id(), '_shipping_vat_number', sanitize_text_field($shipping_address['organization_number'] ) );
 
-					update_post_meta( $order->get_id(), '_shipping_company', sanitize_text_field($transaction['shipping_address']['business_name'] ) );
-					update_post_meta( $order->get_id(), '_billing_company', sanitize_text_field($transaction['shipping_address']['business_name'] ) );
+					update_post_meta( $order->get_id(), '_shipping_company', sanitize_text_field($shipping_address['business_name'] ) );
+					update_post_meta( $order->get_id(), '_billing_company', sanitize_text_field($shipping_address['business_name'] ) );
 
 
-					$coName = $transaction['shipping_address']['co_address'];
+					$coName = $shipping_address['co_address'];
 					$tempName = explode(" ",$coName);
 					
 					$firstName = $tempName[0];
@@ -707,34 +708,34 @@ class WC_AJAX_HP {
 					$order->set_shipping_first_name( sanitize_text_field( $firstName) );
 					$order->set_shipping_last_name( sanitize_text_field( $lastName) );
 				}else{
-					$order->set_billing_first_name( sanitize_text_field($transaction['shipping_address']['first_name']));
-					$order->set_billing_last_name( sanitize_text_field( $transaction['shipping_address']['last_name']  ) );
-					$order->set_shipping_first_name( sanitize_text_field( $transaction['shipping_address']['first_name']) );
-					$order->set_shipping_last_name( sanitize_text_field( $transaction['shipping_address']['last_name']) );
+					$order->set_billing_first_name( sanitize_text_field($shipping_address['first_name']));
+					$order->set_billing_last_name( sanitize_text_field( $shipping_address['last_name']  ) );
+					$order->set_shipping_first_name( sanitize_text_field( $shipping_address['first_name']) );
+					$order->set_shipping_last_name( sanitize_text_field( $shipping_address['last_name']) );
 
 				}
 
 				
 				
 
-				$order->set_billing_country( sanitize_text_field($transaction['shipping_address']['country']) );
-				$order->set_billing_address_1( sanitize_text_field( $transaction['shipping_address']['address_line'] ) );
-				$order->set_billing_city( sanitize_text_field( $transaction['shipping_address']['postal_place'] ) );
-				$order->set_billing_postcode( sanitize_text_field( $transaction['shipping_address']['postal_code']  ) );
-				$order->set_billing_phone( sanitize_text_field( $transaction['shipping_address']['phone_number']) );
-				$order->set_billing_email( sanitize_text_field( $transaction['shipping_address']['email'] ) );
+				$order->set_billing_country( sanitize_text_field($shipping_address['country']) );
+				$order->set_billing_address_1( sanitize_text_field( $shipping_address['address_line'] ) );
+				$order->set_billing_city( sanitize_text_field( $shipping_address['postal_place'] ) );
+				$order->set_billing_postcode( sanitize_text_field( $shipping_address['postal_code']  ) );
+				$order->set_billing_phone( sanitize_text_field( $shipping_address['phone_number']) );
+				$order->set_billing_email( sanitize_text_field( $shipping_address['email'] ) );
 
 				
 
 
-				$order->set_shipping_country( sanitize_text_field( $transaction['shipping_address']['country'] ) );
-				$order->set_shipping_address_1( sanitize_text_field( $transaction['shipping_address']['address_line'] ) );
+				$order->set_shipping_country( sanitize_text_field( $shipping_address['country'] ) );
+				$order->set_shipping_address_1( sanitize_text_field( $shipping_address['address_line'] ) );
 				
-				$order->set_shipping_city( sanitize_text_field( $transaction['shipping_address']['postal_place']) );
+				$order->set_shipping_city( sanitize_text_field( $shipping_address['postal_place']) );
 				
-				$order->set_shipping_postcode( sanitize_text_field( $transaction['shipping_address']['postal_code'] ) );
-				update_post_meta( $order->get_id(), '_shipping_phone', sanitize_text_field($transaction['shipping_address']['phone_number'] ) );
-				update_post_meta( $order->get_id(), '_shipping_email', sanitize_text_field( $transaction['shipping_address']['email']  ) );
+				$order->set_shipping_postcode( sanitize_text_field( $shipping_address['postal_code'] ) );
+				update_post_meta( $order->get_id(), '_shipping_phone', sanitize_text_field($shipping_address['phone_number'] ) );
+				update_post_meta( $order->get_id(), '_shipping_email', sanitize_text_field( $shipping_address['email']  ) );
 
 				$order->save();
 			}

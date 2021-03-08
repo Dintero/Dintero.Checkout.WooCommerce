@@ -548,6 +548,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 
 	/**
 	 * Creating checkout session and requesting payment page URL
+	 *
+	 * Executed when the checkout button is pressed
 	 */
 	private function get_payment_page_url( $order , $isExpress = false) {
 		if ( ! empty( $order ) && $order instanceof WC_Order ) {
@@ -602,133 +604,101 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				$total_amount += $item_line_total_amount;
 			}
 
-			$shipping_option = array();
 			$express_option = array();
 
-			echo("foo");
+			$counter ++;
+			$line_id                = strval( $counter );
+			$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
+			$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
+			$item_line_total_amount = $item_total_amount + $item_tax_amount;
+			$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
+					2 ) * 100 ) : 0;
 
-			if ( count( $order->get_shipping_methods() ) > 0 ) {
-				$counter ++;
-				$line_id                = strval( $counter );
-				$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
-				$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
-				$item_line_total_amount = $item_total_amount + $item_tax_amount;
-				$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
-						2 ) * 100 ) : 0;
+			if (!$isExpress) {
+				$item = array(
+					'id'          => 'shipping',
+					'description' => 'Shipping: ' . $order->get_shipping_method(),
+					'quantity'    => 1,
+					'vat_amount'  => $item_tax_amount,
+					'vat'         => $item_tax_percentage,
+					'amount'      => $item_line_total_amount,
+					'line_id'     => $line_id
+				);
+				array_push( $items, $item );
 
-				if (!$isExpress) {
-					$item = array(
-						'id'          => 'shipping',
-						'description' => 'Shipping: ' . $order->get_shipping_method(),
-						'quantity'    => 1,
-						'vat_amount'  => $item_tax_amount,
-						'vat'         => $item_tax_percentage,
-						'amount'      => $item_line_total_amount,
-						'line_id'     => $line_id
-					);
-					array_push( $items, $item );
+				$total_amount += $item_line_total_amount;
+			}
 
-					$total_amount += $item_line_total_amount;
+			$order_total_amount = $total_amount;
+			$hasShippingOptions = count($order->get_shipping_methods()) > 0;
+			if ($isExpress) {
+				$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
+				$customer_types = array();
+				if ($express_customer_types == 'b2c') {
+					array_push($customer_types, 'b2c');
+				} else if ($express_customer_types == 'b2b') {
+					array_push($customer_types, 'b2b');
+				} else {
+					array_push($customer_types, 'b2b', 'b2c');
 				}
-
-				$order_total_amount = $total_amount;
-
-				$shipping_option = array(
-						'id'				=> 'shipping',
-						'line_id'			=> $line_id,
-						//"countries"			=> array($order->get_shipping_country()),
-						'country'			=> $order->get_shipping_country(),
-						'amount'			=> $item_line_total_amount,
-						'vat_amount'		=> $item_tax_amount,
-						'vat'				=> $item_tax_percentage,
-						'title'				=> 'Shipping: ' . $order->get_shipping_method(),
-						'description'		=> '',
-						'delivery_method'	=> 'delivery',						
-						'operator'			=> '',
-						'operator_product_id' => '',
-						'eta'				=> array(),
-						/*
-						"time_slot"			=> array(),
-						"pick_up_address"	=> array(
-								"first_name"=>$order->get_shipping_first_name(),
-								"last_name"=>$order->get_shipping_last_name(),
-								"address_line"=>$order->get_shipping_address_1(),
-								"address_line_2"=>$order->get_shipping_address_2(),
-								"co_address"=>"",
-								"business_name"=>"",
-								"postal_code"=>$order->get_shipping_postcode(),
-								"postal_place"=>$order->get_shipping_city(),
-								"country"=>$order->get_shipping_country(),
-								"phone_number"=>$order->get_billing_phone(),
-								"email"=>$order->get_billing_email(),
-								"latitude"=>0,
-								"longitude"=>0,
-								"comment"=>"",
-								"distance"=>0
-							)*/
+				if ($hasShippingOptions) {
+					$dintero_shipping_options = array(
+						0 => array(
+							'id' => 'shipping_express',
+							'line_id' => $line_id,
+							//"countries"=>array($order->get_shipping_country()),
+							'country' => $order->get_shipping_country(),
+							'amount' => $item_line_total_amount,
+							'vat_amount' => $item_tax_amount,
+							'vat' => $item_tax_percentage,
+							'title' => 'Shipping: ' . $order->get_shipping_method(),
+							'description' => '',
+							'delivery_method' => 'delivery',
+							'operator' => '',
+							'operator_product_id' => '',
+							'eta' => array(
+								'relative' => array(
+									'minutes_min' => 0,
+									'minutes_max' => 0
+								),
+								'absolute' => array(
+									'starts_at' => '',
+									'ends_at' => ''
+								)
+							),
+							/*
+							"time_slot"=>array(
+									"starts_at"=>"2020-10-14T19:00:00Z",
+									"ends_at"=>"2020-10-14T20:00:00Z"
+								),
+							"pick_up_address"=>array(
+									"first_name"=>$order->get_shipping_first_name(),
+									"last_name"=>$order->get_shipping_last_name(),
+									"address_line"=>$order->get_shipping_address_1(),
+									"address_line_2"=>$order->get_shipping_address_2(),
+									"co_address"=>"",
+									"business_name"=>"",
+									"postal_code"=>$order->get_shipping_postcode(),
+									"postal_place"=>$order->get_shipping_city(),
+									"country"=>$order->get_shipping_country(),
+									"phone_number"=>"123456", //$order->get_billing_phone(),
+									"email"=>$order->get_billing_email(),
+									"latitude"=>0,
+									"longitude"=>0,
+									"comment"=>""
+									//"distance"=>0
+								)*/
+						)
 					);
-
-				if ($isExpress) {
-					$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
-                    $customer_types = array();
-                    if ($express_customer_types == 'b2c') {
-                        array_push($customer_types, 'b2c');
-                    } else if ($express_customer_types == 'b2b') {
-                        array_push($customer_types, 'b2b');
-                    } else {
-                        array_push($customer_types, 'b2b', 'b2c');
-                    }
 					$express_option = array(
 						'shipping_address_callback_url'=>$ship_callback_url,
 						'customer_types'=>$customer_types,
-						'shipping_options'=>array(
-								0=>array(
-										'id'=>'shipping_express',
-										'line_id'=>$line_id,
-										//"countries"=>array($order->get_shipping_country()),
-										'country'=>$order->get_shipping_country(),
-										'amount'=>$item_line_total_amount,
-										'vat_amount'=>$item_tax_amount,
-										'vat'=>$item_tax_percentage,
-										'title'=>'Shipping: ' . $order->get_shipping_method(),
-										'description'=>'',
-										'delivery_method'=>'delivery',
-										'operator'=>'',
-										'operator_product_id'=>'',
-										'eta'=>array(
-												'relative'=>array(
-													'minutes_min'=>0,
-													'minutes_max'=>0
-												),
-												'absolute'=>array(
-													'starts_at'=>'',
-													'ends_at'=>''
-												)
-											),
-										/*
-										"time_slot"=>array(
-												"starts_at"=>"2020-10-14T19:00:00Z",
-												"ends_at"=>"2020-10-14T20:00:00Z"
-											),
-										"pick_up_address"=>array(
-												"first_name"=>$order->get_shipping_first_name(),
-												"last_name"=>$order->get_shipping_last_name(),
-												"address_line"=>$order->get_shipping_address_1(),
-												"address_line_2"=>$order->get_shipping_address_2(),
-												"co_address"=>"",
-												"business_name"=>"",
-												"postal_code"=>$order->get_shipping_postcode(),
-												"postal_place"=>$order->get_shipping_city(),
-												"country"=>$order->get_shipping_country(),
-												"phone_number"=>"123456", //$order->get_billing_phone(),
-												"email"=>$order->get_billing_email(),
-												"latitude"=>0,
-												"longitude"=>0,
-												"comment"=>""
-												//"distance"=>0
-											)*/
-									)
-							)
+						'shipping_options'=> $dintero_shipping_options
+					);
+				} else {
+					$express_option = array(
+						'customer_types' => $customer_types,
+						'shipping_options'=> array(),
 					);
 				}
 			}
@@ -781,6 +751,19 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			
 			if ( $isExpress ) {
 				$payload['express'] = $express_option;
+			}
+
+			if ($isExpress && !$hasShippingOptions) {
+				$payload["order"]["shipping_option"]	= array(
+					'id' => 'shipping_express',
+					'line_id' => 'shipping_method',
+					'country' => (string)WC()->checkout()->get_value('billing_country'),
+					'amount' => 0,
+					'title' => 'Shipping: none',
+					'description' => '',
+					'delivery_method' => 'none',
+					'operator' => ''
+				);
 			}
 			
 			$response = wp_remote_post( $api_endpoint, array(
