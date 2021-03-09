@@ -1003,10 +1003,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	private function process_payment_embed_express ($express = true, $pay_for_order = false ){
 
 		$shipping_methods = WC()->session->get('chosen_shipping_methods');
-		// TODO: Add as setting
-		$insist_on_shipping = false;
-		if($insist_on_shipping && (!$shipping_methods || !$shipping_methods[0])){
-			
+		$allow_no_shipping = 'yes' == WCDHP()->setting()->get('express_allow_no_shipping');
+		if(!$allow_no_shipping && (!$shipping_methods || !$shipping_methods[0])){
+
 			$postCode = WC()->checkout()->get_value( 'shipping_postcode' );
 			if(!$postCode){	 
 

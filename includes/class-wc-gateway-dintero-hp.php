@@ -339,6 +339,19 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
                 'default' => 'both',
                 'desc_tip'    => true,
             ),
+            'express_allow_no_shipping_title' => array(
+                'title'       => __( 'Allow no shipping:' ),
+                'type'        => 'title',
+                'description' => ''
+            ),
+			'express_allow_no_shipping' => array(
+				'title'       => __( 'Allow no shipping:' ),
+				'label'       => __( 'Allow Checkout Express without shipping' ),
+				'type'        => 'checkbox',
+				'description' => __( 'Allow orders without shipping' ),
+				'default'     => 'no',
+				'desc_tip'    => true,
+			),
 			'branding_title'                => array(
 				'title'       => __( 'Branding:' ),
 				'type'        => 'title',
