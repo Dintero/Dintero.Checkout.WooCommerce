@@ -43,6 +43,11 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2021.03.10
+
+  * Setting to allow orders without shipping
+  * Error messages when API calls fail
+
 2021.03.02
 
   * Setting to limit customer types
