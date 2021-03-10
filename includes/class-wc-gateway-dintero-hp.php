@@ -659,8 +659,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 						0 => array(
 							'id' => 'shipping_express',
 							'line_id' => $line_id,
-							//"countries"=>array($order->get_shipping_country()),
-							'country' => $order->get_shipping_country(),
 							'amount' => $item_line_total_amount,
 							'vat_amount' => $item_tax_amount,
 							'vat' => $item_tax_percentage,
@@ -669,16 +667,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 							'delivery_method' => 'delivery',
 							'operator' => '',
 							'operator_product_id' => '',
-							'eta' => array(
-								'relative' => array(
-									'minutes_min' => 0,
-									'minutes_max' => 0
-								),
-								'absolute' => array(
-									'starts_at' => '',
-									'ends_at' => ''
-								)
-							),
 							/*
 							"time_slot"=>array(
 									"starts_at"=>"2020-10-14T19:00:00Z",
@@ -770,7 +758,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				$payload["order"]["shipping_option"]	= array(
 					'id' => 'shipping_express',
 					'line_id' => 'shipping_method',
-					'country' => (string)WC()->checkout()->get_value('billing_country'),
 					'amount' => 0,
 					'title' => 'Shipping: none',
 					'description' => '',
