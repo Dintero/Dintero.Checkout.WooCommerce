@@ -2125,9 +2125,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		}
 
 		if(sizeof($shipping_option)>0){
-			$payload["shipping_option"]	= $shipping_option;
+			$payload['order']['shipping_option']	= $shipping_option;
 		} else {
-			$payload["order"]["shipping_option"] = array(
+			$payload['order']['shipping_option'] = array(
 				'id' => 'shipping_express',
 				'line_id' => 'shipping_method',
 				'amount' => 0,
@@ -2364,18 +2364,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				),
 				'profile_id' => $this->profile_id
 			);
-			/*
-			//still not use
-			if(sizeof($shipping_option)>0){
-				$payload["shipping_option"]	= $shipping_option;
-			}
-			*/
 			if ($express) {
 				$payload['express'] = $express_option;
 			}
 
 			if ($express && !$hasShippingOptions) {
-				$payload["order"]["shipping_option"]	= array(
+				$payload['order']['shipping_option']	= array(
 					'id' => 'shipping_express',
 					'line_id' => 'shipping_method',
 					'amount' => 0,
