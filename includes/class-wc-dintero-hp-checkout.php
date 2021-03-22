@@ -1926,11 +1926,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		
 		$order_total_amount = $total_amount;  
 		$selectedShippingReference = $this->get_shipping_reference();
+		$currency = get_woocommerce_currency();
 		$payload = array(
 			'order' =>  array(
 				'amount'             => $order_total_amount + $this->get_shipping_amount() ,
 				'vat_amount'         => $order_tax_amount ,
-				'currency'           => 'NOK',
+				'currency'           => $currency,
 				'merchant_reference' => '',
 			
 				'items'              => $this->order_lines,
@@ -2084,16 +2085,33 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 		$payload_url[ 'merchant_terms_url' ] = $terms_link;
 
+		$currency = get_woocommerce_currency();
+		$country = WC()->countries->get_base_country();
+
+		$billingPhone =  WC()->checkout()->get_value( 'billing_phone' );
+		if($billingPhone != ''){
+			$billingPhone = (string) WC()->checkout()->get_value( 'billing_phone' );
+
+			$billingPhone = str_replace(' ', '', $billingPhone); // remove space from Phone number if any
+
+			// Not necessary, but convenience so the phone number is properly added to the order
+			if($country === 'NO' && strpos($billingPhone, '+47') === false){
+				$billingPhone = '+47'.$billingPhone;
+			} else if($country === 'SE' && strpos($billingPhone, '+46') === false){
+				$billingPhone = '+46'.$billingPhone;
+			}
+		}
+
 		$payload = array(
 			'url'        => $payload_url,
 			'customer'   => array(
 				'email'        => (string) WC()->checkout()->get_value( 'billing_email' ),
-				'phone_number' => (string) WC()->checkout()->get_value( 'billing_phone' )
+				'phone_number' => $billingPhone ?: ''
 			),
 			'order'      => array(
 				'amount'             => $order_total_amount ,
 				'vat_amount'         => $order_tax_amount ,
-				'currency'           => 'NOK',
+				'currency'           => $currency,
 				'merchant_reference' => '',
 				'shipping_address'   => array(
 					'first_name'   => (string) WC()->checkout()->get_value( 'shipping_first_name' ),
@@ -2101,27 +2119,16 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					'address_line' => (string) WC()->checkout()->get_value( 'shipping_address_1' ),
 					'postal_code'  => (string) WC()->checkout()->get_value( 'shipping_postcode' ),
 					'postal_place' => (string) WC()->checkout()->get_value( 'shipping_city' ),
-					'country'      => 'NO',
+					'country'      => $country,
 					'email'        => (string) WC()->checkout()->get_value( 'billing_email' )
 				),
 				'items'              => $this->order_lines
 			),
 			'profile_id' => $this->profile_id
 		);
-		$billingPhone =  WC()->checkout()->get_value( 'billing_phone' );
-		if($billingPhone != ''){
-			$phone = (string) WC()->checkout()->get_value( 'billing_phone' );
-			// Add Norwegian Phone code is there in not in number to automatic fill up iframe
 
-			$phone = str_replace(' ', '', $phone); // remove space from Phone number if any
-			if(strpos($phone, '+47') === false){
-			   	$phone = '+47'.$phone;
-				
-			} 
-			
-			$payload['order']['shipping_address']['phone_number'] = $phone;
-			
-			
+		if ($billingPhone) {
+			$payload['order']['shipping_address']['phone_number'] = $billingPhone;
 		}
 
 		if(sizeof($shipping_option)>0){

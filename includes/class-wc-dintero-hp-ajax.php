@@ -215,7 +215,7 @@ class WC_AJAX_HP {
 		$customer_data = array();
 		$customer_data['billing_postcode']  = sanitize_text_field($_POST['post_code']);
 		$customer_data['shipping_postcode'] = sanitize_text_field($_POST['post_code']);
-		$country = 'NO';
+		$country = WC()->countries->get_base_country();
 		$customer_data['billing_country']  = $country;
 			$customer_data['shipping_country'] = $country;
 		WC()->customer->set_props( $customer_data );
@@ -569,9 +569,8 @@ class WC_AJAX_HP {
 			$addressline1 = WC()->checkout()->get_value( 'shipping_address_1' );
 			
 			
-			if($country != 'NO'){ // Checks if there is No Shippingn Country in Customer Session
-
-				 WC()->customer->set_shipping_country('NO');
+			if(is_null($country)){ // Checks if there is No Shippingn Country in Customer Session
+				 WC()->customer->set_shipping_country(WC()->countries->get_base_country());
 				 WC()->cart->calculate_totals();
 			}
 
