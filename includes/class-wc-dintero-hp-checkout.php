@@ -1926,11 +1926,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		
 		$order_total_amount = $total_amount;  
 		$selectedShippingReference = $this->get_shipping_reference();
+		$currency = get_woocommerce_currency();
 		$payload = array(
 			'order' =>  array(
 				'amount'             => $order_total_amount + $this->get_shipping_amount() ,
 				'vat_amount'         => $order_tax_amount ,
-				'currency'           => 'NOK',
+				'currency'           => $currency,
 				'merchant_reference' => '',
 			
 				'items'              => $this->order_lines,
@@ -2105,7 +2106,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			'url'        => $payload_url,
 			'customer'   => array(
 				'email'        => (string) WC()->checkout()->get_value( 'billing_email' ),
-				'phone_number' => $billingPhone ? $billingPhone : ''
+				'phone_number' => $billingPhone ?: ''
 			),
 			'order'      => array(
 				'amount'             => $order_total_amount ,
