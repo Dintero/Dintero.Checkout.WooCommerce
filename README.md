@@ -44,6 +44,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 ## Changelog
 
+2021.03.24
+
+* Bugfix: Fix country code issue
+
 2021.03.22
 
 * Bugfix: Fix problem with logged in accounts
