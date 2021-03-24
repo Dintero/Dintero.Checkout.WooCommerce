@@ -2095,9 +2095,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$billingPhone = str_replace(' ', '', $billingPhone); // remove space from Phone number if any
 
 			// Not necessary, but convenience so the phone number is properly added to the order
-			if($country === 'NO' && strpos($billingPhone, '+47') === false){
+			if($country === 'NO' && strpos($billingPhone, '+') === false){
 				$billingPhone = '+47'.$billingPhone;
-			} else if($country === 'SE' && strpos($billingPhone, '+46') === false){
+			} else if($country === 'SE' && strpos($billingPhone, '+') === false){
 				$billingPhone = '+46'.$billingPhone;
 			}
 		}
