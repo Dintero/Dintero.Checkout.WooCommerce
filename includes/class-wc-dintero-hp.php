@@ -779,7 +779,11 @@ final class WC_Dintero_HP {
 					}
 				}
 			}
-		}
+		}elseif( isset( $_SERVER['SERVER_NAME'] ) && isset( $_SERVER['REQUEST_URI'] ) && isset( $_REQUEST['error'] ) ) {
+            // if There is an error in payment, redirect to cart
+            wp_redirect ( wc_get_cart_url() );
+            exit;
+        }
 	}
 
 	/**
