@@ -872,13 +872,13 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				} elseif ( 'CAPTURED' === $transaction['status'] ) {
 
 					$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $dintero_order_transaction_id;
-					self::payment_complete( $order, $transaction_id, $note );
+					self::payment_complete( $order, $dintero_order_transaction_id, $note );
 				}elseif('ON_HOLD' === $transaction['status'] ){
-					$hold_reason = __( 'The payment is put on on-hold for manual review. The status of the payment will be updated when the manual review is finished. Transaction ID: ' ) . $transaction_id;
-					self::on_hold_order( $order, $transaction_id, $hold_reason );
+					$hold_reason = __( 'The payment is put on on-hold for manual review. The status of the payment will be updated when the manual review is finished. Transaction ID: ' ) . $dintero_order_transaction_id;
+					self::on_hold_order( $order, $dintero_order_transaction_id, $hold_reason );
 				}elseif('FAILED' === $transaction['status'] ){
-					$hold_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;
-					self::failed_order( $order, $transaction_id, $hold_reason );
+					$hold_reason = __( 'The payment is not approved. Transaction ID: ' ) . $dintero_order_transaction_id;
+					self::failed_order( $order, $dintero_order_transaction_id, $hold_reason );
 				}
 				
 			}
