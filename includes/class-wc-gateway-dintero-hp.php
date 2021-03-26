@@ -844,13 +844,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 		
 		$dintero_order_session_detail = $this->get_dintero_session( WC()->session->get( 'dintero_wc_order_id' ));
-		
-		$dintero_order_transaction_id = $dintero_order_session_detail['transaction_id'];
-		
-		if ( ! $dintero_order_transaction_id ) {
+		if ( ! array_key_exists('transaction_id', $dintero_order_session_detail)) {
 			return false;
 		}
-		
+		$dintero_order_transaction_id = $dintero_order_session_detail['transaction_id'];
 		if ( $order_id && $dintero_order_transaction_id ) {
 
 			// Set WC order transaction ID.
