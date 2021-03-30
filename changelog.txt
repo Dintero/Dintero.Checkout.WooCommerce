@@ -1,5 +1,9 @@
 *** WooCommerce Dintero Plugin Changelog ***
 
+2021.03.30
+
+ * Pay for Order issue fix
+
 2021.03.29
 
  * Redirect to cart on failed payment
