@@ -1,6 +1,6 @@
 *** WooCommerce Dintero Plugin Changelog ***
 
-2021.03.30
+2021.03.31
 
  * Pay for Order issue fix
 
