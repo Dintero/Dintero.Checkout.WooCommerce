@@ -43,7 +43,13 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
-2021.03.26
+
+2021.03.31
+
+ * Bugfix: Pay for order created in wp-admin
+
+2021.03.29
+
 
  * Redirect to cart on failed payment
 
