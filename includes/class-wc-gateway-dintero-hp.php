@@ -796,7 +796,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 		$embed_enable = WCDHP()->setting()->get('embed_enable');
 		
 		
-		if($embed_enable == 'yes' && !$isExpress){ // If its an Iframe
+		if($embed_enable == 'yes' && !$isExpress  && !isset($_GET['pay_for_order'])){ // If its an Iframe
 			$redirect_url = $this->process_payment_handler( $order_id , true);
 			WC()->session->__unset('dintero_wc_order_id');
 			if ( $redirect_url ) {

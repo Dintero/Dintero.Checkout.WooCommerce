@@ -44,7 +44,12 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 ## Changelog
 
+2021.03.31
+
+* Pay for Order issue fix
+
 2021.03.29
+
  * Redirect to cart on failed payment
 
 2021.03.24
