@@ -43,6 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2021.04.14
+
+ * Show payment method if paid with Collector and Swish
+
 2021.03.31
 
  * Bugfix: Pay for order created in wp-admin
@@ -88,7 +92,7 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
   * Firstname,lastname required issue fix
   * jQuery Fix for document on load
-  * Button Image type added 
+  * Button Image type added
 
 2020.12.14
 
@@ -99,7 +103,7 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
   * Shipping method and Instance Id Seperation for Callback Order creation
   * Update in Api request for Few API calls
-  * Included Checkout SDK wihtin the Plugin 
+  * Included Checkout SDK wihtin the Plugin
   * Sanitized few fields for security enhancement
 
 2020.11.27
@@ -112,9 +116,9 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 2020.11.25
 
-  * Instance id for shipping method, for callback order creation 
+  * Instance id for shipping method, for callback order creation
   * Shipping name fix
-  
+
 2020.11.23
 
    * warning removed from thankyou page
@@ -125,7 +129,7 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
    * 'before_checkout_form_express' warning message fix
    * probable redirect issue resolve
-   * 'dintero_cart_session' warning resolved 
+   * 'dintero_cart_session' warning resolved
    * expire time loop fixed
 
 2020.10.30
@@ -141,7 +145,7 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 2020-09-21
 
-* added support for on_hold status 
+* added support for on_hold status
 * added support for dynamic shipping pricing
 * pause, update and resume sessions
 * callback delayed to 3 minutes to prevent duplicate orders
@@ -244,12 +248,12 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 2020.08.14
 
-  * Rounding Off of price issue resolved 
+  * Rounding Off of price issue resolved
 
 2020.09.21
 
   * Pause, Update, Resume Session implemented
-  * Supports Dynamic Shipping 
+  * Supports Dynamic Shipping
   * Discount codes in Callback Issue resolved
   * On_Hold status for collector payment
   * Failed status for Collector Payment
@@ -257,10 +261,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 2020.09.22
 
-  * Destroy Session 
+  * Destroy Session
   * create new checkout session if current session is COMPLETED, DECLINED, CANCELLED
   * Business Checkout fix with Update session
-  
+
 2020.10.06
 
   * Session Update only with Shipping Options
