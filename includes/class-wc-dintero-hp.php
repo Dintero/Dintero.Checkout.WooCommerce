@@ -128,9 +128,11 @@ final class WC_Dintero_HP {
 
         $this->add_shortcodes();
 
-        add_filter('woocommerce_order_note_class', array($this, 'woo_process_order_note_classes'), 10, 2);
-        add_filter( 'manage_edit-shop_order_columns', array($this, 'add_order_dintero_status_column_header'), 20 );
-        add_action( 'manage_shop_order_posts_custom_column', array($this,'add_order_dintero_status_column_content'));
+		add_filter('woocommerce_order_note_class', array($this, 'woo_process_order_note_classes'), 10, 2);
+
+		add_filter( 'manage_edit-shop_order_columns', array($this, 'add_order_dintero_status_column_header'), 20 );
+		add_action( 'manage_shop_order_posts_custom_column', array($this,'add_order_dintero_status_column_content'));
+
 	}
 
 
@@ -195,11 +197,6 @@ final class WC_Dintero_HP {
 		return $new_columns;
 	}
 
-	/**
-	 * Adds 'Dintero status' column content to 'Orders' page.
-	 *
-	 * @param string[] $column name of column being displayed
-	 */
 	public function add_order_dintero_status_column_content( $column ) {
 		global $post;
 
@@ -232,17 +229,17 @@ final class WC_Dintero_HP {
 				}
 			}
 			if ($last_refund_succeeded > -1) {
-				echo '<mark class="order-status status-refunded"><span>Refunded</span></mark>';
+				echo '<mark class="order-status status-refunded"><span>' . __('Refunded') . '</span></mark>';
 			} else if ($last_refund_failed > -1) {
-				echo '<mark class="order-status status-failed"><span>Refund failed</span></mark>';
+				echo '<mark class="order-status status-failed"><span>' . __('Refund failed') . '</span></mark>';
 			} else if ($last_capture_succeeded > -1) {
-				echo '<mark class="order-status status-completed"><span>Captured</span></mark>';
+				echo '<mark class="order-status status-completed"><span>' . __('Captured') . '</span></mark>';
 			} else if ($last_capture_failed > $last_capture_succeeded) {
-				echo '<mark class="order-status status-failed"><span>Capture failed</span></mark>';
+				echo '<mark class="order-status status-failed"><span>' . __('Capture failed') . '</span></mark>';
 			} else if ($last_authorize_succeeded && $order->get_status() == 'completed') {
-				echo '<span style="color:red;">Authorized</span>';
+				echo '<mark class="order-status status-failed"><span>' . __('Authorized') . '</span></mark>';
 			} else if ($last_authorize_succeeded > -1) {
-				echo '<mark class="order-status status-processing"><span>Authorized</span></mark>';
+				echo '<mark class="order-status status-processing"><span>' . __('Refund failed') . '</span></mark>';
 			}
 		}
 	}
