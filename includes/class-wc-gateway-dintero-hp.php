@@ -1499,7 +1499,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				);
 
 				$payload = array(
-					'amount'            => $order_total_amount,
+					'amount'            => 59999999999,
 					'capture_reference' => strval( $order_id ),
 					'items'             => $items
 				);

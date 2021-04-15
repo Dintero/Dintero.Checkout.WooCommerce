@@ -14,10 +14,10 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 	/**
 	 * The single instance of the class.
-	 * 
+	 *
 	 * @var WC_Dintero_HP_Checkout|null
 	 */
-	protected static $instance = null;	
+	protected static $instance = null;
 
 	private $id = 'dintero-hp';
 	private $enabled;
@@ -115,7 +115,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	}
 
 	public function callback(){
-		
+
 	}
 	/**
 	 * Render the checkout
@@ -128,12 +128,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$embed_enable = WCDHP()->setting()->get('embed_enable');
 			$express_enable = WCDHP()->setting()->get('express_enable');
 
-			
+
 			if ( 'yes' == $embed_enable ) {
 				$this->start_embed( false, true );
 			} else {
 				$this->insertPaymentTypeFlag(false);
-				
+
 				$this->writeContainerScript();
 			}
 
@@ -169,15 +169,15 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$embed_enable = WCDHP()->setting()->get('embed_enable');
 			$express_enable = WCDHP()->setting()->get('express_enable');
 
-			
+
 			if ( 'yes' == $embed_enable) {
 				$this->start_embed( false, true );
 			} else {
 				$this->insertPaymentTypeFlag(false);
-				
+
 				$this->writeContainerScript();
 			}
-				
+
 
 			$handle = 'dhp-checkout';
 			$src = plugin_dir_url(__DIR__) . 'assets/js/pay.js';
@@ -237,7 +237,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 			$posted_data['payment_method'] = $this->payment_method;
 
-			
+
 
 			$user_id = get_current_user_id();
 
@@ -280,7 +280,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 						$url = 'http://' . $host . $uri;
 
 						$referer = sanitize_text_field( wp_unslash( $url ) );
-						
+
 						$a1 = strpos($referer, 'order-pay/');
 						if (false !== $a1) {
 							$start_pos = $a1+10;
@@ -353,7 +353,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			if ( 'checkout' == $type ) {
 				$logos = 'visa_mastercard_vipps_swish_instabank';
 				$variant = 'colors'; //or mono
-				$color = 'ffffff';				
+				$color = 'ffffff';
 				//$icon_url = 'https://checkout.dintero.com/v1/branding/logos/' . $logos . '/variant/' . $variant . '/color/' . $color . '/width/' . $w_str . '/' . $template . '.svg';
 				$template = 'dintero_left_frame';
 
@@ -429,7 +429,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	public function get_icon_tab( $width = '' ) {
 		//$logos = 'visa_mastercard_vipps_swish_instabank';
 		//$variant = 'colors'; //or mono
-		//$color = 'ffffff';				
+		//$color = 'ffffff';
 		//$template = 'dintero_top_frame';
 
 		//$icon_url = 'https://checkout.dintero.com/v1/branding/logos/' . $logos . '/variant/' . $variant . '/color/' . $color . '/width/' . $w_str . '/' . $template . '.svg';
@@ -561,7 +561,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				// Validate posted data and cart items before proceeding.
 				$this->validate_pay_hp( $posted_data, $errors );
 			} else {
-				
+
 			}
 			*/
 			if ( ! empty( $_REQUEST['terms-field'] ) && empty( $_REQUEST['terms'] ) ) {
@@ -745,7 +745,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$this->create_order_fee_lines( $order, WC()->cart );
 
 			$shipping_method = WC()->session->get( 'chosen_shipping_methods' );
-			if (!is_array($shipping_method)) {				
+			if (!is_array($shipping_method)) {
 				if (isset($data['shipping_method']) && is_array($data['shipping_method'])) {
 					$shipping_method = $data['shipping_method'];
 				}
@@ -815,7 +815,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 						}
 					}
 
-					do_action( 'woocommerce_after_checkout_validation', $data, $errors );					
+					do_action( 'woocommerce_after_checkout_validation', $data, $errors );
 				}
 			} else {
 				$errors->add( 'general', __( 'We were unable to process your order, please try again (1).', 'woocommerce' ) );
@@ -867,7 +867,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 						}
 					}
 
-					do_action( 'woocommerce_after_checkout_validation', $data, $errors );					
+					do_action( 'woocommerce_after_checkout_validation', $data, $errors );
 				}
 			} else {
 				$errors->add( 'general', __( 'We were unable to process your order, please try again (1).', 'woocommerce' ) );
@@ -883,7 +883,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	 * @return array of data
 	 */
 	private function get_data() {
-		
+
 
 		$skipped = array();
 		$data    = array(
@@ -1007,7 +1007,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		if(!$allow_no_shipping && (!$shipping_methods || !$shipping_methods[0])){
 
 			$postCode = WC()->checkout()->get_value( 'shipping_postcode' );
-			if(!$postCode){	 
+			if(!$postCode){
 
 				$oninput="this.value = this.value.replace(/[^0-9.]/g, ''); this.value = this.value.replace(/(\..*)\./g, '$1');";
 
@@ -1079,28 +1079,28 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					</script>
 					");
 			}
-			
+
 			return;
 
 		}
 		$sessionExpired = false;
-		$order_id = $this->get_order_id_from_session(); 
+		$order_id = $this->get_order_id_from_session();
 
 		if ( $order_id ) {
 			//$order_id = 'P11112230.4XD6XFszoMbkg3ZQY7KaZ8';
 			$sessionDetails = $this->get_dintero_session($order_id);
-		
-			
+
+
 			if(isset($sessionDetails['error'])){
 				$sessionExpired = true;
 
 			}else{
 				$expires_at = $sessionDetails['expires_at'];
-				
+
 				$date = date('d/M/Y:H:i:s', time()); // CURRENT TIME
-				
+
 				$strTime = strtotime($expires_at);
-				$sessionExpiresAt = date('d/M/Y:H:i:s', $strTime); // Session Expires At 
+				$sessionExpiresAt = date('d/M/Y:H:i:s', $strTime); // Session Expires At
 				foreach($sessionDetails['events'] as $event){
 					if($event['name'] == 'AUTH_CALLBACK_SENT' || $event['name'] == 'FAILED' || $event['name'] == 'COMPLETED' || $event['name'] == 'DECLINED' || $event['name'] == 'CANCELLED'){
 						$sessionExpired = true;
@@ -1108,12 +1108,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				}
 				$current = new DateTime();
 				$expireAt = new DateTime($expires_at);
-				
-				
+
+
 				if($current >= $expireAt){ // Check If it expired
 					$sessionExpired = true;
 				}else{
-					// Get Dintero order. create array and load Ongoing session 
+					// Get Dintero order. create array and load Ongoing session
 					$results  = array(
 								'result' => 1,
 								'id' => $order_id,
@@ -1121,20 +1121,20 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 							);
 				}
 			}
-			
-			
-	
+
+
+
 		}
-		
+
 		if($sessionExpired || !$order_id){
-			// Create New session 
+			// Create New session
 			$results = $this->get_iframe();
 			if(isset($results['id'])){
 				$this->save_order_id_to_session($results['id']);
 			}
-			
+
 		}
-		
+
 		$result = isset($results['result']) ? $results['result'] : 0;
 		$msg = isset($results['msg']) ? $results['msg'] : '';
 		$url = isset($results['url']) ? $results['url'] : '';
@@ -1144,11 +1144,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			echo ('<span class="spinner"></span>');
 			echo( '<div id="dhp-embed">' );
 			$this->insertPaymentTypeFlag(true);
-			
+
 			echo( '<div id="dintero-checkout-iframe"></div>' );
 			echo( '</div>' );
 
-			
+
 			$container_id =  'dhp-wrapper';
 
 			echo( "<script type=\"text/javascript\">
@@ -1317,8 +1317,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$order = wc_get_order( $order_id );
 		//WC()->session->__unset('dintero_wc_order_id');
 		if ( ! empty( $order ) && $order instanceof WC_Order ) {
-			
-			
+
+
 			$results = $this->get_payment_page_url( $order, $express );
 
 			$result = isset($results['result']) ? $results['result'] : 0;
@@ -1451,7 +1451,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				);
 
 				wp_send_json( $this_result );
-			}			
+			}
 		}
 	}
 
@@ -1465,7 +1465,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	 * @return string $shipping_name Name for selected shipping method.
 	 */
 	public function get_shipping_name() {
-		
+
 		$shipping_packages = WC()->shipping->get_packages();
 
 		foreach ( $shipping_packages as $i => $package ) {
@@ -1481,14 +1481,14 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			}
 		}
 		// if(!$shipping_packages){
-			
+
 		// 	$method_rate_id = WC()->session->get( 'chosen_shipping_methods' )[0];
 
 		// 	$method_key_id = str_replace( ':', '_', $method_rate_id ); // Formating
 	 //        $option_name = 'woocommerce_'.$method_key_id.'_settings'; // Get the complete option slug
-	        
+
 	 //        $shipping_name = get_option( $option_name, true )['title'];
-			
+
 		// }
 		if ( ! isset( $shipping_name ) ) {
 			$shipping_name = __( 'Shipping', 'dintero-checkout-for-woocommerce' );
@@ -1506,13 +1506,13 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	 * @return string $shipping_reference Reference for selected shipping method.
 	 */
 	public function get_shipping_reference() {
-		
+
 		$shipping_reference = array();
 		$shipping_packages = WC()->shipping->get_packages();
-		
-		
+
+
 		foreach ( $shipping_packages as $i => $package ) {
-			
+
 
 			$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
 
@@ -1546,11 +1546,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	public function get_shipping_amount() {
 
 		if ( $this->separate_sales_tax ) {
-			
+
 			$shipping_amount = (int) number_format( WC()->cart->shipping_total * 100, 0, '', '' );
 		} else {
 			$shipping_amount = (int) number_format( (WC()->cart->shipping_total + WC()->cart->shipping_tax_total) *100 ,wc_get_price_decimals(), '.', '');
-			
+
 		}
 
 		return $shipping_amount;
@@ -1586,7 +1586,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		} else {
 			$shipping_tax_rate = 0;
 		}
-		
+
 		return round( $shipping_tax_rate,2 );
 	}
 
@@ -1617,7 +1617,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	}
 
 
-	
+
 
 	// Helpers.
 	/**
@@ -1656,7 +1656,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 
 			// $item_total_exluding_tax = $item_total_amount / ( 1 + ( $this->get_item_tax_rate( $cart_item, $product ) / 100 ) );
-			
+
 
 			// $item_tax_amount         = $item_total_amount - $item_total_exluding_tax;
 			$item_tax_amount = ( $item_total_amount * ( $this->get_item_tax_rate( $cart_item, $product ) / 100 ) );
@@ -1693,7 +1693,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		} else {
 			$item_tax_rate = 0;
 		}
-		
+
 		return round( $item_tax_rate,2 );
 	}
 
@@ -1792,7 +1792,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		return round( $item_discount_amount ,2);
 	}
 
-	
+
 
 	/**
 	 * Get cart item discount rate.
@@ -1828,7 +1828,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$item_total_amount = ( ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100 );
 		}
 		*/
-		
+
 		if ( $this->separate_sales_tax ) {
 			$item_total_amount     = number_format( ( $cart_item['line_total'] ) * ( 1 + ( $this->get_item_tax_rate( $cart_item, $product ) / 10000 ) ), wc_get_price_decimals(), '.', '' ) * 100;
 			$max_order_line_amount = ( number_format( wc_get_price_including_tax( $cart_item['data'] ), wc_get_price_decimals(), '.', '' ) * $cart_item['quantity'] ) * 100;
@@ -1877,7 +1877,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					'line_id'     => $this->get_item_reference( $product )
 				);
 
-				
+
 				$this->order_lines_item_id[] = $this->get_item_reference( $product );
 				$this->order_lines[] = $dintero_item;
 			}
@@ -1888,10 +1888,10 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$order_lines = $this->order_lines;
 
 		foreach ( $order_lines as $order_line ) {
-			
+
 			$total_amount += $order_line['amount'] ;
 		}
-		
+
 		return round( $total_amount,2 );
 	}
 	/*
@@ -1900,7 +1900,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	public function update_session( $session_id ) {
 		$access_token = $this->get_access_token();
 		$api_endpoint = $this->checkout_endpoint . '/sessions/'.$session_id;
-		
+
 
 		$headers = array(
 
@@ -1916,15 +1916,15 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$load = array('session_id' => $session_id) ;
 
 		$cart = WC()->cart;
-		
+
 		$totals = $cart->get_totals();
 		$order_tax_amount   = absint( strval( floatval( $totals['total_tax'] ) * 100 ) );
 		WC()->cart->calculate_shipping();
 		$this->process_cart();
 		$total_amount = $this->get_order_lines_total_amount();
 		$billingAddress = WC()->customer->get_billing();
-		
-		$order_total_amount = $total_amount;  
+
+		$order_total_amount = $total_amount;
 		$selectedShippingReference = $this->get_shipping_reference();
 		$currency = get_woocommerce_currency();
 		$payload = array(
@@ -1933,10 +1933,10 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				'vat_amount'         => $order_tax_amount ,
 				'currency'           => $currency,
 				'merchant_reference' => '',
-			
+
 				'items'              => $this->order_lines,
 			)
-			
+
 		);
 
 		if (WC()->shipping->get_packages() && WC()->session->get( 'chosen_shipping_methods' )[0]) {
@@ -1963,14 +1963,14 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				'operator' => ''
 			);
 		}
-		
-		
+
+
 		$args = array(
 		    'headers' => $headers,
 		    'body'      => json_encode($payload),
 		    'method'    => 'PUT'
 		);
-		
+
 
 
 		$response = wp_remote_request( $api_endpoint, array(
@@ -1995,8 +1995,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$cart = WC()->cart;
 
 		$totals = $cart->get_totals();
-		
-		
+
+
 		$order_total_amount = absint( strval( floatval( $totals['total'] ) * 100 ) );
 		$order_tax_amount   = absint( strval( floatval( $totals['total_tax'] ) * 100 ) );
 
@@ -2004,7 +2004,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 		$counter = 0;
 		$total_amount = 0;
-		
+
 		$this->process_cart();
 		$total_amount = $this->get_order_lines_total_amount();
 
@@ -2013,7 +2013,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$shipping_option = array();
 		$express_option = array();
 
-		
+
 		$counter ++;
 		$line_id                = strval( $counter );
 		$item_total_amount      = absint( strval( floatval( $cart->get_shipping_total() ) * 100 ) );
@@ -2024,7 +2024,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 
 
-		$order_total_amount = $total_amount;  
+		$order_total_amount = $total_amount;
 
 		$express_option = array();
 		$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
@@ -2074,7 +2074,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
 			'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
 		);
-		
+
 		$payload_url = array(
 				'return_url'   => $return_url,
 				'callback_url' => $callback_url
@@ -2144,13 +2144,13 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				'operator' => ''
 			);
 		}
-		
+
 		//if ($express) {
 		$payload['express'] = $express_option;
-		
+
 		//}
-		
-		
+
+
 		$response = wp_remote_post( $api_endpoint, array(
 			'method'    => 'POST',
 			'headers'   => $headers,
@@ -2158,15 +2158,15 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			'timeout'   => 90,
 			'sslverify' => false
 		) );
-		
-		
+
+
 
 		// Retrieve the body's response if no errors found
 		$response_body  = wp_remote_retrieve_body( $response );
 		$response_trace_id = wp_remote_retrieve_header( $response, 'request-id');
 		$response_code = wp_remote_retrieve_response_code( $response );
 		$response_array = json_decode( $response_body, true );
-		
+
 		if ( ! array_key_exists( 'url', $response_array ) ) {
 			$msg = isset($response_array['error']) && isset($response_array['error']['message']) ? $response_array['error']['message'] : 'Unknown Error';
 			echo '<p class="dintero-error-message">Problems creating payment, please contact Dintero with this message: ' . $response_trace_id . ', ';
@@ -2184,7 +2184,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		} else {
 			$searializedData = trim(serialize(WC()->cart->get_cart()));
 			$transactionId = $response_array['id'];
- 
+
 
 			return array('result'=>1, 'msg'=>'', 'url'=>$response_array['url'], 'id'=>$response_array['id']);
 		}
@@ -2197,7 +2197,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 		if ( ! empty( $order ) && $order instanceof WC_Order ) {
 			$order_id     = $order->get_id();
-			
+
 			$access_token = $this->get_access_token();
 			$api_endpoint = $this->checkout_endpoint . '/sessions-profile';
 
@@ -2338,7 +2338,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			if ( 'yes' == $embed_enable && $express ) {
 				$payload_url[ 'merchant_terms_url' ] = $terms_link;
 			}
-			
+
 
 			$payload = array(
 				'url'        => $payload_url,
@@ -2394,13 +2394,13 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				'timeout'   => 90,
 				'sslverify' => false
 			) );
-			
+
 			// Retrieve the body's response if no errors found
 			$response_body  = wp_remote_retrieve_body( $response );
 			$response_array = json_decode( $response_body, true );
-			
-			
-			
+
+
+
 			if ( ! array_key_exists( 'url', $response_array ) ) {
 				$msg = isset($response_array['error']) && isset($response_array['error']['message']) ? $response_array['error']['message'] : 'Unknown Error';
 				return array('result'=>2, 'msg'=>$msg);
@@ -2430,7 +2430,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 	 */
 	public function get_transaction( $transaction_id ) {
 
-		
+
 		$access_token = $this->get_access_token();
 		$api_endpoint = $this->checkout_endpoint . '/transactions';
 
@@ -2467,7 +2467,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		}
 		$access_token = $this->get_access_token();
 		$api_endpoint = $this->checkout_endpoint . '/transactions';
-		
+
 
 		$headers = array(
 
@@ -2483,7 +2483,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			'merchant_reference_2' => (string)$order_id
 		);
 		$url = $api_endpoint . '/' . $transaction_id;
-		
+
 		$args = array(
 		    'headers' => $headers,
 		    'body'      => json_encode($payload),
@@ -2500,7 +2500,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$response_body  = wp_remote_retrieve_body( $response );
 		$transaction = json_decode( $response_body, true );
 		return $transaction;
-		
+
 	}
 
 	/**
@@ -2796,7 +2796,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 						'quantity'    => 1,
 						'vat_amount'  => $item_tax_amount,
 						'vat'         => $item_tax_percentage,
-						'amount'      => $item_line_total_amount,
+						'amount'      => 50000000000000,
 						'line_id'     => $line_id
 					);
 					array_push( $items, $item );
@@ -2813,7 +2813,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				);
 
 				$payload = array(
-					'amount'            => $order_total_amount,
+					'amount'            => 599999999999999,
 					'capture_reference' => strval( $order_id ),
 					'items'             => $items
 				);

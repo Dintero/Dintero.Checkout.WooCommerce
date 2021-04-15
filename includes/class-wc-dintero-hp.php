@@ -59,7 +59,7 @@ final class WC_Dintero_HP {
         if('yes' == $this->setting()->get('branding_enable')){
             add_action( 'wp_footer', array( $this, 'init_footer') );
         }
-		
+
 
 		$express_enable = $this->setting()->get('express_enable');
 		$embed_enable = $this->setting()->get('embed_enable');
@@ -75,10 +75,10 @@ final class WC_Dintero_HP {
 		add_action( 'woocommerce_cancelled_order', array( $this, 'cancel_order' ) );
 		add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
 
-		add_action( 'woocommerce_applied_coupon', array( $this, 'applied_coupon' ), 10, 3 ); 
-		add_action( 'woocommerce_removed_coupon', array( $this, 'removed_coupon' ), 10, 3 ); 
+		add_action( 'woocommerce_applied_coupon', array( $this, 'applied_coupon' ), 10, 3 );
+		add_action( 'woocommerce_removed_coupon', array( $this, 'removed_coupon' ), 10, 3 );
 
-		add_action( 'template_redirect', array( $this, 'check_thankyou' ), 10, 3 ); 
+		add_action( 'template_redirect', array( $this, 'check_thankyou' ), 10, 3 );
 		add_action( 'dhp_payment_tab', array( $this, 'create_checkout_nav' ));
 
 		//if ( 'no' == $express_enable || ( 'yes' == $express_enable && 'no' == $embed_enable ) ) {
@@ -95,11 +95,11 @@ final class WC_Dintero_HP {
 		}
 
 		add_action( 'woocommerce_admin_order_data_after_shipping_address', array( $this, 'check_dintero_shipping' ));
-		add_action( 'dhp_business_customer', array( $this, 'check_dintero_shipping' ));	
+		add_action( 'dhp_business_customer', array( $this, 'check_dintero_shipping' ));
 
 
-		// Added By Ritesh - After Cart update hook to check if cart is updated 
-		 // add_action( 'woocommerce_update_cart_action_cart_updated',  array( $this, 'destroy_dintero_ongoing_session' ));	
+		// Added By Ritesh - After Cart update hook to check if cart is updated
+		 // add_action( 'woocommerce_update_cart_action_cart_updated',  array( $this, 'destroy_dintero_ongoing_session' ));
 
 		 // add_action('woocommerce_checkout_update_order_review',  array( $this, 'on_action_update_review' ),10,1);
 
@@ -127,7 +127,18 @@ final class WC_Dintero_HP {
         add_action( 'wp_footer', array( $this, 'maybe_submit_wc_checkout' ), 999 );
 
 		 $this->add_shortcodes();
-		
+
+		add_filter('woocommerce_order_note_class', array($this, 'woo_process_order_note_classes'), 10, 2);
+	}
+
+
+	public function woo_process_order_note_classes($note_classes, $note){
+		if (strpos( $note->content, 'Payment capture failed') !== false) {
+			$note_classes[] = 'failed-note';
+			return $note_classes;
+		}
+
+		return $note_classes;
 	}
 
 	public function wc_npr_filter_billing_fields( $address_fields ) {
@@ -160,7 +171,7 @@ final class WC_Dintero_HP {
 		return $address_fields;
 	}
 
-	
+
     public function add_shortcodes() {
         add_shortcode('woo_dintero_buy_now', array($this, 'buy_now_button_shortcode'));
         add_shortcode('woo_dintero_express_checkout_button', array($this, 'express_checkout_button_shortcode'));
@@ -176,7 +187,7 @@ final class WC_Dintero_HP {
 
     // The express checkout shortcode implementation. It does not need to check if we are to show the button, obviously, but needs to see if the cart works
     public function express_checkout_button_shortcode() {
-        
+
         if ( WCDHP()->setting()->get('express_enable') !='yes') return;
         ob_start();
         $this->cart_express_checkout_button_html();
@@ -191,7 +202,7 @@ final class WC_Dintero_HP {
     }
      // Show the express button if reasonable to do so
     public function cart_express_checkout_button() {
-     
+
 
         if ( WCDHP()->setting()->get('express_enable') =='yes'){
             return $this->cart_express_checkout_button_html();
@@ -208,7 +219,7 @@ final class WC_Dintero_HP {
             var dintero_text = '<?php echo __( 'Vent mens vi behandler bestillingen.', 'collector-checkout-for-woocommerce' ); ?>';
             jQuery(function ($) {
                 $( 'body' ).append( $( '<div class="dintero-modal"><div class="dintero-modal-content">' + dintero_text + '</div></div>' ) );
-                
+
 
                 setTimeout(checkIfOrderNowExists, 2000);
 
@@ -222,18 +233,18 @@ final class WC_Dintero_HP {
                             transaction_id : transactionId
                         };
                                     var url ='?dhp-ajax=check_order_status';
-                                            
+
                     jQuery.ajax({
                          type:       'POST',
                          url:        url,
                          data:       data,
-                            
+
                          success:    function( result ) {
 
                                          if(result.data.redirect_url){
-                                            window.location = result.data.redirect_url ; 
+                                            window.location = result.data.redirect_url ;
                                          }
-                                        
+
                                      }
                          });
 
@@ -248,7 +259,7 @@ final class WC_Dintero_HP {
         <?php
 
         $transaction_id = sanitize_text_field( wp_unslash( $_GET['transaction_id'] ) );
-            
+
         $transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
 
         $transaction_order_id = trim($transaction['merchant_reference']);
@@ -272,7 +283,7 @@ final class WC_Dintero_HP {
      * @return bool
      */
     private function is_dintero_confirmation() {
-        
+
         if ( is_checkout() && is_wc_endpoint_url( 'order-received' ) ) {
             if (strpos(sanitize_text_field( wp_unslash($_SERVER['REQUEST_URI'])), "error=cancelled") !== false){ // order Cancelled
                    $location = wc_get_cart_url();
@@ -283,10 +294,10 @@ final class WC_Dintero_HP {
                 return true;
             }
         }
-       
+
         return false;
 
-        
+
     }
      // Code that will generate various versions of the 'buy now with Vipps' button IOK 2018-09-27
     public function get_buy_now_button($product_id,$variation_id=null,$sku=null,$disabled=false, $classes='') {
@@ -329,7 +340,7 @@ final class WC_Dintero_HP {
     }
     public function cart_express_checkout_button_html() {
         $url = $this->express_checkout_url();
-      	
+
         $url = wp_nonce_url($url,'express','sec');
         $className = 'button dintero-express-checkout';
         $imgurl = '';
@@ -348,7 +359,7 @@ final class WC_Dintero_HP {
         }
         $button = "<a href='#' class='".$className."' onclick='dintero_express_checkout();' title='$title' style='background-image: url(".$imgurl.");'></a>";
         $button = apply_filters('woo_vipps_cart_express_checkout_button', $button, $url);
-       
+
 
         echo $button;
         	echo( "<script type=\"text/javascript\">
@@ -423,7 +434,7 @@ final class WC_Dintero_HP {
 
             " );
 
-        	
+
     }
 
      public function express_checkout_url() {
@@ -458,7 +469,7 @@ final class WC_Dintero_HP {
     }
 
 
-    // Special pages, and some callbacks. IOK 2018-05-18 
+    // Special pages, and some callbacks. IOK 2018-05-18
     public function template_redirect() {
         // Handle special callbacks
         $special = $this->is_special_page() ;
@@ -491,7 +502,7 @@ final class WC_Dintero_HP {
         if ( !get_option('permalink_structure')) {
             if (sanitize_text_field( wp_unslash($_REQUEST['dintero-consent-removal']))){
                 return sanitize_text_field( wp_unslash($_REQUEST['callback']));
-            } 
+            }
             return false;
         }
         if (preg_match("!/dintero-consent-removal/([^/]*)!", sanitize_text_field( wp_unslash($_SERVER['REQUEST_URI'])), $matches)) {
@@ -564,11 +575,11 @@ final class WC_Dintero_HP {
     }
     // Used as a landing page for launching express checkout - borh for the cart and for single products. IOK 2018-09-28
     protected function print_express_checkout_page($execute,$action,$productinfo=null) {
-        
+
     }
 
 
-    
+
 
 
 	/**
@@ -710,7 +721,7 @@ final class WC_Dintero_HP {
 		$order = wc_get_order( $order_id );
 		if ( ! empty( $order ) && $order instanceof WC_Order ) {
 			$used_coupons = $order->get_used_coupons();
-		
+
 			$coupons = WC()->cart->get_coupons();
 
 			foreach ($coupons as $coupon_code=>$cdata) {
@@ -740,7 +751,7 @@ final class WC_Dintero_HP {
 				}
 			}
 			$order->calculate_totals();
-		}		
+		}
 	}
 
 	/**
@@ -755,18 +766,18 @@ final class WC_Dintero_HP {
 			if ( strpos( $url, $template_name ) !== false ) {
 				$start = strpos( $url, $template_name );
 				$first_part = substr( $url, $start + strlen( $template_name ) );
-                $orderUrl =  explode('?',$first_part); 
+                $orderUrl =  explode('?',$first_part);
 				//$order_id = substr( $first_part, 0, strpos( $first_part, '/' ) );
                 $order_id = $orderUrl[0];
-               
-                
+
+
 				$order = wc_get_order( $order_id );
 
 				if ( ! empty( $order ) && $order instanceof WC_Order ) {
 					$order_key = get_post_meta( $order_id, '_order_key', true );
 
 					if ( sanitize_text_field( wp_unslash( $_REQUEST['key'] ) ) == $order_key ) {
-						if ( isset( $_REQUEST['error'] ) && 'cancelled' == $_REQUEST['error'] ) {						
+						if ( isset( $_REQUEST['error'] ) && 'cancelled' == $_REQUEST['error'] ) {
 							$order_status = $order->get_status();
 							if ( 'pending' == $order_status ) {
 								//$order->update_status( 'failed' );
@@ -795,7 +806,7 @@ final class WC_Dintero_HP {
 	 * @return string
 	 */
 	public function override_template( $template, $template_name ) {
-	
+
 		if ( is_checkout() && WCDHP()->setting()->get('enabled') == 'yes') {
 			// Fallback Order Received, used when WooCommerce checkout form submission fails.
 			if ( 'checkout/thankyou.php' === $template_name ) {
@@ -805,7 +816,7 @@ final class WC_Dintero_HP {
 			}
 
 			// Don't display template if we have a cart that doesn't needs payment.
-			
+
 			if ( apply_filters( 'dhp_check_if_needs_payment', true ) ) {
 				if ( ! WC()->cart->needs_payment() ) {
 					return $template;
@@ -822,7 +833,7 @@ final class WC_Dintero_HP {
 					// return DHP_ABSPATH . 'templates/dhp-checkout-noembed-express.php';
 					// There SHD be NO Change In Checkout page
 
-				
+
 				}else */
 				if ( 'yes' == $embed_enable ) {
 					if ( locate_template( 'woocommerce/dhp-checkout-embed-express.php' ) ) {
@@ -830,7 +841,7 @@ final class WC_Dintero_HP {
 					} else {
 						return DHP_ABSPATH . 'templates/dhp-checkout-embed-express.php';
 					}
-				}else {				
+				}else {
 					return $template;
 				}
 			}
@@ -838,7 +849,7 @@ final class WC_Dintero_HP {
 			// Pay.
 			if ( 'checkout/form-pay.php' === $template_name ) {
 				return DHP_ABSPATH . 'templates/dhp-pay.php';
-			}			
+			}
 		}
 
 		// Order detail customer info
@@ -868,8 +879,8 @@ final class WC_Dintero_HP {
 	 * Added by Ritesh | MooGruppen
 	 */
 	public function on_action_cart_updated($cart_updated ){
-		// Cart Updated 
-		// If Cart is updated we need to create new Dintero Checkout sension, hence clear the ongoing checkout session 
+		// Cart Updated
+		// If Cart is updated we need to create new Dintero Checkout sension, hence clear the ongoing checkout session
 		WC()->session->__unset('dintero_wc_order_id');
 	}
 
@@ -889,7 +900,7 @@ final class WC_Dintero_HP {
         foreach(explode('&', $postData) as $value)
         {
             $value1 = explode('=', $value);
-           
+
             $data[$value1[0]] = urldecode($value1[1]);
         }
         $customerData = array(
@@ -897,36 +908,36 @@ final class WC_Dintero_HP {
                 'billing_last_name'     => $data['billing_last_name'],
                 'billing_email'  => $data['billing_email'],
                 'billing_phone' => $data['billing_phone']
-                
+
             );
         if(isset($data['billing_vat'])){
             WC()->session->set( 'dintero_billing_vat',$data['billing_vat'] );
             $customerData['billing_vat'] =  $data['billing_vat'];
             $customerData['billing_company'] = $data['billing_company'];
-            
+
         }
-       
+
         WC()->customer->set_props($customerData);
         WC()->customer->save();
-        
+
 		// $chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
   //   	$posted_shipping_methods = isset( $_POST['shipping_method'] ) ? wc_clean( wp_unslash( $_POST['shipping_method'] ) ) : array();
   //   	$newMethod = array();
-    
-    	
+
+
   //   	if ( is_array( $posted_shipping_methods ) && count($posted_shipping_methods)>0 ) {
 		//     foreach ( $posted_shipping_methods as $i => $value ) {
 		//         $newMethod[ $i ] = $value;
 		//     }
-		   
+
 	 //    }
-    	
+
 
   //   	if($chosen_shipping_methods[0] != $newMethod[0]){
-    		
+
 	 //    	WC()->session->reload_checkout = true;
-	    	
+
 	 //    	WC()->session->__unset('dintero_wc_order_id');
 	 //    }
 	}
@@ -936,7 +947,7 @@ final class WC_Dintero_HP {
 
 	 //    $order->set_shipping_total('5');
 	 //    $order->save();
-	    
+
 	}
 	public function create_checkout_nav() {
 		$gateways = WC()->payment_gateways->get_available_payment_gateways();
@@ -958,7 +969,7 @@ final class WC_Dintero_HP {
 				$title = $gateway->settings['title'] ? $gateway->settings['title'] : '';
 				$id = $gateway->id ? $gateway->id : '';
 				$rel = 'dintero-hp' == $id ? 'dhp-embed' : 'dhp-others';
-				
+
 				if ( 'dintero-hp' == $id ) {
 					echo( '<div id="' . esc_attr( $id ) . '" rel="' . esc_attr ( $rel ) . '" style="width:' . esc_attr( $tab_w ) . '%;background-image: url(\'' . wp_kses_post( WCDHP()->checkout()->get_icon_tab() ) . '\');"></div>' );
 				} else {
