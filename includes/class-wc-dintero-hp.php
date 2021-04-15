@@ -128,11 +128,9 @@ final class WC_Dintero_HP {
 
         $this->add_shortcodes();
 
-		add_filter('woocommerce_order_note_class', array($this, 'woo_process_order_note_classes'), 10, 2);
-
-		add_filter( 'manage_edit-shop_order_columns', array($this, 'add_order_dintero_status_column_header'), 20 );
-		add_action( 'manage_shop_order_posts_custom_column', array($this,'add_order_dintero_status_column_content'));
-
+        add_filter('woocommerce_order_note_class', array($this, 'woo_process_order_note_classes'), 10, 2);
+        add_filter( 'manage_edit-shop_order_columns', array($this, 'add_order_dintero_status_column_header'), 20 );
+        add_action( 'manage_shop_order_posts_custom_column', array($this,'add_order_dintero_status_column_content'));
 	}
 
 
