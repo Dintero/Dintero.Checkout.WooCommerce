@@ -72,7 +72,6 @@ class Dintero_HP {
 
 		$this->load_dependencies();
 		$this->define_hooks();
-
 	}
 
 	/**
