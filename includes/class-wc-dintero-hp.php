@@ -235,13 +235,13 @@ final class WC_Dintero_HP {
 				echo '<mark class="order-status status-refunded"><span>Refunded</span></mark>';
 			} else if ($last_refund_failed > -1) {
 				echo '<mark class="order-status status-failed"><span>Refund failed</span></mark>';
-			}  else if ($last_capture_succeeded > -1) {
+			} else if ($last_capture_succeeded > -1) {
 				echo '<mark class="order-status status-completed"><span>Captured</span></mark>';
 			} else if ($last_capture_failed > $last_capture_succeeded) {
 				echo '<mark class="order-status status-failed"><span>Capture failed</span></mark>';
 			} else if ($last_authorize_succeeded && $order->get_status() == 'completed') {
 				echo '<span style="color:red;">Authorized</span>';
-			} else if($last_authorize_succeeded > -1) {
+			} else if ($last_authorize_succeeded > -1) {
 				echo '<mark class="order-status status-processing"><span>Authorized</span></mark>';
 			}
 		}
