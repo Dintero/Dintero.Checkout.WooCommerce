@@ -176,7 +176,29 @@ final class WC_Dintero_HP {
 	}
 
 	/**
-	 * Adds 'Profit' column content to 'Orders' page immediately after 'Total' column.
+	 * Adds 'Dintero status' column header to 'Orders' page.
+	 *
+	 * @param string[] $columns
+	 * @return string[] $new_columns
+	 */
+	public function add_order_dintero_status_column_header( $columns ) {
+
+		$new_columns = array();
+
+		foreach ( $columns as $column_name => $column_info ) {
+
+			$new_columns[ $column_name ] = $column_info;
+
+			if ( 'order_status' === $column_name ) {
+				$new_columns['dintero_status'] = __( 'Dintero', 'my-textdomain' );
+			}
+		}
+
+		return $new_columns;
+	}
+
+	/**
+	 * Adds 'Dintero status' column content to 'Orders' page.
 	 *
 	 * @param string[] $column name of column being displayed
 	 */
@@ -225,28 +247,6 @@ final class WC_Dintero_HP {
 				echo('Authorized');
 			}
 		}
-	}
-
-	/**
-	 * Adds 'Profit' column header to 'Orders' page immediately after 'Total' column.
-	 *
-	 * @param string[] $columns
-	 * @return string[] $new_columns
-	 */
-	public function add_order_dintero_status_column_header( $columns ) {
-
-		$new_columns = array();
-
-		foreach ( $columns as $column_name => $column_info ) {
-
-			$new_columns[ $column_name ] = $column_info;
-
-			if ( 'order_status' === $column_name ) {
-				$new_columns['dintero_status'] = __( 'Dintero', 'my-textdomain' );
-			}
-		}
-
-		return $new_columns;
 	}
 
     public function add_shortcodes() {
