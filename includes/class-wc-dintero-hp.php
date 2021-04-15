@@ -126,9 +126,13 @@ final class WC_Dintero_HP {
 
         add_action( 'wp_footer', array( $this, 'maybe_submit_wc_checkout' ), 999 );
 
-		 $this->add_shortcodes();
+        $this->add_shortcodes();
 
 		add_filter('woocommerce_order_note_class', array($this, 'woo_process_order_note_classes'), 10, 2);
+
+		add_filter( 'manage_edit-shop_order_columns', array($this, 'add_order_dintero_status_column_header'), 20 );
+		add_action( 'manage_shop_order_posts_custom_column', array($this,'add_order_dintero_status_column_content'));
+
 	}
 
 
@@ -171,6 +175,79 @@ final class WC_Dintero_HP {
 		return $address_fields;
 	}
 
+	/**
+	 * Adds 'Profit' column content to 'Orders' page immediately after 'Total' column.
+	 *
+	 * @param string[] $column name of column being displayed
+	 */
+	public function add_order_dintero_status_column_content( $column ) {
+		global $post;
+
+		if ( 'dintero_status' === $column ) {
+
+			$order = wc_get_order( $post->ID );
+			$notes = wc_get_order_notes([
+					'order_id' => $order->get_id(),
+					'type' => 'internal',
+			]);
+
+			$last_authorize_succeeded = -1;
+			$last_capture_failed = -1;
+			$last_capture_succeeded = -1;
+			$last_refund_succeeded = -1;
+			$last_refund_failed = -1;
+
+
+			foreach($notes as $note) {
+				if (strpos( $note->content, 'Payment capture failed') !== false) {
+					$last_capture_failed = $note->id;
+				} else if (strpos( $note->content, 'Payment captured via Dintero') !== false) {
+					$last_capture_succeeded = $note->id;
+				} else if (strpos( $note->content, 'Transaction authorized via Dintero') !== false) {
+					$last_authorize_succeeded = $note->id;
+				} else if (strpos( $note->content, 'Payment refunded via Dintero.') !== false) {
+					$last_refund_succeeded = $note->id;
+				} else if (strpos( $note->content, 'Payment refund failed') !== false) {
+					$last_refund_failed = $note->id;
+				}
+			}
+			if ($last_refund_succeeded > -1) {
+				echo 'Refunded';
+			} else if ($last_refund_failed > -1) {
+				echo '<span style="color:red;">Refund failed</span>';
+			}  else if ($last_capture_succeeded > -1) {
+				echo('Captured');
+			} else if ($last_capture_failed > $last_capture_succeeded) {
+				echo '<span style="color:red;">Capture failed</span>';
+			} else if ($last_authorize_succeeded && $order->get_status() == 'completed') {
+				echo '<span style="color:red;">Authorized</span>';
+			} else if($last_authorize_succeeded > -1) {
+				echo('Authorized');
+			}
+		}
+	}
+
+	/**
+	 * Adds 'Profit' column header to 'Orders' page immediately after 'Total' column.
+	 *
+	 * @param string[] $columns
+	 * @return string[] $new_columns
+	 */
+	public function add_order_dintero_status_column_header( $columns ) {
+
+		$new_columns = array();
+
+		foreach ( $columns as $column_name => $column_info ) {
+
+			$new_columns[ $column_name ] = $column_info;
+
+			if ( 'order_status' === $column_name ) {
+				$new_columns['dintero_status'] = __( 'Dintero', 'my-textdomain' );
+			}
+		}
+
+		return $new_columns;
+	}
 
     public function add_shortcodes() {
         add_shortcode('woo_dintero_buy_now', array($this, 'buy_now_button_shortcode'));
