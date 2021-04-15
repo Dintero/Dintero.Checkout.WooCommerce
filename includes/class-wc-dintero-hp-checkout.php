@@ -2796,7 +2796,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 						'quantity'    => 1,
 						'vat_amount'  => $item_tax_amount,
 						'vat'         => $item_tax_percentage,
-						'amount'      => 50000000000000,
+						'amount'      => $item_line_total_amount,
 						'line_id'     => $line_id
 					);
 					array_push( $items, $item );
@@ -2813,7 +2813,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				);
 
 				$payload = array(
-					'amount'            => 599999999999999,
+					'amount'            => $order_total_amount,
 					'capture_reference' => strval( $order_id ),
 					'items'             => $items
 				);
