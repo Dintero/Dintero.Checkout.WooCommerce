@@ -190,7 +190,7 @@ final class WC_Dintero_HP {
 			$new_columns[ $column_name ] = $column_info;
 
 			if ( 'order_status' === $column_name ) {
-				$new_columns['dintero_status'] = __( 'Dintero', 'my-textdomain' );
+				$new_columns['dintero_status'] = __( 'Dintero status', 'my-textdomain' );
 			}
 		}
 
@@ -234,17 +234,17 @@ final class WC_Dintero_HP {
 				}
 			}
 			if ($last_refund_succeeded > -1) {
-				echo 'Refunded';
+				echo '<mark class="order-status status-refunded"><span>Refunded</span></mark>';
 			} else if ($last_refund_failed > -1) {
-				echo '<span style="color:red;">Refund failed</span>';
+				echo '<mark class="order-status status-failed"><span>Refund failed</span></mark>';
 			}  else if ($last_capture_succeeded > -1) {
-				echo('Captured');
+				echo '<mark class="order-status status-completed"><span>Captured</span></mark>';
 			} else if ($last_capture_failed > $last_capture_succeeded) {
-				echo '<span style="color:red;">Capture failed</span>';
+				echo '<mark class="order-status status-failed"><span>Capture failed</span></mark>';
 			} else if ($last_authorize_succeeded && $order->get_status() == 'completed') {
 				echo '<span style="color:red;">Authorized</span>';
 			} else if($last_authorize_succeeded > -1) {
-				echo('Authorized');
+				echo '<mark class="order-status status-processing"><span>Authorized</span></mark>';
 			}
 		}
 	}
