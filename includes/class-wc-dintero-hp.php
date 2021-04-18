@@ -207,12 +207,16 @@ final class WC_Dintero_HP {
 					'order_id' => $order->get_id(),
 					'type' => 'internal',
 			]);
-
+			$txn_id = $order->get_transaction_id();
+			$account_id = explode( '.', $txn_id )[0];
+			$backoffice_url = 'https://backoffice.dintero.com/' . $account_id . '/payments/transactions/' . $txn_id;
+			$backoffice_link_start = '<a href="'. $backoffice_url . '" target="_blank" rel="noopener">';
 			$last_authorize_succeeded = -1;
 			$last_capture_failed = -1;
 			$last_capture_succeeded = -1;
 			$last_refund_succeeded = -1;
 			$last_refund_failed = -1;
+			$last_on_hold = -1;
 
 
 			foreach($notes as $note) {
@@ -226,20 +230,24 @@ final class WC_Dintero_HP {
 					$last_refund_succeeded = $note->id;
 				} else if (strpos( $note->content, 'Payment refund failed') !== false) {
 					$last_refund_failed = $note->id;
+				} else if (strpos( $note->content, 'The payment is put on on-hold') !== false) {
+					$last_on_hold = $note->id;
 				}
 			}
 			if ($last_refund_succeeded > -1) {
-				echo '<mark class="order-status status-refunded"><span>' . __('Refunded') . '</span></mark>';
+				echo $backoffice_link_start . '<mark class="order-status status-refunded"><span>' . __('Refunded') . '</span></mark></a>';
 			} else if ($last_refund_failed > -1) {
-				echo '<mark class="order-status status-failed"><span>' . __('Refund failed') . '</span></mark>';
+				echo $backoffice_link_start . '<mark class="order-status status-failed"><span>' . __('Refund failed') . '</span></mark></a>';
 			} else if ($last_capture_succeeded > -1) {
-				echo '<mark class="order-status status-completed"><span>' . __('Captured') . '</span></mark>';
+				echo $backoffice_link_start . '<mark class="order-status status-completed"><span>' . __('Captured') . '</span></mark></a>';
 			} else if ($last_capture_failed > $last_capture_succeeded) {
-				echo '<mark class="order-status status-failed"><span>' . __('Capture failed') . '</span></mark>';
+				echo $backoffice_link_start . '<mark class="order-status status-failed"><span>' . __('Capture failed') . '</span></mark></a>';
 			} else if ($last_authorize_succeeded && $order->get_status() == 'completed') {
-				echo '<mark class="order-status status-failed"><span>' . __('Authorized') . '</span></mark>';
+				echo $backoffice_link_start . '<mark class="order-status status-failed"><span>' . __('Authorized') . '</span></mark></a>';
 			} else if ($last_authorize_succeeded > -1) {
-				echo '<mark class="order-status status-processing"><span>' . __('Refund failed') . '</span></mark>';
+				echo $backoffice_link_start . '<mark class="order-status status-processing"><span>' . __('Authorized') . '</span></mark></a>';
+			} else if ($last_on_hold > -1) {
+				echo $backoffice_link_start . '<mark class="order-status status-on-hold"><span>' . __('On hold') . '</span></mark></a>';
 			}
 		}
 	}
