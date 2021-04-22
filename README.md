@@ -44,6 +44,9 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 ## Changelog
 
+2021.04.22
+
+* Added Dintero Status-column based on the order notes
 
 2021.04.14
 
