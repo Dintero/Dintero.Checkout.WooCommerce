@@ -1,0 +1,8 @@
+.note.failed-note .note_content {
+    background-color: red !important;
+    color: #ffffff;
+}
+
+.note.failed-note .note_content:after {
+    border-color: red transparent !important;
+}
