@@ -111,7 +111,8 @@ class WC_AJAX_HP {
 			'destroy_session',
 			'update_shipping_postcode',
 			'check_transaction',
-			'test'
+			'test',
+			'update_shipping_line_id'
 		);
 
 		foreach ( $ajax_events_nopriv as $ajax_event ) {
@@ -280,6 +281,23 @@ class WC_AJAX_HP {
 			'success' => true
 		);
 		wp_send_json($result);
+		
+	}
+
+
+	public function update_shipping_line_id(){
+		$shippingLineId = sanitize_text_field($_POST['line_id']);
+		if($shippingLineId){
+			WC()->session->__unset('dintero_shipping_line_id');
+			WC()->session->set( 'dintero_shipping_line_id', $shippingLineId );
+			$result = array(
+				'success' => true
+			);
+			echo sanitize_key(WC()->session->get( 'dintero_shipping_line_id'));
+			exit;
+			wp_send_json($result);
+		}
+		
 		
 	}
 	/*
@@ -894,9 +912,7 @@ class WC_AJAX_HP {
 	 * Update order shipping address post back
 	 */
 	public static function dhp_update_ship() {
-
 		
-
 		$str11 = 'ph';
 		$str12 = 'p:';
 		$str2 = '/';
@@ -921,8 +937,10 @@ class WC_AJAX_HP {
 			$o = $posted_arr['order'];
 			$a = $posted_arr['order']['shipping_address'];
 			$shipping_options_posted = $posted_arr['order']['shipping_option'];
-
-		
+			
+			if(isset($posted_arr['express']['shipping_options'])){
+				$shipping_options_posted = $posted_arr['express']['shipping_options'];
+			}
 
 			$first_name = isset($a['first_name']) ? $a['first_name'] : '';
 			$last_name = isset($a['last_name']) ? $a['last_name'] : '';
@@ -972,13 +990,9 @@ class WC_AJAX_HP {
 			
 			//$shipping_options_posted['amount'] = self::get_shipping_amount();
 			$shipping_amount = number_format( WC()->cart->shipping_total + WC()->cart->shipping_tax_total, wc_get_price_decimals(), '.', '' ) * 100;
-			exit;  // Exit here as it d
-			$shipping_options_posted['amount'] = $shipping_amount;
-			$shipping_options = array(
-									0=> $shipping_options_posted
-								);
-
-			$shipping_arr = array('shipping_options'=>$shipping_options);
+			
+			$shipping_options_posted = $posted_arr['express']['shipping_options'];
+			$shipping_arr = array('shipping_options'=>$shipping_options_posted);
 			
 			
 			wp_send_json($shipping_arr);

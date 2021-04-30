@@ -44,6 +44,8 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 ## Changelog
 
+2021.04.30
+* Added Functionality for pushing shipping methods in Iframe
 
 2021.04.22
 

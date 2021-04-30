@@ -293,6 +293,14 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
+			'shipping_method_in_iframe' => array(
+				'title'       => __( 'Shipping methods in iframe:' ),
+				'label'       => __( 'Display Shipping methods in Dintero iframe.' ),
+				'type'        => 'checkbox',
+				'description' => __( 'Shipping methods will be pushed in the iframe, Recomended to use only when shipping method are of type flat i.e. Price not dependent on Shipping postcode' ),
+				'default'     => 'no',
+				
+			),
 			'express_button_type'                        => array(
 				'title'       => __( 'Express Button Image Type:' ),
 				'label'       => __( 'Express Button Image Type' ),
@@ -799,6 +807,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 		if($embed_enable == 'yes' && !$isExpress  && !isset($_GET['pay_for_order'])){ // If its an Iframe
 			$redirect_url = $this->process_payment_handler( $order_id , true);
 			WC()->session->__unset('dintero_wc_order_id');
+			WC()->session->__unset('dintero_shipping_line_id');
+
 			if ( $redirect_url ) {
 
 				wc_empty_cart();
@@ -854,6 +864,9 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 			update_post_meta( $order_id, '_wc_dintero_session_id', sanitize_key(WC()->session->get( 'dintero_wc_order_id' ) ) );
 
 			update_post_meta( $order_id, '_transaction_id', sanitize_key( $dintero_order_transaction_id ) );
+
+			// Update Shipping Line Id
+			update_post_meta($order_id,'_wc_dintero_shipping_line_id',sanitize_key(WC()->session->get( 'dintero_shipping_line_id')));
 
 			// Update the Dintero order with new confirmation merchant reference.  TO DO
 			$transaction = WCDHP()->checkout()->update_transaction($dintero_order_transaction_id, $order_id);
@@ -1485,6 +1498,15 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 						'amount'      => $item_line_total_amount,
 						'line_id'     => 'shipping_method'
 					);
+					$shippingLineId = get_post_meta($order_id,'_wc_dintero_shipping_line_id');
+
+					if($shippingLineId && count($shippingLineId)>0){
+						if($shippingLineId[0] != ''){
+							$item['line_id'] = $shippingLineId[0];
+						}
+						
+					}
+
 					array_push( $items, $item );
 				}
 

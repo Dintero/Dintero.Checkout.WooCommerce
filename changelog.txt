@@ -1,4 +1,6 @@
 *** WooCommerce Dintero Plugin Changelog ***
+2021.04.30
+* Added Functionality for pushing shipping methods in Iframe
 
 2021.04.22
 
