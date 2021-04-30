@@ -435,6 +435,9 @@ class WC_AJAX_HP {
 				update_post_meta( $order->get_id(), '_shipping_phone', sanitize_text_field($transaction['shipping_address']['phone_number'] ) );
 				update_post_meta( $order->get_id(), '_shipping_email', sanitize_text_field( $transaction['shipping_address']['email']  ) );
 
+				// Update Shipping Line Id
+				update_post_meta($order_id,'_wc_dintero_shipping_line_id',sanitize_text_field( $transaction['shipping_option']['line_id']  ) );
+
 				$data['shipping_country'] = sanitize_text_field($transaction['shipping_address']['country']);
 				$data['shipping_address_1'] = sanitize_text_field( $transaction['shipping_address']['address_line'] );
 				$data['shipping_city'] = sanitize_text_field( $transaction['shipping_address']['postal_place'] );
