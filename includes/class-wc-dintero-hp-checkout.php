@@ -1973,7 +1973,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				'amount'=> (int) $this->get_shipping_amount(),
 				'vat_amount'=> (int)$this->get_shipping_tax_amount(),
 				'vat'=> $this->get_shipping_tax_rate(),
-				'title'=>'Shipping: ' . $this->get_shipping_name(),
+				'title'=> $this->get_shipping_name(),
 				'description'=>'',
 				'delivery_method'=>'delivery',
 				'operator'=>'',
