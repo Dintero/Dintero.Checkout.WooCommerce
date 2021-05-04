@@ -2100,7 +2100,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 						$dintero_shipping_options[] = array(
 							'id'          => $method_id,
 							'line_id' 	  => 'shipping_method_'.$j,
-							'title'       =>  'Shipping: '.$method_name,
+							'title'       =>  $method_name,
 							'amount'      =>  (int) $method_price,
 							'vat_amount'  =>(int) $method_tax_amount,
 							'vat'    => $method_tax_rate,
@@ -2127,7 +2127,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 						'amount' => (int)$this->get_shipping_amount(),
 						'vat_amount' => (int)$this->get_shipping_tax_amount(),
 						'vat' => $this->get_shipping_tax_rate(),
-						'title' => 'Shipping: ' . $this->get_shipping_name(),
+						'title' => $this->get_shipping_name(),
 						'description' => '',
 						'delivery_method' => 'delivery',
 						'operator' => '',
@@ -2344,12 +2344,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			if (!$express) {
 				$item = array(
 					'id'          => 'shipping',
-					'description' => 'Shipping: ' . $order->get_shipping_method(),
+					'description' =>  $order->get_shipping_method(),
 					'quantity'    => 1,
 					'amount'=> $this->get_shipping_amount(),
 					'vat_amount'=> $this->get_shipping_tax_amount(),
 					'vat'=> $this->get_shipping_tax_rate(),
-					'title'=>'Shipping: ' . $this->get_shipping_name(),
+					'title'=> $this->get_shipping_name(),
 
 					'line_id'     => $line_id
 				);
@@ -2381,7 +2381,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 							'amount'=> $this->get_shipping_amount(),
 							'vat_amount'=> $this->get_shipping_tax_amount(),
 							'vat'=> $this->get_shipping_tax_rate(),
-							'title'=>'Shipping: ' . $this->get_shipping_name(),
+							'title'=> $this->get_shipping_name(),
 							'description'=>'',
 							'delivery_method'=>'delivery',
 							'operator'=>'',

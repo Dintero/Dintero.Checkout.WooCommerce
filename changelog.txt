@@ -1,4 +1,7 @@
 *** WooCommerce Dintero Plugin Changelog ***
+2021.05.04
+* Removed Shipping text from Frakt Iframe window
+
 2021.04.30
 * Added Functionality for pushing shipping methods in Iframe
 
