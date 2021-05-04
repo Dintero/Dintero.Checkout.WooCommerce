@@ -224,6 +224,8 @@ final class WC_Dintero_HP {
 					$last_capture_failed = $note->id;
 				} else if (strpos( $note->content, 'Payment captured via Dintero') !== false) {
 					$last_capture_succeeded = $note->id;
+				} else if (strpos( $note->content, 'Payment auto captured via Dintero') !== false) {
+					$last_capture_succeeded = $note->id;
 				} else if (strpos( $note->content, 'Transaction authorized via Dintero') !== false) {
 					$last_authorize_succeeded = $note->id;
 				} else if (strpos( $note->content, 'Payment refunded via Dintero.') !== false) {
