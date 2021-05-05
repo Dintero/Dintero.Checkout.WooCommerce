@@ -3,7 +3,7 @@ Contributors: moogruppen, dintero
 Tags: woocommerce, Payment, Checkout, Vipps, Visa, Mastercard, Invoice, Instalment, Installment, Swish, Gateway, payment, dintero, Betalingsløsning, Checkout, Betaling, Vipps, Visa, Mastercard, Faktura, Delbetaling, Swish, Betalingsgateway, vipps, Betaling, nettbutikk
 Donate link: https://dintero.com
 Requires at least: 4.0
-Tested up to: 5.6
+Tested up to: 5.7
 Requires PHP: 5.6
 WC requires at least: 3.4.0
 WC tested up to: 4.0.0
@@ -42,13 +42,13 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 
 == Changelog ==
-2021.03.30
+2021.05.05
 
- * Pay for Order issue fix
-2021.03.26
+* Removed Shipping text from Frakt Iframe window
 
- * Redirect to cart on failed payment
+2021.04.30
 
+* Added Functionality for pushing shipping methods in Iframe
 
 2021.04.22
 
@@ -58,13 +58,11 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
  * Show payment method if paid with Collector and Swish
 
-
 2021.03.31
 
  * Bugfix: Pay for order created in wp-admin
 
 2021.03.29
-
 
  * Redirect to cart on failed payment
 
