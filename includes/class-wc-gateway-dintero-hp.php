@@ -299,7 +299,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'type'        => 'checkbox',
 				'description' => __( 'Shipping methods will be pushed in the iframe, Recomended to use only when shipping method are of type flat i.e. Price not dependent on Shipping postcode' ),
 				'default'     => 'no',
-				
+
 			),
 			'express_button_type'                        => array(
 				'title'       => __( 'Express Button Image Type:' ),
@@ -663,6 +663,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 					array_push($customer_types, 'b2b', 'b2c');
 				}
 				if ($hasShippingOptions) {
+					$method_id = reset( $order->get_items( 'shipping' ) )->get_method_id();
+					$delivery_method = strpos($method_id, "local_pickup" ) === 0 ? 'pick_up' : 'delivery';
 					$dintero_shipping_options = array(
 						0 => array(
 							'id' => 'shipping_express',
@@ -672,7 +674,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 							'vat' => $item_tax_percentage,
 							'title' => 'Shipping: ' . $order->get_shipping_method(),
 							'description' => '',
-							'delivery_method' => 'delivery',
+							'delivery_method' => $delivery_method,
 							'operator' => '',
 							'operator_product_id' => '',
 							/*
@@ -1504,7 +1506,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 						if($shippingLineId[0] != ''){
 							$item['line_id'] = $shippingLineId[0];
 						}
-						
+
 					}
 
 					array_push( $items, $item );

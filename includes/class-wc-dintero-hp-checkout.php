@@ -1967,22 +1967,24 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		);
 
 		if (WC()->shipping->get_packages() && WC()->session->get( 'chosen_shipping_methods' )[0]) {
+			$id = (string)$selectedShippingReference['id'];
+			$delivery_method = strpos($id, "local_pickup" ) === 0 ? 'pick_up' : 'delivery';
 			$payload["order"]['shipping_option'] = array(
-				'id'=> (string)$selectedShippingReference['id'],
+				'id'=> $id,
 				'line_id'=>'shipping_method',
 				'amount'=> (int) $this->get_shipping_amount(),
 				'vat_amount'=> (int)$this->get_shipping_tax_amount(),
 				'vat'=> $this->get_shipping_tax_rate(),
 				'title'=> $this->get_shipping_name(),
 				'description'=>'',
-				'delivery_method'=>'delivery',
+				'delivery_method'=> $delivery_method,
 				'operator'=>'',
 				'operator_product_id'=> (string)$selectedShippingReference['instance_id'],
 			);
 
 
-			
-			
+
+
 		} else {
 			$payload["order"]["shipping_option"]	= array(
 				'id' => 'shipping_express',
@@ -2080,8 +2082,10 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 				foreach ( $packages as $i => $package ) {
 					$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
 					foreach ( $package['rates'] as $method ) {
+
 						$method_id   = $method->id;
 						$method_name = $method->label;
+						$delivery_method = strpos($method_id, "local_pickup" ) === 0 ? 'pick_up' : 'delivery';
 
 						if ( $separate_sales_tax || 'excl' === $tax_display ) {
 							$method_price = intval( round( $method->cost, 2 ) * 100 );
@@ -2105,10 +2109,10 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 							'vat_amount'  =>(int) $method_tax_amount,
 							'vat'    => $method_tax_rate,
 							'description' => '',
-							'delivery_method' => 'delivery',
+							'delivery_method' => $delivery_method,
 							'operator' => '',
 							'operator_product_id' => (string)$method->instance_id,
-							
+
 						);
 						if($j == 0){
 							WC()->session->set( 'dintero_shipping_line_id', 'shipping_method_'.$j );
@@ -2116,31 +2120,33 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 
 						$j++;
 					}
-					
+
 				}
 			}else{
 				// If shipping is not In Iframe
+				$id = (string)$selectedShippingReference['id'];
+				$delivery_method = strpos($id, "local_pickup" ) === 0 ? 'pick_up' : 'delivery';
 				$dintero_shipping_options = array(
 					0 => array(
-						'id' => (string)$selectedShippingReference['id'],
+						'id' => $id,
 						'line_id' => 'shipping_method',
-						'amount' => (int)$this->get_shipping_amount(),
-						'vat_amount' => (int)$this->get_shipping_tax_amount(),
+						'amount' => $this->get_shipping_amount(),
+						'vat_amount' => $this->get_shipping_tax_amount(),
 						'vat' => $this->get_shipping_tax_rate(),
 						'title' => $this->get_shipping_name(),
 						'description' => '',
-						'delivery_method' => 'delivery',
+						'delivery_method' => $delivery_method,
 						'operator' => '',
 						'operator_product_id' => (string)$selectedShippingReference['instance_id'],
 					)
 				);
 			}
-			
 
 
-			
-			
-			
+
+
+
+
 			$express_option = array(
 				'shipping_address_callback_url' => $ship_callback_url,
 				'customer_types' => $customer_types,
@@ -2237,7 +2243,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$payload['express'] = $express_option;
 
 		//}
-		
+
 
 
 		$response = wp_remote_post( $api_endpoint, array(
@@ -2248,14 +2254,14 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			'sslverify' => false
 		) );
 
-		
+
 
 		// Retrieve the body's response if no errors found
 		$response_body  = wp_remote_retrieve_body( $response );
 		$response_trace_id = wp_remote_retrieve_header( $response, 'request-id');
 		$response_code = wp_remote_retrieve_response_code( $response );
 		$response_array = json_decode( $response_body, true );
-		
+
 		if ( ! array_key_exists( 'url', $response_array ) ) {
 			$msg = isset($response_array['error']) && isset($response_array['error']['message']) ? $response_array['error']['message'] : 'Unknown Error';
 			echo '<p class="dintero-error-message">Problems creating payment, please contact Dintero with this message: ' . $response_trace_id . ', ';
@@ -2372,9 +2378,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					array_push($customer_types, 'b2b', 'b2c');
 				}
 				if ($hasShippingOptions) {
+					$id = (string)$selectedShippingReference['id'];
+					$delivery_method = strpos($id, "local_pickup" ) === 0 ? 'pick_up' : 'delivery';
 					$dintero_shipping_options = array(
 						0=>array(
-							'id'=> (string)$selectedShippingReference['id'],
+							'id'=> $id,
 							'line_id'=>$line_id,
 							//"countries"=>array($order->get_shipping_country()),
 							'country'=>$order->get_shipping_country(),
@@ -2383,7 +2391,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 							'vat'=> $this->get_shipping_tax_rate(),
 							'title'=> $this->get_shipping_name(),
 							'description'=>'',
-							'delivery_method'=>'delivery',
+							'delivery_method'=> $delivery_method,
 							'operator'=>'',
 							'operator_product_id'=>(string)$selectedShippingReference['instance_id'],
 						)
