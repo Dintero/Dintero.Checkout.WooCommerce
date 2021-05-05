@@ -1140,6 +1140,10 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$msg = isset($results['msg']) ? $results['msg'] : '';
 		$url = isset($results['url']) ? $results['url'] : '';
 		$id = isset($results['id']) ? $results['id'] : '';
+		$isShippingInIframe = 'yes' == WCDHP()->setting()->get('shipping_method_in_iframe');
+		if(!$isShippingInIframe){
+			$isShippingInIframe = 0;
+		}
 
 		if (1 == $result && $url) {
 			echo ('<span class="spinner"></span>');
@@ -1159,16 +1163,14 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 					order_review.appendChild(emb);
 					var checkoutSessionData;
 					var checkoutSession;
-				
-
+					var isShippingInIframe = ".$isShippingInIframe.";
+					var homeUrl = \"" .home_url(). "\";
 					document.addEventListener('DOMContentLoaded', function(event) { 
 					  	jQuery( document ).on( 'updated_checkout', function(){
-							if(checkoutSession){
-								
+					  		if(checkoutSession && isShippingInIframe == 0){
+					  			// If shipping in Iframe then we dont need the lock session 
 								checkoutSession.lockSession();
 							}
-							
-
 						});
 
 						jQuery('input:radio[name=name]:checked').change(function () {
@@ -1249,7 +1251,31 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 									jQuery( '#billing_phone' ).val( ss.order.shipping_address.phone_number);
 									jQuery( '#billing_email' ).val( ss.order.shipping_address.email );
 									jQuery( '#billing_country' ).val( ss.order.shipping_address.country.toUpperCase() );
+
+									var fieldName = 'shipping_method[0]';
+
 									
+
+									var url = \"".home_url().'?dhp-ajax=update_shipping_line_id'."\";
+									var data = {
+									        action: 'update_shipping_line_id',
+									        line_id: ss.order.shipping_option.line_id
+									    };    
+									jQuery.ajax({
+										type:		'POST',
+										url:		url,
+										data:		data,
+										
+										success:	function( result ) {
+														console.log('Success Called');
+														
+														
+														
+													}
+									});
+
+									jQuery('input:radio[name=\"'+fieldName+'\"][value=\"'+ss.order.shipping_option.id+'\"]').attr('checked',true);
+									//jQuery('input:radio[name=\"'+fieldName+'\"][value=\"'+ss.order.shipping_option.id+'\"]').trigger('click');
 									if(ss.order.shipping_address.business_name){
 										jQuery( '#billing_company' ).val(ss.order.shipping_address.business_name);
 										jQuery( '#billing_vat' ).val(ss.order.shipping_address.organization_number);
@@ -1944,15 +1970,19 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			$payload["order"]['shipping_option'] = array(
 				'id'=> (string)$selectedShippingReference['id'],
 				'line_id'=>'shipping_method',
-				'amount'=> $this->get_shipping_amount(),
-				'vat_amount'=> $this->get_shipping_tax_amount(),
+				'amount'=> (int) $this->get_shipping_amount(),
+				'vat_amount'=> (int)$this->get_shipping_tax_amount(),
 				'vat'=> $this->get_shipping_tax_rate(),
-				'title'=>'Shipping: ' . $this->get_shipping_name(),
+				'title'=> $this->get_shipping_name(),
 				'description'=>'',
 				'delivery_method'=>'delivery',
 				'operator'=>'',
 				'operator_product_id'=> (string)$selectedShippingReference['instance_id'],
 			);
+
+
+			
+			
 		} else {
 			$payload["order"]["shipping_option"]	= array(
 				'id' => 'shipping_express',
@@ -2040,20 +2070,77 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		}
 
 		if (WC()->shipping->get_packages() && WC()->session->get( 'chosen_shipping_methods' )[0]) {
-			$dintero_shipping_options = array(
-				0 => array(
-					'id' => (string)$selectedShippingReference['id'],
-					'line_id' => 'shipping_method',
-					'amount' => (int)$this->get_shipping_amount(),
-					'vat_amount' => $this->get_shipping_tax_amount(),
-					'vat' => $this->get_shipping_tax_rate(),
-					'title' => 'Shipping: ' . $this->get_shipping_name(),
-					'description' => '',
-					'delivery_method' => 'delivery',
-					'operator' => '',
-					'operator_product_id' => (string)$selectedShippingReference['instance_id'],
-				)
-			);
+			$dintero_shipping_options = array();
+			$isShippingInIframe = 'yes' == WCDHP()->setting()->get('shipping_method_in_iframe');
+
+			if($isShippingInIframe){
+				$packages         = WC()->shipping->get_packages();
+				$tax_display      = get_option( 'woocommerce_tax_display_cart' );
+				$j = 0;
+				foreach ( $packages as $i => $package ) {
+					$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
+					foreach ( $package['rates'] as $method ) {
+						$method_id   = $method->id;
+						$method_name = $method->label;
+
+						if ( $separate_sales_tax || 'excl' === $tax_display ) {
+							$method_price = intval( round( $method->cost, 2 ) * 100 );
+						} else {
+							$method_price = intval( round( $method->cost + array_sum( $method->taxes ), 2 ) * 100 );
+						}
+
+						if ( array_sum( $method->taxes ) > 0 && ( ! $separate_sales_tax && 'excl' !== $tax_display ) ) {
+							$method_tax_amount = intval( round( array_sum( $method->taxes ), 2 ) * 100 );
+							$method_tax_rate   = intval( round( ( array_sum( $method->taxes ) / $method->cost ) * 100, 2 ) * 100 );
+						} else {
+							$method_tax_amount = 0;
+							$method_tax_rate   = $this->get_shipping_tax_rate();
+						}
+						$method_selected    = $method->id === $chosen_method ? true : false;
+						$dintero_shipping_options[] = array(
+							'id'          => $method_id,
+							'line_id' 	  => 'shipping_method_'.$j,
+							'title'       =>  $method_name,
+							'amount'      =>  (int) $method_price,
+							'vat_amount'  =>(int) $method_tax_amount,
+							'vat'    => $method_tax_rate,
+							'description' => '',
+							'delivery_method' => 'delivery',
+							'operator' => '',
+							'operator_product_id' => (string)$method->instance_id,
+							
+						);
+						if($j == 0){
+							WC()->session->set( 'dintero_shipping_line_id', 'shipping_method_'.$j );
+						}
+
+						$j++;
+					}
+					
+				}
+			}else{
+				// If shipping is not In Iframe
+				$dintero_shipping_options = array(
+					0 => array(
+						'id' => (string)$selectedShippingReference['id'],
+						'line_id' => 'shipping_method',
+						'amount' => (int)$this->get_shipping_amount(),
+						'vat_amount' => (int)$this->get_shipping_tax_amount(),
+						'vat' => $this->get_shipping_tax_rate(),
+						'title' => $this->get_shipping_name(),
+						'description' => '',
+						'delivery_method' => 'delivery',
+						'operator' => '',
+						'operator_product_id' => (string)$selectedShippingReference['instance_id'],
+					)
+				);
+			}
+			
+
+
+			
+			
+			
 			$express_option = array(
 				'shipping_address_callback_url' => $ship_callback_url,
 				'customer_types' => $customer_types,
@@ -2150,6 +2237,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 		$payload['express'] = $express_option;
 
 		//}
+		
 
 
 		$response = wp_remote_post( $api_endpoint, array(
@@ -2160,14 +2248,14 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			'sslverify' => false
 		) );
 
-
+		
 
 		// Retrieve the body's response if no errors found
 		$response_body  = wp_remote_retrieve_body( $response );
 		$response_trace_id = wp_remote_retrieve_header( $response, 'request-id');
 		$response_code = wp_remote_retrieve_response_code( $response );
 		$response_array = json_decode( $response_body, true );
-
+		
 		if ( ! array_key_exists( 'url', $response_array ) ) {
 			$msg = isset($response_array['error']) && isset($response_array['error']['message']) ? $response_array['error']['message'] : 'Unknown Error';
 			echo '<p class="dintero-error-message">Problems creating payment, please contact Dintero with this message: ' . $response_trace_id . ', ';
@@ -2256,12 +2344,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 			if (!$express) {
 				$item = array(
 					'id'          => 'shipping',
-					'description' => 'Shipping: ' . $order->get_shipping_method(),
+					'description' =>  $order->get_shipping_method(),
 					'quantity'    => 1,
 					'amount'=> $this->get_shipping_amount(),
 					'vat_amount'=> $this->get_shipping_tax_amount(),
 					'vat'=> $this->get_shipping_tax_rate(),
-					'title'=>'Shipping: ' . $this->get_shipping_name(),
+					'title'=> $this->get_shipping_name(),
 
 					'line_id'     => $line_id
 				);
@@ -2293,7 +2381,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout {
 							'amount'=> $this->get_shipping_amount(),
 							'vat_amount'=> $this->get_shipping_tax_amount(),
 							'vat'=> $this->get_shipping_tax_rate(),
-							'title'=>'Shipping: ' . $this->get_shipping_name(),
+							'title'=> $this->get_shipping_name(),
 							'description'=>'',
 							'delivery_method'=>'delivery',
 							'operator'=>'',

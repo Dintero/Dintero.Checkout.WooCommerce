@@ -66,7 +66,7 @@ jQuery( function( $ ) {
 
 			$( document ).on('click', '.dhp_ebch a', this.embedClicked);
 			$( document ).on('click', '.dhp_exch a', this.expressClicked);
-			$( document ).on( 'updated_checkout', this.updateDinteroSession );
+			$( document ).on( 'updated_checkout', this.updateShippingInfo );
 			
 			$( document ).ready(function() {
 				if($('#dhp-exp-ele').length>0){
@@ -107,7 +107,9 @@ jQuery( function( $ ) {
 					var submit_btn = $('button#place_order');
 					submit_btn.html(submit_btn.attr('data-value'));
 				}
-			});			
+			});	
+
+			
 		},
 
 		embedClicked: function() {
@@ -117,19 +119,33 @@ jQuery( function( $ ) {
 		expressClicked: function() {
 			dhpCheckout.submit(true);
 		},
-		updateDinteroSession: function(checkout){
-			// console.log('UpDate Called'+dintero_url );
-			//checkout.lockSession();
-			// $.ajax({
-			// 		type:		'POST',
-			// 		url:		dintero_url,
-			// 		data:		'Test',
-			// 		dataType:   'json',
-			// 		success:	function( result ) {
-			// 						checkout.refreshSession();
-			// 					}
-			// 	});
-			//checkout.lockSession();
+		updateShippingInfo: function(checkout){
+		
+			if (isShippingInIframe != 0) {
+	  			jQuery('#shipping_method').hide();
+	  			if(jQuery('#shipping_method .dintero-shipping-label').length == 0){
+	  				jQuery('.dintero-shipping-label').remove();
+	  				jQuery( '<ul class="dintero-shipping-label" style="margin:0;padding:0"><li></li></ul>').insertAfter( "#shipping_method" );
+	  			}
+	  			
+				if ( jQuery( '#shipping_method input[type=\'radio\']' ).length ) {
+
+					// Multiple shipping options available.
+					jQuery( '#shipping_method input[type=\'radio\']:checked' ).each( function() {
+						var idVal = jQuery( this ).attr( 'id' );
+						var shippingPrice = jQuery( 'label[for=\'' + idVal + '\']' ).text();
+						jQuery( '.dintero-shipping-label' ).html( shippingPrice );
+					});
+				} else {
+
+					// Only one shipping option available.
+					var idVal = jQuery( '#shipping_method input[name=\'shipping_method[0]\']' ).attr( 'id' );
+					var shippingPrice = jQuery( 'label[for=\'' + idVal + '\']' ).text();
+					jQuery( '.dintero-shipping-label' ).html( shippingPrice );
+				}
+			}
+
+			
 		},
 
 
