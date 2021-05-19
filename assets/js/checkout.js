@@ -90,7 +90,10 @@ jQuery( function( $ ) {
 		  						$('#dhp-wrapper .dhp-checkout-tab>div').removeClass('active');
 		  						$('#'+a_rel).css('display', 'block');
 		  						$(this).addClass('active');
-		  						$('input:radio[name=payment_method]').filter('[value='+a_id+']').attr('checked', true);
+		  						$('input:radio[name=payment_method]')
+									.filter('[value='+a_id+']')
+									.attr('checked', 'checked')
+									.prop('checked', true)
 
 		  						var submit_btn = $('button#place_order');
 								submit_btn.html(submit_btn.attr('data-value'));
