@@ -43,10 +43,17 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 
 ## Changelog
+
+2021.05.19
+
+* Bugfix: Fix bug when paying with other payment types when Dintero is first
+
 2021.05.05
+
 * Removed Shipping text from Frakt Iframe window
 
 2021.04.30
+
 * Added Functionality for pushing shipping methods in Iframe
 
 2021.04.22
