@@ -1,8 +1,19 @@
 *** WooCommerce Dintero Plugin Changelog ***
+
+2021.05.25
+
+* Bugfix: Use correct item amount creating order from callback after discount
+
+2021.05.19
+
+* Bugfix: Fix bug when paying with other payment types when Dintero is first
+
 2021.05.05
+
 * Removed Shipping text from Frakt Iframe window
 
 2021.04.30
+
 * Added Functionality for pushing shipping methods in Iframe
 
 2021.04.22
