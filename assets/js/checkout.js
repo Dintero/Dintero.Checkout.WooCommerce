@@ -147,8 +147,13 @@ jQuery( function( $ ) {
 					jQuery( '.dintero-shipping-label' ).html( shippingPrice );
 				}
 			}
-
-			
+            var activeTab = jQuery('.dhp-checkout-tab .active');
+			if (activeTab.length > 0) {
+				$('input:radio[name=payment_method]')
+					.filter('[value=' + activeTab.prop('id') + ']')
+					.attr('checked', 'checked')
+					.prop('checked', true);
+			}
 		},
 
 
