@@ -335,9 +335,9 @@ class WC_AJAX_HP {
 					if($id && get_product( $id )){
 						
 						$args = array(
-								'total'   => $product['amount'] / 100
+								'total'   => ($product['amount'] - $product['vat_amount']) / 100
 					      );
-						$order->add_product(get_product( $id ),$product['quantity']);
+						$order->add_product(get_product( $id ),$product['quantity'], $args);
 
 						if(isset($product['discount_lines'])){
 							foreach($product['discount_lines'] as $discountLines){
@@ -464,7 +464,7 @@ class WC_AJAX_HP {
 
 				// Get a new instance of the WC_Order_Item_Shipping Object
 				$item = new WC_Order_Item_Shipping();
-				$shippingTitle = $transaction['shipping_option']['title'] ;
+				$shippingTitle = $transaction['shipping_option']['title'];
 
 				$tempTitle = explode('Shipping:', $shippingTitle);
 
