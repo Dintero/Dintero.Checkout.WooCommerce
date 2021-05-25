@@ -43,6 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2021.05.25
+
+* Bugfix: Use correct item amount creating order from callback after discount
+
 2021.05.19
 
 * Bugfix: Fix bug when paying with other payment types when Dintero is first
