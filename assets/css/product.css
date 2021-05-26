@@ -1,0 +1,12 @@
+.product .dhp-add-to-cart-button-wrapper {
+    float: left;
+    width: 100%;
+    clear: both;
+}
+.product .dhp-add-to-cart-button-wrapper button {
+    background: transparent !important;
+    float: left;
+}
+.product .dhp-add-to-cart-button-wrapper button img {
+    max-width: 162px;
+}

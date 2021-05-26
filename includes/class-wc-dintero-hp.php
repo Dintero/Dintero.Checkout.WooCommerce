@@ -66,6 +66,7 @@ final class WC_Dintero_HP {
 
 		if ('yes' == $express_enable) { //express
 			add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'add_custom_style' ), 1, 1 );
+			add_action( 'woocommerce_after_add_to_cart_button', array($this, 'render_product_express_button'));
 		}
 
 		add_action( 'wp_enqueue_scripts', array( $this, 'init_script' ));
@@ -686,30 +687,45 @@ final class WC_Dintero_HP {
 	 * Include script and style
 	 */
 	public function init_script() {
-        //first check that woo exists to prevent fatal errors
-        if ( function_exists( 'is_woocommerce' ) ) {
-            if ( is_cart() || is_checkout() ) {
-        		wp_enqueue_style( 'style', plugin_dir_url(__DIR__) . 'assets/css/style.css', array(), '1.0.07', 'all' );
+		// first check that woo exists to prevent fatal errors
+		if (!function_exists('is_woocommerce')) {
+			return;
+		}
 
-        		$handle = 'dhp-hp';
-        		$src = plugin_dir_url(__DIR__) . 'assets/js/dintero_hp.js';
-        		$deps = array( 'jquery' );
-        		$version = false;
+		if ( is_cart() || is_checkout() ) {
+			wp_enqueue_style( 'style', plugin_dir_url(__DIR__) . 'assets/css/style.css', array(), '1.0.07', 'all' );
 
-        		// Register the script
-        		wp_register_script( $handle, $src, $deps, $version, true );
-        		wp_enqueue_script( $handle);
+			$handle = 'dhp-hp';
+			$src = plugin_dir_url(__DIR__) . 'assets/js/dintero_hp.js';
+			$deps = array( 'jquery' );
+			$version = false;
 
+			// Register the script
+			wp_register_script( $handle, $src, $deps, $version, true );
+			wp_enqueue_script( $handle);
 
-                $handle = 'dintero-checkout-web-sdk';
-                $src = plugin_dir_url(__DIR__) . 'assets/js/checkout-web-sdk.umd.js';
-                $deps = array( 'jquery' );
-                $version = false;
-                wp_register_script( $handle, $src, $deps, $version, true );
-                wp_enqueue_script( $handle);
+			$handle = 'dintero-checkout-web-sdk';
+			$src = plugin_dir_url(__DIR__) . 'assets/js/checkout-web-sdk.umd.js';
+			$deps = array( 'jquery' );
+			$version = false;
+			wp_register_script( $handle, $src, $deps, $version, true );
+			wp_enqueue_script( $handle);
+		}
 
-            }
-        }
+		if (is_product() && WCDHP()->setting()->get('express_enable')) {
+			wp_enqueue_style( 'style', plugin_dir_url(__DIR__) . 'assets/css/product.css', array(), '1.0.07', 'all' );
+			wp_register_script(
+					'dhp-add-to-cart',
+					plugin_dir_url(__DIR__) . 'assets/js/express-add-to-cart.js',
+					array('jquery'),
+					true
+			);
+			wp_localize_script('dhp-add-to-cart', 'dhp_express_cart', array(
+				'ajax_url' => admin_url('admin-ajax.php'),
+				'dhp_ajax_url' => home_url() . '?dhp-ajax=%%endpoint%%',
+			));
+			wp_enqueue_script('dhp-add-to-cart');
+		}
 	}
 
 	/**
@@ -1104,6 +1120,20 @@ final class WC_Dintero_HP {
 					}
 				}
 			}
+		}
+	}
+
+	/**
+	 * Rendering product express button
+	 */
+	public function render_product_express_button()
+	{
+		if (!$template = locate_template( 'woocommerce/dhp-checkout-embed-express.php' )) {
+			$template = DHP_ABSPATH . 'templates/dhp-add-to-cart.php';
+		}
+
+		if (file_exists($template)) {
+			load_template($template);
 		}
 	}
 }
