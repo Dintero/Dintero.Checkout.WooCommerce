@@ -64,7 +64,7 @@ final class WC_Dintero_HP {
 		$express_enable = $this->setting()->get('express_enable');
 		$embed_enable = $this->setting()->get('embed_enable');
 
-		if ('yes' == $express_enable) { //express
+		if ('yes' == $express_enable && $this->setting()->get('express_product') == 'yes') { //express
 			add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'add_custom_style' ), 1, 1 );
 			add_action( 'woocommerce_after_add_to_cart_button', array($this, 'render_product_express_button'));
 		}
