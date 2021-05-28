@@ -8,5 +8,5 @@
     float: left;
 }
 .product .dhp-add-to-cart-button-wrapper button img {
-    max-width: 162px;
+    min-width: 162px;
 }
