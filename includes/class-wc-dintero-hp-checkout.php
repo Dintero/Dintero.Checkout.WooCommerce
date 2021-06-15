@@ -2033,7 +2033,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 		$return_url   = $this->get_return_url( );
         $express_customer_types = WCDHP()->setting()->get('express_customer_types');
 
-        //$callback_url = home_url() . '?dhp-ajax=dhp_update_ord_emded';
 		$callback_url = home_url() . '?dhp-ajax=dhp_create_order&delay_callback=180&include=session';
 		$cart = WC()->cart;
 
@@ -2095,11 +2094,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 						$method_id   = $method->id;
 						$method_name = $method->label;
 
-						if ( $separate_sales_tax || 'excl' === $tax_display ) {
-							$method_price = intval( round( $method->cost, 2 ) * 100 );
-						} else {
-							$method_price = intval( round( $method->cost + array_sum( $method->taxes ), 2 ) * 100 );
-						}
+						$method_price = intval(round( $method->cost, 2 ) * 100 );
 
 						if ( array_sum( $method->taxes ) > 0 && ( ! $separate_sales_tax && 'excl' !== $tax_display ) ) {
 							$method_tax_amount = intval( round( array_sum( $method->taxes ), wc_get_rounding_precision() ) * 100 );
@@ -2230,8 +2225,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			$payload['order']['shipping_address']['phone_number'] = $billingPhone;
 		}
 
-		if(sizeof($shipping_option)>0){
-			$payload['order']['shipping_option']	= $shipping_option;
+		if(sizeof($shipping_option) > 0){
+			$payload['order']['shipping_option'] = $shipping_option;
 		} else {
 			$payload['order']['shipping_option'] = array(
 				'id' => 'shipping_express',
