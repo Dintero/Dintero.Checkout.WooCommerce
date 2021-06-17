@@ -540,19 +540,10 @@ class WC_AJAX_HP {
 	public static function create_order(){
 
 		WC()->session->__unset('dintero_wc_order_id');
-		$cart = WC()->cart;
-		//$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
-		
+
 		try {
-
-			
-
 			$country = WC()->checkout()->get_value( 'shipping_country' );
-			$postcode = WC()->checkout()->get_value( 'shipping_postcode' );
-			$city = WC()->checkout()->get_value( 'shipping_city' );
-			$addressline1 = WC()->checkout()->get_value( 'shipping_address_1' );
-			
-			
+
 			if(is_null($country)){ // Checks if there is No Shippingn Country in Customer Session
 				 WC()->customer->set_shipping_country(WC()->countries->get_base_country());
 				 WC()->cart->calculate_totals();
@@ -560,14 +551,15 @@ class WC_AJAX_HP {
 
 			$order = wc_create_order( array( 'status' => 'pending' ) );
 
-			$order->set_billing_first_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_first_name' ) ));
-			$order->set_billing_last_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_last_name' )  ) );
-			$order->set_billing_country( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_country' ) ) );
-			$order->set_billing_address_1( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_address_1' ) ) );
-			$order->set_billing_city( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_city' ) ) );
-			$order->set_billing_postcode( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_postcode' ) ) );
-			$order->set_billing_phone( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_phone' )) );
-			$order->set_billing_email( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_email' ) ) );
+			$order->set_customer_id(WC()->cart->get_customer()->get_id());
+			$order->set_billing_first_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'billing_first_name' ) ));
+			$order->set_billing_last_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'billing_last_name' )  ) );
+			$order->set_billing_country( sanitize_text_field( (string) WC()->checkout()->get_value( 'billing_country' ) ) );
+			$order->set_billing_address_1( sanitize_text_field( (string) WC()->checkout()->get_value( 'billing_address_1' ) ) );
+			$order->set_billing_city( sanitize_text_field( (string) WC()->checkout()->get_value( 'billing_city' ) ) );
+			$order->set_billing_postcode( sanitize_text_field( (string) WC()->checkout()->get_value( 'billing_postcode' ) ) );
+			$order->set_billing_phone( sanitize_text_field( (string) WC()->checkout()->get_value( 'billing_phone' )) );
+			$order->set_billing_email( sanitize_text_field( (string) WC()->checkout()->get_value( 'billing_email' ) ) );
 
 			$order->set_shipping_first_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_first_name' )  ) );
 			$order->set_shipping_last_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_last_name' ) ) );
@@ -596,17 +588,12 @@ class WC_AJAX_HP {
 			$order->set_cart_tax( WC()->cart->get_cart_contents_tax() + WC()->cart->get_fee_tax() );
 			$order->set_shipping_tax( WC()->cart->get_shipping_tax() );
 			$order->set_total( WC()->cart->get_total( 'edit' ) );
-			//$order->apply_coupon($coupon_code);
-			//$order->set_transaction_id( $transaction_id );
 
 			WC()->checkout()->create_order_line_items( $order, WC()->cart );
 			WC()->checkout()->create_order_fee_lines( $order, WC()->cart );
 			WC()->checkout()->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
 			WC()->checkout()->create_order_tax_lines( $order, WC()->cart );
 			WC()->checkout()->create_order_coupon_lines( $order, WC()->cart );
-
-			
-			
 
 			/**
 			 * Added to simulate WCs own order creation.
@@ -618,22 +605,18 @@ class WC_AJAX_HP {
 			// Save the order.
 			$order_id = $order->save();
 
-			if($order_id){
+			if ($order_id) {
 				do_action( 'woocommerce_checkout_update_order_meta', $order_id, array() );
 				$result = $payment_method->process_payment( $order_id ,true);
 				wp_send_json($result);
-				
-				
 			}
 			
 	
             //wp_send_json_success($return);
 
-		}catch ( Exception $e ) {
+		} catch ( Exception $e ) {
 			return new WP_Error( 'checkout-error', $e->getMessage() );
 		}
-
-
 	}
 
 	public static function express_pay() {
