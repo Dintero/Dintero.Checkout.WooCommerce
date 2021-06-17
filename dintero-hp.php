@@ -47,6 +47,9 @@ register_deactivation_hook( __FILE__, 'deactivate_dintero_hp' );
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
  */
+require plugin_dir_path( __FILE__ ) . 'includes/class-dintero-hp-request.php';
+require plugin_dir_path( __FILE__ ) . 'includes/class-dintero-hp-request-builder.php';
+require plugin_dir_path( __FILE__ ) . 'includes/class-dintero-hp-adapter.php';
 require plugin_dir_path( __FILE__ ) . 'includes/class-dintero-hp.php';
 require plugin_dir_path( __FILE__ ) . 'includes/class-wc-dintero-hp.php';
 
