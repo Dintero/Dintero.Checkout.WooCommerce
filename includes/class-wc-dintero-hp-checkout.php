@@ -1128,14 +1128,14 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 
 		}
 
-		// if($sessionExpired || !$order_id){
-			// Create New session
-			$results = $this->get_iframe();
-			if(isset($results['id'])){
-				$this->save_order_id_to_session($results['id']);
-			}
+		if($sessionExpired || !$order_id){
+		    // Create New session
+		    $results = $this->get_iframe();
+		    if(isset($results['id'])){
+		        $this->save_order_id_to_session($results['id']);
+		    }
 
-		// }
+		}
 
 		$result = isset($results['result']) ? $results['result'] : 0;
 		$msg = isset($results['msg']) ? $results['msg'] : '';
@@ -2103,7 +2103,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 							$method_tax_amount = intval(round(array_sum($method->taxes), wc_get_price_decimals()) * 100);
 							$method_tax_rate   = $this->get_shipping_tax_rate();
 						}
-						$method_selected    = $method->id === $chosen_method ? true : false;
+
 						$dintero_shipping_options[] = array(
 							'id'          => $method_id,
 							'line_id' 	  => 'shipping_method_'.$j,
