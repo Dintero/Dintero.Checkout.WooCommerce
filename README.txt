@@ -43,6 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2021.06.17
+
+* Rewrite callback order creation to fix coupon codes, shipping tax and similar issues.
+
 2021.05.26
 
 * Bugfix: #47 fixed some cases of other payment methods not working with Dintero. This fixes the rest.
