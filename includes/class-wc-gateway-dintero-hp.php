@@ -293,6 +293,14 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
+			'express_product' => array(
+				'title'       => __( 'Enable Express Button (Product Page):' ),
+				'label'       => __( 'Enable Checkout Express (Product Page)' ),
+				'type'        => 'checkbox',
+				'description' => __( 'Enable or disable Dintero Checkout Express on Product page' ),
+				'default'     => 'no',
+				'desc_tip'    => true,
+			),
 			'shipping_method_in_iframe' => array(
 				'title'       => __( 'Shipping methods in iframe:' ),
 				'label'       => __( 'Display Shipping methods in Dintero iframe.' ),
