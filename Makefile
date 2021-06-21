@@ -1,5 +1,5 @@
 PHPCS_ARGS ?= \
-	--standard=Wordpress \
+	--standard=phpcs.ruleset.xml \
 	--extensions=php \
 	-w dintero-hp.php includes/ \
 	--ignore-annotations
