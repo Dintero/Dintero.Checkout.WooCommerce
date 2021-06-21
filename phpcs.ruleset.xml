@@ -20,5 +20,9 @@
         <exclude name="Squiz.Commenting.FunctionComment.Missing" />
     </rule>
 
+    <rule ref="PEAR">
+        <exclude name="Squiz.Commenting.FunctionComment.Missing" />
+    </rule>
+
     <exclude-pattern>*/vendor/*</exclude-pattern>
 </ruleset>

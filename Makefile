@@ -1,4 +1,5 @@
 PHPCS_ARGS ?= \
+	-s \
 	--standard=phpcs.ruleset.xml \
 	--extensions=php \
 	-w dintero-hp.php includes/ \
