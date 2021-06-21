@@ -16,7 +16,10 @@
  * @package    dintero-hp
  * @subpackage dintero-hp/includes
  */
-class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
+class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
+{
+	/** @var null | Dintero_HP_Adapter */
+	protected static $_adapter = null;
 
 	/**
 	 * Class constructor.
@@ -71,8 +74,17 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 		}
 
 		add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
+	}
 
-
+	/**
+	 * @return Dintero_HP_Adapter|null
+	 */
+	protected static function _adapter()
+	{
+		if (!self::$_adapter) {
+			self::$_adapter = new Dintero_HP_Adapter();
+		}
+		return self::$_adapter;
 	}
 
 	/**
@@ -82,10 +94,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	 */
 	public function get_icon() {
 		$icon_url  = 'https://checkout.dintero.com/v1/branding/profiles/' . $this->profile_id . '/variant/colors/color/cecece/width/' . $this->checkout_logo_width . '/dintero_left_frame.svg';
-
-
-
-
 		//$icon_html = '<img src="' . esc_attr( $icon_url ) . '" alt="Dintero Logo" />';
 		$icon_html = $this->get_icon_checkout();
 		return apply_filters( 'woocommerce_gateway_icon', $icon_html, $this->id );
@@ -577,232 +585,201 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 
 	/**
 	 * Creating checkout session and requesting payment page URL
-	 *
 	 * Executed when the checkout button is pressed
+	 *
+	 * @param $order
+	 * @param bool $isExpress
+	 * @return mixed|string
 	 */
-	private function get_payment_page_url( $order , $isExpress = false) {
-		if ( ! empty( $order ) && $order instanceof WC_Order ) {
-			$order_id     = $order->get_id();
-			$access_token = $this->get_access_token();
-			$api_endpoint = $this->checkout_endpoint . '/sessions-profile';
+	private function get_payment_page_url( $order , $isExpress = false)
+	{
+		if ( empty( $order ) || !($order instanceof WC_Order)) {
+			return '';
+		}
 
-			$express_enable = WCDHP()->setting()->get('express_enable');
-			$embed_enable = WCDHP()->setting()->get('embed_enable');
-			$express_customer_types = WCDHP()->setting()->get('express_customer_types');
+		$order_id     = $order->get_id();
+		$embed_enable = WCDHP()->setting()->get('embed_enable');
+		$express_customer_types = WCDHP()->setting()->get('express_customer_types');
 
-			if($isExpress == true){
-				$express_enable = 'yes';
-			}
+		$return_url   = $this->get_return_url( $order );
+		$callback_url = $isExpress
+			? home_url() . '?dhp-ajax=dhp_update_ord' : WC()->api_request_url(strtolower(get_class( $this )));
 
-
-			$return_url   = $this->get_return_url( $order );
-
-			if ( $isExpress ) {
-				$callback_url = home_url() . '?dhp-ajax=dhp_update_ord';
-			} else {
-				$callback_url = WC()->api_request_url( strtolower( get_class( $this ) ) );
-			}
-
-			$order_total_amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
-			$order_tax_amount   = absint( strval( floatval( $order->get_total_tax() ) * 100 ) );
-
-			$items = array();
-
-			$counter = 0;
-			$total_amount = 0;
-			foreach ( $order->get_items() as $order_item ) {
-				$counter ++;
-				$line_id                = strval( $counter );
-				$item_total_amount      = absint( strval( floatval( $order_item->get_total() ) * 100 ) );
-				$item_tax_amount        = absint( strval( floatval( $order_item->get_total_tax() ) * 100 ) );
-				$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $order_item,
-						true ) ) * 100 ) );
-				$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
-						2 ) * 100 ) : 0;
-				$item                   = array(
-					'id'          => 'item_' . $counter,
-					'description' => $order_item->get_name(),
-					'quantity'    => $order_item->get_quantity(),
-					'vat_amount'  => $item_tax_amount,
-					'vat'         => $item_tax_percentage,
-					'amount'      => $item_line_total_amount,
-					'line_id'     => $line_id
-				);
-				array_push( $items, $item );
-
-				$total_amount += $item_line_total_amount;
-			}
-
-			$express_option = array();
-
-			$counter ++;
+		$order_tax_amount   = absint( strval( floatval( $order->get_total_tax() ) * 100 ) );
+		$items = array();
+		$total_amount = $counter = 0;
+		foreach ( $order->get_items() as $order_item ) {
+			$counter++;
 			$line_id                = strval( $counter );
-			$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
-			$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
-			$item_line_total_amount = $item_total_amount + $item_tax_amount;
+			$item_total_amount      = absint( strval( floatval( $order_item->get_total() ) * 100 ) );
+			$item_tax_amount        = absint( strval( floatval( $order_item->get_total_tax() ) * 100 ) );
+			$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $order_item,
+					true ) ) * 100 ) );
 			$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
 					2 ) * 100 ) : 0;
-
-			if (!$isExpress) {
-				$item = array(
-					'id'          => 'shipping',
-					'description' => 'Shipping: ' . $order->get_shipping_method(),
-					'quantity'    => 1,
-					'vat_amount'  => $item_tax_amount,
-					'vat'         => $item_tax_percentage,
-					'amount'      => $item_line_total_amount,
-					'line_id'     => $line_id
-				);
-				array_push( $items, $item );
-
-				$total_amount += $item_line_total_amount;
-			}
-
-			$order_total_amount = $total_amount;
-			$hasShippingOptions = count($order->get_shipping_methods()) > 0;
-			if ($isExpress) {
-				$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
-				$customer_types = array();
-				if ($express_customer_types == 'b2c') {
-					array_push($customer_types, 'b2c');
-				} else if ($express_customer_types == 'b2b') {
-					array_push($customer_types, 'b2b');
-				} else {
-					array_push($customer_types, 'b2b', 'b2c');
-				}
-				if ($hasShippingOptions) {
-					$dintero_shipping_options = array(
-						0 => array(
-							'id' => 'shipping_express',
-							'line_id' => $line_id,
-							'amount' => $item_line_total_amount,
-							'vat_amount' => $item_tax_amount,
-							'vat' => $item_tax_percentage,
-							'title' => 'Shipping: ' . $order->get_shipping_method(),
-							'description' => '',
-							'delivery_method' => 'delivery',
-							'operator' => '',
-							'operator_product_id' => '',
-							/*
-							"time_slot"=>array(
-									"starts_at"=>"2020-10-14T19:00:00Z",
-									"ends_at"=>"2020-10-14T20:00:00Z"
-								),
-							"pick_up_address"=>array(
-									"first_name"=>$order->get_shipping_first_name(),
-									"last_name"=>$order->get_shipping_last_name(),
-									"address_line"=>$order->get_shipping_address_1(),
-									"address_line_2"=>$order->get_shipping_address_2(),
-									"co_address"=>"",
-									"business_name"=>"",
-									"postal_code"=>$order->get_shipping_postcode(),
-									"postal_place"=>$order->get_shipping_city(),
-									"country"=>$order->get_shipping_country(),
-									"phone_number"=>"123456", //$order->get_billing_phone(),
-									"email"=>$order->get_billing_email(),
-									"latitude"=>0,
-									"longitude"=>0,
-									"comment"=>""
-									//"distance"=>0
-								)*/
-						)
-					);
-					$express_option = array(
-						'shipping_address_callback_url'=>$ship_callback_url,
-						'customer_types'=>$customer_types,
-						'shipping_options'=> $dintero_shipping_options
-					);
-				} else {
-					$express_option = array(
-						'customer_types' => $customer_types,
-						'shipping_options'=> array(),
-					);
-				}
-			}
-
-			$headers = array(
-				'Content-type'  => 'application/json; charset=utf-8',
-				'Accept'        => 'application/json',
-				'Authorization' => 'Bearer ' . $access_token,
-				'Dintero-System-Name' => 'woocommerce',
-				'Dintero-System-Version' =>  WC()->version,
-				'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
-				'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
+			$item = array(
+				'id'          => 'item_' . $counter,
+				'description' => $order_item->get_name(),
+				'quantity'    => $order_item->get_quantity(),
+				'vat_amount'  => $item_tax_amount,
+				'vat'         => $item_tax_percentage,
+				'amount'      => $item_line_total_amount,
+				'line_id'     => $line_id
 			);
-
-			$payload_url = array(
-					'return_url'   => $return_url,
-					'callback_url' => $callback_url
-				);
-
-			$terms_page_id   = wc_terms_and_conditions_page_id();
-			$terms_link      = esc_url( get_permalink( $terms_page_id ) );
-
-			if ( 'yes' == $embed_enable || $isExpress) {
-				$payload_url[ 'merchant_terms_url' ] = $terms_link;
-			}
-
-			$payload = array(
-				'url'        => $payload_url,
-				'customer'   => array(
-					'email'        => $order->get_billing_email(),
-					'phone_number' => $order->get_billing_phone()
-				),
-				'order'      => array(
-					'amount'             => $order_total_amount,
-					'vat_amount'         => $order_tax_amount,
-					'currency'           => $order->get_currency(),
-					'merchant_reference' => strval( $order_id ),
-					'shipping_address'   => array(
-						'first_name'   => $order->get_shipping_first_name(),
-						'last_name'    => $order->get_shipping_last_name(),
-						'address_line' => $order->get_shipping_address_1(),
-						'postal_code'  => $order->get_shipping_postcode(),
-						'postal_place' => $order->get_shipping_city(),
-						'country'      => $order->get_shipping_country()
-					),
-					'items'              => $items
-				),
-				'profile_id' => $this->profile_id
-			);
-
-			if ( $isExpress ) {
-				$payload['express'] = $express_option;
-			}
-
-			if ($isExpress && !$hasShippingOptions) {
-				$payload["order"]["shipping_option"]	= array(
-					'id' => 'shipping_express',
-					'line_id' => 'shipping_method',
-					'amount' => 0,
-					'title' => 'Shipping: none',
-					'description' => '',
-					'delivery_method' => 'none',
-					'operator' => ''
-				);
-			}
-
-			$response = wp_remote_post( $api_endpoint, array(
-				'method'    => 'POST',
-				'headers'   => $headers,
-				'body'      => wp_json_encode( $payload ),
-				'timeout'   => 90,
-				'sslverify' => false
-			) );
-
-			// Retrieve the body's response if no errors found
-			$response_body  = wp_remote_retrieve_body( $response );
-			$response_array = json_decode( $response_body, true );
-
-			if ( ! array_key_exists( 'url', $response_array ) ) {
-				return false;
-			}
-			$payment_page_url = $response_array['url'];
-
-			return $payment_page_url;
+			array_push( $items, $item );
+			$total_amount += $item_line_total_amount;
 		}
-	}
 
+		$express_option = array();
+
+		$counter ++;
+		$line_id                = strval( $counter );
+		$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
+		$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
+		$item_line_total_amount = $item_total_amount + $item_tax_amount;
+		$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
+				2 ) * 100 ) : 0;
+
+		if (!$isExpress) {
+			$item = array(
+				'id'          => 'shipping',
+				'description' => 'Shipping: ' . $order->get_shipping_method(),
+				'quantity'    => 1,
+				'vat_amount'  => $item_tax_amount,
+				'vat'         => $item_tax_percentage,
+				'amount'      => $item_line_total_amount,
+				'line_id'     => $line_id
+			);
+			array_push( $items, $item );
+
+			$total_amount += $item_line_total_amount;
+		}
+
+		$order_total_amount = $total_amount;
+		$hasShippingOptions = count($order->get_shipping_methods()) > 0;
+		if ($isExpress) {
+			$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
+			$customer_types = array();
+			if ($express_customer_types == 'b2c') {
+				array_push($customer_types, 'b2c');
+			} else if ($express_customer_types == 'b2b') {
+				array_push($customer_types, 'b2b');
+			} else {
+				array_push($customer_types, 'b2b', 'b2c');
+			}
+			if ($hasShippingOptions) {
+				$dintero_shipping_options = array(
+					0 => array(
+						'id' => 'shipping_express',
+						'line_id' => $line_id,
+						'amount' => $item_line_total_amount,
+						'vat_amount' => $item_tax_amount,
+						'vat' => $item_tax_percentage,
+						'title' => 'Shipping: ' . $order->get_shipping_method(),
+						'description' => '',
+						'delivery_method' => 'delivery',
+						'operator' => '',
+						'operator_product_id' => '',
+						/*
+						"time_slot"=>array(
+								"starts_at"=>"2020-10-14T19:00:00Z",
+								"ends_at"=>"2020-10-14T20:00:00Z"
+							),
+						"pick_up_address"=>array(
+								"first_name"=>$order->get_shipping_first_name(),
+								"last_name"=>$order->get_shipping_last_name(),
+								"address_line"=>$order->get_shipping_address_1(),
+								"address_line_2"=>$order->get_shipping_address_2(),
+								"co_address"=>"",
+								"business_name"=>"",
+								"postal_code"=>$order->get_shipping_postcode(),
+								"postal_place"=>$order->get_shipping_city(),
+								"country"=>$order->get_shipping_country(),
+								"phone_number"=>"123456", //$order->get_billing_phone(),
+								"email"=>$order->get_billing_email(),
+								"latitude"=>0,
+								"longitude"=>0,
+								"comment"=>""
+								//"distance"=>0
+							)*/
+					)
+				);
+				$express_option = array(
+					'shipping_address_callback_url'=>$ship_callback_url,
+					'customer_types'=>$customer_types,
+					'shipping_options'=> $dintero_shipping_options
+				);
+			} else {
+				$express_option = array(
+					'customer_types' => $customer_types,
+					'shipping_options'=> array(),
+				);
+			}
+		}
+
+		$payload_url = array(
+			'return_url'   => $return_url,
+			'callback_url' => $callback_url
+		);
+
+		$terms_page_id   = wc_terms_and_conditions_page_id();
+		$terms_link      = esc_url( get_permalink( $terms_page_id ) );
+
+		if ( 'yes' == $embed_enable || $isExpress) {
+			$payload_url[ 'merchant_terms_url' ] = $terms_link;
+		}
+
+		$payload = array(
+			'url'        => $payload_url,
+			'customer'   => array(
+				'email'        => $order->get_billing_email(),
+				'phone_number' => $order->get_billing_phone()
+			),
+			'order'      => array(
+				'amount'             => $order_total_amount,
+				'vat_amount'         => $order_tax_amount,
+				'currency'           => $order->get_currency(),
+				'merchant_reference' => strval( $order_id ),
+				'shipping_address'   => array(
+					'first_name'   => $order->get_shipping_first_name(),
+					'last_name'    => $order->get_shipping_last_name(),
+					'address_line' => $order->get_shipping_address_1(),
+					'postal_code'  => $order->get_shipping_postcode(),
+					'postal_place' => $order->get_shipping_city(),
+					'country'      => $order->get_shipping_country()
+				),
+				'billing_address'   => array(
+					'first_name'   => $order->get_billing_first_name(),
+					'last_name'    => $order->get_billing_last_name(),
+					'address_line' => $order->get_billing_address_1(),
+					'postal_code'  => $order->get_billing_postcode(),
+					'postal_place' => $order->get_billing_city(),
+					'country'      => $order->get_billing_country()
+				),
+				'items'              => $items
+			),
+			'profile_id' => $this->profile_id
+		);
+
+		if ( $isExpress ) {
+			$payload['express'] = $express_option;
+		}
+
+		if ($isExpress && !$hasShippingOptions) {
+			$payload["order"]["shipping_option"]	= array(
+				'id' => 'shipping_express',
+				'line_id' => 'shipping_method',
+				'amount' => 0,
+				'title' => 'Shipping: none',
+				'description' => '',
+				'delivery_method' => 'none',
+				'operator' => ''
+			);
+		}
+
+		$response = self::_adapter()->init_session($payload);
+		return isset($response['url']) ? $response['url'] : '';
+	}
 
 	/**
 	 * We're processing the payment here.
@@ -810,44 +787,32 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway {
 	public function process_payment( $order_id, $isExpress = false ) {
 
 		$embed_enable = WCDHP()->setting()->get('embed_enable');
-
-
-		if($embed_enable == 'yes' && !$isExpress  && !isset($_GET['pay_for_order'])){ // If its an Iframe
+		if ($embed_enable == 'yes' && !$isExpress  && !isset($_GET['pay_for_order'])) { // If its an Iframe
 			$redirect_url = $this->process_payment_handler( $order_id , true);
 			WC()->session->__unset('dintero_wc_order_id');
 			WC()->session->__unset('dintero_shipping_line_id');
 
 			if ( $redirect_url ) {
-
 				wc_empty_cart();
-
 				return array(
 					'result'   => 'success',
 					'redirect' =>  $redirect_url
 				);
-			} else {
-				return array(
-					'result' => 'error',
-				);
 			}
 
-
-		}else{
-
-			$order = wc_get_order( $order_id );
-			WC()->session->__unset('dintero_wc_order_id');
-			if ( ! empty( $order ) && $order instanceof WC_Order ) {
-				$express_enable = WCDHP()->setting()->get('express_enable');
-				$payment_page_url = $this->get_payment_page_url( $order, $isExpress );
-
-				return array(
-					'result'   => 'success',
-					'redirect' => $payment_page_url
-				);
-			}
+			return array('result' => 'error');
 		}
 
+		$order = wc_get_order( $order_id );
+		WC()->session->__unset('dintero_wc_order_id');
+		if ( ! empty( $order ) && $order instanceof WC_Order ) {
+			$payment_page_url = $this->get_payment_page_url( $order, $isExpress );
 
+			return array(
+				'result'   => 'success',
+				'redirect' => $payment_page_url
+			);
+		}
 	}
 
 	/**

@@ -113,4 +113,23 @@ class Dintero_HP_Adapter
 
 		return json_decode(wp_remote_retrieve_body( $response ), true );
 	}
+
+	/**
+	 * Initializing session
+	 *
+	 * @param array $payload
+	 * @return mixed
+	 */
+	public function init_session($payload)
+	{
+		$request = $this->_init_request($this->get_access_token());
+		$request->set_body(wp_json_encode($payload));
+
+		$response = _wp_http_get_object()->post(
+			$this->_endpoint('/sessions-profile'),
+			Dintero_HP_Request_Builder::instance()->build($request)
+		);
+
+		return json_decode(wp_remote_retrieve_body($response), true);
+	}
 }

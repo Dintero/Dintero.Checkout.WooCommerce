@@ -442,37 +442,31 @@ final class WC_Dintero_HP {
         $button = "<a href='#' class='".$className."' onclick='dintero_express_checkout();' title='$title' style='background-image: url(".$imgurl.");'></a>";
         $button = apply_filters('woo_vipps_cart_express_checkout_button', $button, $url);
 
-
         echo $button;
         	echo( "<script type=\"text/javascript\">
-
-
 				function dintero_express_checkout(){
         			jQuery('.loader').css('display','block');
 					jQuery('.loader').css('opacity','1');
         			var data = {
-						        action: 'create_order',
-						        
-						        is_express: 1
-						    };
-		            		var url = \"".home_url().'?dhp-ajax=create_order'."\";
+        				action: 'create_order',
+						is_express: 1
+					};
+					var url = \"".home_url().'?dhp-ajax=create_order'."\";
 							    
-							jQuery.ajax({
-								type:		'POST',
-								url:		url,
-								data:		data,
-								
-								success:	function( result ) {
-												if(result.redirect){
-													window.location = result.redirect ;
-												}else{
-													console.log('Error creating session, contact integration@dintero.com', result);
-													alert('Error creating session, contact integration@dintero.com');
-												}
-											}
-							});
+					jQuery.ajax({
+						type: 'POST',
+						url: url,
+						data: data,
+						success: function( result ) {
+							if (result.redirect) {
+								window.location = result.redirect ;
+							} else {
+								console.log('Error creating session, contact integration@dintero.com', result);
+								alert('Error creating session, contact integration@dintero.com');
+							}
+						}
+					});
         		}
-        		
         	</script>
             <style>
                 .site-header-cart .widget_shopping_cart a.button.dintero-express-checkout {

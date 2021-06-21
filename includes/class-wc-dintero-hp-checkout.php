@@ -2026,7 +2026,13 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 		return $response_array;
 	}
 
-	private function get_iframe(){
+	/**
+	 * Initializing iframe
+	 *
+	 * @return array
+	 */
+	private function get_iframe()
+	{
 		$access_token = $this->get_access_token();
 		$api_endpoint = $this->checkout_endpoint . '/sessions-profile';
 
@@ -2037,38 +2043,14 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 		$cart = WC()->cart;
 
 		$totals = $cart->get_totals();
-
-
-		$order_total_amount = absint( strval( floatval( $totals['total'] ) * 100 ) );
 		$order_tax_amount   = absint( strval( floatval( $totals['total_tax'] ) * 100 ) );
-
-		$items = array();
-
-		$counter = 0;
-		$total_amount = 0;
 
 		$this->process_cart();
 		$total_amount = $this->get_order_lines_total_amount();
 
-		$items = array();
-
 		$shipping_option = array();
-		$express_option = array();
-
-
-		$counter ++;
-		$line_id                = strval( $counter );
-		$item_total_amount      = absint( strval( floatval( $cart->get_shipping_total() ) * 100 ) );
-		$item_tax_amount        = absint( strval( floatval( $cart->get_shipping_tax() ) * 100 ) );
-		$item_line_total_amount = $item_total_amount + $item_tax_amount;
-		$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
-				2 ) * 100 ) : 0;
-
-
-
 		$order_total_amount = $total_amount;
 
-		$express_option = array();
 		$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
 		$selectedShippingReference = $this->get_shipping_reference();
 		$customer_types = array();
@@ -2089,7 +2071,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				$tax_display      = get_option( 'woocommerce_tax_display_cart' );
 				$j = 0;
 				foreach ( $packages as $i => $package ) {
-					$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
 					foreach ( $package['rates'] as $method ) {
 						$method_id   = $method->id;
 						$method_name = $method->label;
@@ -2117,10 +2098,10 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 							'operator_product_id' => (string)$method->instance_id,
 							
 						);
-						if($j == 0){
+
+						if ($j == 0) {
 							WC()->session->set( 'dintero_shipping_line_id', 'shipping_method_'.$j );
 						}
-
 						$j++;
 					}
 					
@@ -2272,13 +2253,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				console.log('dintero: extended error information:', errorObj);  
 			</script>" );
 			return array('result'=>2, 'msg'=>$msg);
-		} else {
-			$searializedData = trim(serialize(WC()->cart->get_cart()));
-			$transactionId = $response_array['id'];
-
-
-			return array('result'=>1, 'msg'=>'', 'url'=>$response_array['url'], 'id'=>$response_array['id']);
 		}
+
+		return array('result'=>1, 'msg'=>'', 'url'=>$response_array['url'], 'id'=>$response_array['id']);
 	}
 
 	/**
