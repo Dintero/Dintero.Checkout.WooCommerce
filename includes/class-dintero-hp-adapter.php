@@ -62,8 +62,8 @@ class Dintero_HP_Adapter
 	public function get_access_token()
 	{
 		$is_sandbox = WCDHP()->setting()->get('test_mode') === 'yes';
-		$client_id = WCDHP()->setting()->get($is_sandbox ? 'test_client_id' : 'client_id' );
-		$client_secret = WCDHP()->setting()->get($is_sandbox ? 'test_client_secret' : 'client_secret');
+		$client_id = WCDHP()->setting()->get($is_sandbox ? 'test_client_id' : 'production_client_id' );
+		$client_secret = WCDHP()->setting()->get($is_sandbox ? 'test_client_secret' : 'production_client_secret');
 		$account_id = ($is_sandbox ? 'T' : 'P') . WCDHP()->setting()->get('account_id');
 		$request = $this->_init_request()
 			->set_auth_params($client_id, $client_secret)
