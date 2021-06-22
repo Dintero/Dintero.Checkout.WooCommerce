@@ -43,6 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2021.06.22
+
+* Fix error when creating redirect session
+
 2021.06.21
 
 * Add option of having a Checkout Express button on the product pages
