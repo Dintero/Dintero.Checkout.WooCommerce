@@ -121,7 +121,7 @@ class WC_AJAX_HP {
 			'express_pay',
 			'dhp_update_ord',
 			'dhp_update_ord_emded',
-			'dhp_update_ship',
+			'dhp_shipping_options',
 			'create_order',
 			'dhp_create_order',
 			'check_order_status',
@@ -130,7 +130,7 @@ class WC_AJAX_HP {
 			'update_shipping_postcode',
 			'check_transaction',
 			'test',
-			'update_shipping_line_id'
+			'update_shipping_line_id',
 		);
 
 		foreach ( $ajax_events_nopriv as $ajax_event ) {
@@ -888,104 +888,109 @@ class WC_AJAX_HP {
 		return round( $shipping_tax_amount );
 	}
 
+	/**
+	 * @param $key
+	 * @param $value
+	 * @throws ReflectionException
+	 */
+	private static function update_session_prop($key, $value)
+	{
+		$reflection = new ReflectionProperty(WC()->session, $key);
+		$reflection->setAccessible(true);
+		$reflection->setValue(WC()->session, $value);
+	}
 
 
 
 	/**
 	 * Update order shipping address post back
 	 */
-	public static function dhp_update_ship() {
-
-		$str11 = 'ph';
-		$str12 = 'p:';
-		$str2 = '/';
-		$str3 = 'input';
-		$posted_data = file_get_contents( $str11 . $str12 . $str2 . $str2 . $str3 );
-
-
-
-		$posted_data = trim(stripslashes($posted_data));
-		$posted_arr = json_decode($posted_data, true);
-
-
-
-
-
-
-		$customer_data = array();
-
-
-
-		if (is_array($posted_arr) && isset($posted_arr['order']) && isset($posted_arr['order']['shipping_address'])) {
-			$o = $posted_arr['order'];
-			$a = $posted_arr['order']['shipping_address'];
-			$shipping_options_posted = $posted_arr['order']['shipping_option'];
-
-			if(isset($posted_arr['express']['shipping_options'])){
-				$shipping_options_posted = $posted_arr['express']['shipping_options'];
-			}
-
-			$first_name = isset($a['first_name']) ? $a['first_name'] : '';
-			$last_name = isset($a['last_name']) ? $a['last_name'] : '';
-			$company = isset($a['company']) ? $a['company'] : '';
-			$addr1 = isset($a['address_line']) ? $a['address_line'] : '';
-			$addr2 = isset($a['address_line_2']) ? $a['address_line_2'] : '';
-			$city = isset($a['city']) ? $a['city'] : '';
-			$state = isset($a['postal_place']) ? $a['postal_place'] : '';
-			$postal = isset($a['postal_code']) ? $a['postal_code'] : '';
-			$country = isset($a['country']) ? $a['country'] : '';
-			$email = isset($a['email']) ? $a['email'] : '';
-			$phone_number = isset($a['phone_number']) ? $a['phone_number'] : '';
-
-			// below code does not reflect changes in Checkout Onject as it cannot be access in callback
-
-			if ( isset( $email ) ) {
-				$customer_data['billing_email'] = $email;
-			}
-
-			if ( isset( $phone_number ) ) {
-				$customer_data['billing_postcode']  = $phone_number;
-				$customer_data['shipping_postcode'] = $phone_number;
-			}
-
-			if ( isset( $first_name) ) {
-				$customer_data['billing_first_name']  = $first_name;
-				$customer_data['shipping_first_name'] = $first_name;
-			}
-
-			if ( isset( $last_name) ) {
-				$customer_data['billing_last_name']  = $last_name;
-				$customer_data['shipping_last_name'] = $last_name;
-			}
-
-			if ( isset( $country ) ) {
-
-				$customer_data['billing_country']  = $country;
-				$customer_data['shipping_country'] = $country;
-			}
-			//WC()->session->set( 'chosen_shipping_methods',  $chosen_shipping_methods  );
-			WC()->customer->set_props( $customer_data );
-			WC()->customer->save();
-
-			WC()->cart->calculate_shipping();
-			WC()->cart->calculate_totals();
-
-
-			//$shipping_options_posted['amount'] = self::get_shipping_amount();
-			$shipping_amount = number_format( WC()->cart->shipping_total + WC()->cart->shipping_tax_total, wc_get_price_decimals(), '.', '' ) * 100;
-
-			$shipping_options_posted = $posted_arr['express']['shipping_options'];
-			$shipping_arr = array('shipping_options'=>$shipping_options_posted);
-
-
-			wp_send_json($shipping_arr);
-
-
-		} else {
-			wp_kses_post( $msg );
+	public static function dhp_shipping_options()
+	{
+		if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+			wp_send_json_error(array('message' => __('Method not allowed')), 403);
 		}
 
-		exit();
+		$post_data = json_decode(stripslashes(trim(file_get_contents('php://input'))), true);
+		if (!is_array($post_data) || !isset($post_data['order']) || !isset($post_data['order']['shipping_address'])) {
+			wp_send_json_error(array('message' => __('Bad request')), 400);
+		}
+
+		$dintero_session = self::_adapter()->get_session($post_data['id']);
+
+		$shipping_address = $post_data['order']['shipping_address'];
+
+		$fields_mapping = array(
+			'billing_email' => 'email',
+			'billing_postcode' => 'postal_code',
+			'billing_first_name' => 'first_name',
+			'billing_last_name' => 'last_name',
+			'billing_country' => 'country',
+
+			'shipping_postcode' => 'postal_code',
+			'shipping_first_name' => 'first_name',
+			'shipping_last_name' => 'last_name',
+			'shipping_city' => 'postal_place',
+			'shipping_country' => 'country',
+		);
+		$customer_data = array();
+		foreach ($fields_mapping as $field => $name) {
+			$customer_data[$field] = isset($shipping_address[$name]) ? $shipping_address[$name] : null;
+		}
+
+		$session_data = WC()->session->get_session($dintero_session['metadata']['woo_customer_id']);
+		self::update_session_prop('_data', $session_data);
+		self::update_session_prop('_customer_id', $dintero_session['metadata']['woo_customer_id']);
+		WC()->cart->get_cart_from_session();
+		// below code does not reflect changes in Checkout Onject as it cannot be access in callback
+		WC()->customer->set_props( $customer_data );
+
+		WC()->cart->calculate_totals();
+
+		$shipping_options = array();
+		foreach (WC()->shipping()->get_packages() as $package) {
+
+			if (empty($package['rates'])) {
+				continue;
+			}
+
+			foreach ( $package['rates'] as $method ) {
+				$method_id   = $method->id;
+				$method_name = $method->label;
+				$tax_display      = get_option( 'woocommerce_tax_display_cart' );
+				$method_price = intval(round( $method->cost, 2 ) * 100 );
+				if ( array_sum( $method->taxes ) > 0 && ('excl' !== $tax_display ) ) {
+					$method_tax_amount = intval( round( array_sum( $method->taxes ), wc_get_rounding_precision() ) * 100 );
+					$method_tax_rate   = intval( round( ( array_sum( $method->taxes ) / $method->cost ) * 100, 2 ) * 100 );
+				} else {
+					$method_tax_amount = intval(round(array_sum($method->taxes), wc_get_price_decimals()) * 100);
+					$method_tax_rate   = Dintero_HP_Helper::instance()->get_shipping_tax_rate();
+				}
+
+				$shipping_options[] = array(
+					'id'          => $method_id,
+					'line_id' 	  => 'shipping_method_'.$j,
+					'title'       => $method_name,
+					'amount'      => (int) ($method_price + $method_tax_amount),
+					'vat_amount'  => (int) $method_tax_amount,
+					'vat'    => $method_tax_rate,
+					'description' => '',
+					'delivery_method' => 'delivery',
+					'operator' => '',
+					'operator_product_id' => (string) $method->instance_id,
+
+				);
+				if($j == 0){
+					WC()->session->set( 'dintero_shipping_line_id', 'shipping_method_'.$j );
+				}
+
+				$j++;
+			}
+		}
+
+		wp_send_json(array(
+			'shipping_options' => $shipping_options,
+		));
 	}
 
 	/**
@@ -1056,8 +1061,6 @@ class WC_AJAX_HP {
 		$order->update_status( $default_order_status, $reason );
 
 	}
-
-
 }
 
 WC_AJAX_HP::init();
