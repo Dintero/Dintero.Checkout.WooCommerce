@@ -1,4 +1,4 @@
-name: CI
+name: Lint
 
 on:
   pull_request:
@@ -9,6 +9,7 @@ env:
 
 jobs:
   lint:
+    if: ${{ false }}  # disable for now
     runs-on: ubuntu-latest
 
     steps:
