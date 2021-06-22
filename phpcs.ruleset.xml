@@ -11,6 +11,9 @@
     <rule ref="WooCommerce-Core" >
         <exclude name="Generic.Commenting.Todo.TaskFound"/>
         <exclude name="Generic.Arrays.DisallowShortArraySyntax.Found"/>
+        <exclude name="Generic.WhiteSpace.DisallowTabIndent.TabsUsed" />
+        <exclude name="WordPress.WhiteSpace.OperatorSpacing.NoSpaceBefore" />
+        <exclude name="WordPress.WhiteSpace.OperatorSpacing.NoSpaceAfter" />
     </rule>
 
     <rule ref="PEAR">
