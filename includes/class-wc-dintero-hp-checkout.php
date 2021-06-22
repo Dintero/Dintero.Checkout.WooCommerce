@@ -1612,29 +1612,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	 *
 	 * @return integer $shipping_tax_rate Tax rate for selected shipping method.
 	 */
-	public function get_shipping_tax_rate() {
-		/*
-		if ( WC()->cart->shipping_tax_total > 0 && ! $this->separate_sales_tax ) {
-			$shipping_tax_rate = round( ( WC()->cart->shipping_tax_total / WC()->cart->shipping_total ) * 100, 2 ) * 100;
-		} else {
-			$shipping_tax_rate = 0;
-		}
-		*/
-
-		// error_log( 'tax rate ' . var_export( WC_Tax::get_shipping_tax_rates(), true ) );
-		if ( WC()->cart->shipping_tax_total > 0 && ! $this->separate_sales_tax ) {
-			$shipping_rates = WC_Tax::get_shipping_tax_rates();
-			$vat            = array_shift( $shipping_rates );
-			if ( isset( $vat['rate'] ) ) {
-				$shipping_tax_rate = round( $vat['rate'] ,2 );
-			} else {
-				$shipping_tax_rate = 0;
-			}
-		} else {
-			$shipping_tax_rate = 0;
-		}
-
-		return round( $shipping_tax_rate,2 );
+	public function get_shipping_tax_rate()
+	{
+		return Dintero_HP_Helper::instance()->get_shipping_tax_rate();
 	}
 
 	/**
@@ -2070,7 +2050,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 		$shipping_option = array();
 		$order_total_amount = $total_amount;
 
-		$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
+		$express_option = array();
+		$ship_callback_url = home_url() . '?dhp-ajax=dhp_shipping_options';
 		$selectedShippingReference = $this->get_shipping_reference();
 		$customer_types = array();
 		if ($express_customer_types == 'b2c') {
@@ -2146,10 +2127,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			$express_option = array(
 				'shipping_address_callback_url' => $ship_callback_url,
 				'customer_types' => $customer_types,
-				'shipping_options'=> $dintero_shipping_options
+				// 'shipping_options'=> $dintero_shipping_options
+				'shipping_options'=> array()
 			);
 		} else {
 			$express_option = array(
+				'shipping_address_callback_url' => $ship_callback_url,
 				'customer_types' => $customer_types,
 				'shipping_options'=> array(),
 			);
@@ -2359,7 +2342,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			$order_total_amount = $total_amount;
 			$hasShippingOptions = count($order->get_shipping_methods()) > 0;
 			if ($express) {
-				$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
+				$ship_callback_url = home_url() . '?dhp-ajax=dhp_shipping_options';
 				$selectedShippingReference = $this->get_shipping_reference();
 				$customer_types = array();
 				if ($express_customer_types == 'b2c') {

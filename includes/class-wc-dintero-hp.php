@@ -671,6 +671,7 @@ final class WC_Dintero_HP {
 	 */
 	public function includes() {
 		include_once DHP_ABSPATH . 'includes/class-wc-dintero-hp-setting.php';
+		include_once DHP_ABSPATH . 'includes/class-wc-dintero-hp-helper.php';
 		include_once DHP_ABSPATH . 'includes/class-wc-dintero-hp-ajax.php';
 		include_once DHP_ABSPATH . 'includes/class-wc-dintero-hp-checkout.php';
 		include_once DHP_ABSPATH . 'includes/admin/class-wc-dintero-hp-admin-menus.php';
