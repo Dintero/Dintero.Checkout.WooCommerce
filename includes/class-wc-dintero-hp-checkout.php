@@ -1574,14 +1574,19 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	public function get_shipping_amount() {
 
 		if ( $this->separate_sales_tax ) {
-
-			$shipping_amount = (int) number_format( WC()->cart->shipping_total * 100, 0, '', '' );
-		} else {
-			$shipping_amount = (int) number_format( (WC()->cart->shipping_total + WC()->cart->shipping_tax_total) *100 ,wc_get_price_decimals(), '.', '');
-
+			return (int) number_format(
+				WC()->cart->shipping_total * 100,
+				0,
+				'',
+				''
+			);
 		}
-
-		return $shipping_amount;
+		return intval(number_format(
+			WC()->cart->shipping_total + WC()->cart->shipping_tax_total,
+			wc_get_price_decimals(),
+			'.',
+			''
+		)) * 100;
 	}
 
 
@@ -2206,7 +2211,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			$payload['order']['shipping_address']['phone_number'] = $billingPhone;
 		}
 
-		if(sizeof($shipping_option) > 0){
+		if(count($shipping_option) > 0){
 			$payload['order']['shipping_option'] = $shipping_option;
 		} else {
 			$payload['order']['shipping_option'] = array(

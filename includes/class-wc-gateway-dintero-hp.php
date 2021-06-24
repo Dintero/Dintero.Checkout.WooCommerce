@@ -634,8 +634,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 		$counter ++;
 		$line_id                = strval( $counter );
-		$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
-		$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
+		$item_total_amount      = absint( round($order->get_shipping_total(), 2) * 100 );
+		$item_tax_amount        = absint( round( $order->get_shipping_tax(), 2) * 100 );
 		$item_line_total_amount = $item_total_amount + $item_tax_amount;
 		$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
 				2 ) * 100 ) : 0;
@@ -672,8 +672,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 					0 => array(
 						'id' => 'shipping_express',
 						'line_id' => $line_id,
-						'amount' => $item_line_total_amount,
-						'vat_amount' => $item_tax_amount,
+						'amount' => intval($item_line_total_amount),
+						'vat_amount' => intval($item_tax_amount),
 						'vat' => $item_tax_percentage,
 						'title' => 'Shipping: ' . $order->get_shipping_method(),
 						'description' => '',
