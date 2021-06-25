@@ -315,7 +315,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				'type'        => 'checkbox',
 				'description' => __( 'Shipping methods will be pushed in the iframe, Recomended to use only when shipping method are of type flat i.e. Price not dependent on Shipping postcode' ),
 				'default'     => 'no',
-				
+
 			),
 			'express_button_type'                        => array(
 				'title'       => __( 'Express Button Image Type:' ),
@@ -658,7 +658,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 		$order_total_amount = $total_amount;
 		$hasShippingOptions = count($order->get_shipping_methods()) > 0;
 		if ($isExpress) {
-			$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
+			$ship_callback_url = home_url() . '?dhp-ajax=dhp_shipping_options';
 			$customer_types = array();
 			if ($express_customer_types == 'b2c') {
 				array_push($customer_types, 'b2c');
@@ -667,54 +667,12 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			} else {
 				array_push($customer_types, 'b2b', 'b2c');
 			}
-			if ($hasShippingOptions) {
-				$dintero_shipping_options = array(
-					0 => array(
-						'id' => 'shipping_express',
-						'line_id' => $line_id,
-						'amount' => intval($item_line_total_amount),
-						'vat_amount' => intval($item_tax_amount),
-						'vat' => $item_tax_percentage,
-						'title' => 'Shipping: ' . $order->get_shipping_method(),
-						'description' => '',
-						'delivery_method' => 'delivery',
-						'operator' => '',
-						'operator_product_id' => '',
-						/*
-						"time_slot"=>array(
-								"starts_at"=>"2020-10-14T19:00:00Z",
-								"ends_at"=>"2020-10-14T20:00:00Z"
-							),
-						"pick_up_address"=>array(
-								"first_name"=>$order->get_shipping_first_name(),
-								"last_name"=>$order->get_shipping_last_name(),
-								"address_line"=>$order->get_shipping_address_1(),
-								"address_line_2"=>$order->get_shipping_address_2(),
-								"co_address"=>"",
-								"business_name"=>"",
-								"postal_code"=>$order->get_shipping_postcode(),
-								"postal_place"=>$order->get_shipping_city(),
-								"country"=>$order->get_shipping_country(),
-								"phone_number"=>"123456", //$order->get_billing_phone(),
-								"email"=>$order->get_billing_email(),
-								"latitude"=>0,
-								"longitude"=>0,
-								"comment"=>""
-								//"distance"=>0
-							)*/
-					)
-				);
-				$express_option = array(
-					'shipping_address_callback_url'=>$ship_callback_url,
-					'customer_types'=>$customer_types,
-					'shipping_options'=> $dintero_shipping_options
-				);
-			} else {
-				$express_option = array(
-					'customer_types' => $customer_types,
-					'shipping_options'=> array(),
-				);
-			}
+
+			$express_option = array(
+				'shipping_address_callback_url' => $ship_callback_url,
+				'customer_types'=>$customer_types,
+				'shipping_options' => array(),
+			);
 		}
 
 		$payload_url = array(
@@ -758,7 +716,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				),
 				'items'              => $items
 			),
-			'profile_id' => $this->profile_id
+			'profile_id' => $this->profile_id,
+			'metadata' => array(
+				'woo_customer_id' => WC()->session->get_customer_id(),
+			)
 		);
 
 		if ( $isExpress ) {
@@ -1477,7 +1438,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 						if($shippingLineId[0] != ''){
 							$item['line_id'] = $shippingLineId[0];
 						}
-						
+
 					}
 
 					array_push( $items, $item );
