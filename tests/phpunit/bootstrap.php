@@ -26,7 +26,7 @@ require_once $_tests_dir . '/includes/functions.php';
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
-	// Load the WooCommerce plugin so we can use its classes in our WooCommerce Stripe Payment Gateway plugin.
+	// Load the WooCommerce plugin so we can use its classes in our Dintero Payment Gateway plugin.
 	require_once ABSPATH . '/wp-content/plugins/woocommerce/woocommerce.php';
 	require __DIR__ . '/setup.php';
 

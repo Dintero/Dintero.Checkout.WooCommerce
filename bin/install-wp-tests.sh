@@ -5,7 +5,7 @@ if [ $# -lt 3 ] && [ -z $WC_DINTERO_DIR ]; then
 	exit 1
 fi
 
-DB_NAME=${1-wc_stripe_tests}
+DB_NAME=${1-wc_dintero_tests}
 DB_USER=${2-root}
 DB_PASS=${3-$MYSQL_ROOT_PASSWORD}
 DB_HOST=${4-$WORDPRESS_DB_HOST}
