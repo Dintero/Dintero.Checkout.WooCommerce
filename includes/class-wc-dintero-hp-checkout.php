@@ -20,6 +20,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	 */
 	protected static $instance = null;
 
+	/**
+	 * @var Dintero_HP_Adapter $_adapter
+	 */
+	protected static $_adapter;
+
 	private $id = 'dintero-hp';
 	private $enabled;
 	private $test_mode;
@@ -118,6 +123,18 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	public function callback(){
 
 	}
+
+	/**
+	 * @return Dintero_HP_Adapter|null
+	 */
+	protected static function _adapter()
+	{
+		if (!self::$_adapter) {
+			self::$_adapter = new Dintero_HP_Adapter();
+		}
+		return self::$_adapter;
+	}
+
 	/**
 	 * Render the checkout
 	 */
@@ -1124,8 +1141,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				}
 			}
 
-
-
 		}
 
 		if($sessionExpired || !$order_id){
@@ -1583,12 +1598,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 		}
 		return intval(number_format(
 			WC()->cart->shipping_total + WC()->cart->shipping_tax_total,
-			wc_get_price_decimals(),
+			min(array(2, wc_get_price_decimals())),
 			'.',
 			''
-		)) * 100;
+		) * 100);
 	}
-
 
 	/**
 	 * Get shipping method tax rate.
@@ -2502,113 +2516,39 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	}
 
 	/**
-	 * Get transaction by ID.
+	 * @param string $transaction_id
+	 * @return array
 	 */
-	public function get_transaction( $transaction_id ) {
-
-
-		$access_token = $this->get_access_token();
-		$api_endpoint = $this->checkout_endpoint . '/transactions';
-
-		$headers = array(
-			'Accept'        => 'application/json',
-			'Authorization' => 'Bearer ' . $access_token,
-			'Dintero-System-Name' => 'woocommerce',
-			'Dintero-System-Version' =>  WC()->version,
-			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
-			'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
-		);
-
-		$response = wp_remote_get( $api_endpoint . '/' . $transaction_id, array(
-			'method'    => 'GET',
-			'headers'   => $headers,
-			'timeout'   => 90,
-			'sslverify' => false
-		) );
-
-		// Retrieve the body's response if no errors found
-		$response_body = wp_remote_retrieve_body( $response );
-		$transaction   = json_decode( $response_body, true );
-
-		return $transaction;
+	public function get_transaction( $transaction_id )
+	{
+		return self::_adapter()->get_transaction($transaction_id);
 	}
 
 	/**
 	 * Update transaction with woocommerce Order Number.
 	 */
-	public function update_transaction( $transaction_id , $order_id ) {
+	public function update_transaction( $transaction_id , $order_id )
+	{
 
-		if($order_id == ''){
+		if(empty($order_id)){
 			return false;
 		}
-		$access_token = $this->get_access_token();
-		$api_endpoint = $this->checkout_endpoint . '/transactions';
 
-
-		$headers = array(
-
-			'Content-type'  => 'application/json; charset=utf-8',
-			'Accept'        => 'application/json',
-			'Authorization' => 'Bearer ' . $access_token,
-			'Dintero-System-Name' => 'woocommerce',
-			'Dintero-System-Version' =>  WC()->version,
-			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
-			'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
+		return self::_adapter()->update_transaction(
+			$transaction_id,
+			array(
+				'merchant_reference_2' => (string)$order_id
+			)
 		);
-		$payload = array(
-			'merchant_reference_2' => (string)$order_id
-		);
-		$url = $api_endpoint . '/' . $transaction_id;
-
-		$args = array(
-		    'headers' => $headers,
-		    'body'      => json_encode($payload),
-		    'method'    => 'PUT'
-		);
-
-
-
-		$response = wp_remote_request( $url, array(
-			'method'    => 'PUT',
-			'headers'   => $headers,
-			'body'      => json_encode( $payload )
-		) );
-		$response_body  = wp_remote_retrieve_body( $response );
-		$transaction = json_decode( $response_body, true );
-		return $transaction;
-
 	}
 
 	/**
-	 * Get Session detail By Session ID.
+	 * @param string $session_id
+	 * @return array
 	 */
-	public function get_dintero_session($sessionId){
-		$access_token = $this->get_access_token();
-		$api_endpoint = $this->checkout_endpoint . '/sessions';
-
-		$headers = array(
-			'Accept'        => 'application/json',
-			'Authorization' => 'Bearer ' . $access_token,
-			'Dintero-System-Name' => 'woocommerce',
-			'Dintero-System-Version' =>  WC()->version,
-			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
-			'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
-		);
-
-		$response = wp_remote_get( $api_endpoint . '/' . $sessionId, array(
-			'method'    => 'GET',
-			'headers'   => $headers,
-			'timeout'   => 90,
-			'sslverify' => false
-		) );
-
-		// Retrieve the body's response if no errors found
-		$response_body = wp_remote_retrieve_body( $response );
-		$sessionDetail   = json_decode( $response_body, true );
-
-		return $sessionDetail;
+	public function get_dintero_session($session_id){
+		return self::_adapter()->get_session($session_id);
 	}
-
 
 	/**
 	 * Check order status when it is changed and call the right action
@@ -2789,134 +2729,159 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	 * Check if payment capture is possible when the order is changed from on-hold to complete or processing
 	 *
 	 * @param int $order_id Order ID.
+	 * @return bool
 	 */
-	private function check_capture( $order_id ) {
-		$order = wc_get_order( $order_id );
-		if ( ! empty( $order ) &&
-			 $order instanceof WC_Order &&
-			 $order->get_transaction_id() &&
-			 'dintero-hp' === $order->get_payment_method() ) {
+	private function check_capture( $order_id )
+	{
 
-			$transaction_id = $order->get_transaction_id();
-			$transaction    = $this->get_transaction( $transaction_id );
-			if ( ! array_key_exists( 'merchant_reference', $transaction ) ) {
-				return false;
-			}
-			$transaction_order_id = absint( strval( $transaction['merchant_reference'] ) );
-			if ( $transaction_order_id === $order_id ) {
-				$this->capture( $order, $transaction );
-			}
+		/** @var WC_Order $order */
+		$order = wc_get_order( $order_id );
+		if (!$order || !($order instanceof WC_Order)) {
+			return false;
 		}
+
+		$transaction_id = $order->get_transaction_id();
+		if (empty($transaction_id) || 'dintero-hp' !== $order->get_payment_method()) {
+			return false;
+		}
+
+		$transaction = $this->get_transaction( $transaction_id );
+
+		if ($error = $this->extract('error', $transaction)) {
+			$order->add_order_note(__('Could not capture transaction: ') . $error['message']);
+			$order->save_meta_data();
+			return false;
+		}
+
+		$merchant_reference_id = absint(strval($this->extract(
+			'merchant_reference',
+			$transaction,
+			$this->extract('merchant_reference_2', $transaction)
+		)));
+
+		if (!$merchant_reference_id || $merchant_reference_id !== $order_id ) {
+			$order->add_order_note(__('Could not capture transaction: Merchant reference id not found'));
+			$order->save_meta_data();
+			return false;
+		}
+
+		$this->capture($order, $transaction);
+		return true;
+	}
+
+	/**
+	 * Extracting value from an array
+	 *
+	 * @param string $key
+	 * @param array $data
+	 * @param null $default
+	 * @return mixed|null
+	 */
+	private function extract($key, $data, $default = null)
+	{
+		return !empty($data[$key]) ? $data[$key] : $default;
 	}
 
 	/**
 	 * Capture Payment.
 	 */
-	public function capture( $order, $transaction = null ) {
-		if ( ! empty( $order ) &&
-			 $order instanceof WC_Order &&
-			 $order->get_transaction_id() ) {
-
-			$order_id = $order->get_id();
-
-			$transaction_id = $order->get_transaction_id();
-			if ( empty( $transaction ) ) {
-				$transaction = $this->get_transaction( $transaction_id );
-			}
-
-			$order_total_amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
-
-			if ( array_key_exists( 'status', $transaction ) &&
-				 array_key_exists( 'amount', $transaction ) &&
-				 'AUTHORIZED' === $transaction['status'] &&
-				 $transaction['amount'] >= $order_total_amount ) {
-				$access_token = $this->get_access_token();
-				$api_endpoint = $this->checkout_endpoint . '/transactions';
-
-				$items = array();
-
-				$counter = 0;
-				foreach ( $order->get_items() as $order_item ) {
-					$counter ++;
-					$line_id                = strval( $counter );
-					$item_total_amount      = absint( strval( floatval( $order_item->get_total() ) * 100 ) );
-					$item_tax_amount        = absint( strval( floatval( $order_item->get_total_tax() ) * 100 ) );
-					$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $order_item,
-							true ) ) * 100 ) );
-					$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
-							2 ) * 100 ) : 0;
-					$item                   = array(
-						'id'          => 'item_' . $counter,
-						'description' => $order_item->get_name(),
-						'quantity'    => $order_item->get_quantity(),
-						'vat_amount'  => $item_tax_amount,
-						'vat'         => $item_tax_percentage,
-						'amount'      => $item_line_total_amount,
-						'line_id'     => $line_id
-					);
-					array_push( $items, $item );
-				}
-
-				if ( count( $order->get_shipping_methods() ) > 0 ) {
-					$counter ++;
-					$line_id                = strval( $counter );
-					$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
-					$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
-					$item_line_total_amount = $item_total_amount + $item_tax_amount;
-					$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
-							2 ) * 100 ) : 0;
-
-					$item = array(
-						'id'          => 'shipping',
-						'description' => 'Shipping: ' . $order->get_shipping_method(),
-						'quantity'    => 1,
-						'vat_amount'  => $item_tax_amount,
-						'vat'         => $item_tax_percentage,
-						'amount'      => $item_line_total_amount,
-						'line_id'     => $line_id
-					);
-					array_push( $items, $item );
-				}
-
-				$headers = array(
-					'Content-type'  => 'application/json; charset=utf-8',
-					'Accept'        => 'application/json',
-					'Authorization' => 'Bearer ' . $access_token,
-					'Dintero-System-Name' => 'woocommerce',
-					'Dintero-System-Version' =>  WC()->version,
-					'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
-					'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
-				);
-
-				$payload = array(
-					'amount'            => $order_total_amount,
-					'capture_reference' => strval( $order_id ),
-					'items'             => $items
-				);
-
-				$response = wp_remote_post( $api_endpoint . '/' . $transaction_id . '/capture', array(
-					'method'    => 'POST',
-					'headers'   => $headers,
-					'body'      => wp_json_encode( $payload ),
-					'timeout'   => 90,
-					'sslverify' => false
-				) );
-
-				// Retrieve the body's response if no errors found
-				$response_body  = wp_remote_retrieve_body( $response );
-				$response_array = json_decode( $response_body, true );
-
-				if ( array_key_exists( 'status', $response_array ) &&
-					('CAPTURED' === $response_array['status'] || 'PARTIALLY_CAPTURED' === $response_array['status'])) {
-
-					$note = __( 'Payment captured via Dintero. Transaction ID: ' ) . $transaction_id;
-					WC_AJAX_HP::payment_complete( $order, $transaction_id, $note );
-				} else {
-					$note = __('Payment capture failed at Dintero. Transaction ID: ') . $transaction_id;
-					$order->add_order_note($note);
-				}
-			}
+	public function capture( $order, $transaction = null )
+	{
+		if (empty($order) || !($order instanceof WC_Order)) {
+			return false;
 		}
+
+		$transaction_id = $order->get_transaction_id();
+
+		if (empty($transaction_id)) {
+			return false;
+		}
+
+		if ( empty( $transaction ) ) {
+			$transaction = $this->get_transaction( $transaction_id );
+		}
+
+		$order_total_amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
+
+		if (isset($transaction['error'])) {
+			$order->add_order_note(__('Could not capture transaction: ' . $transaction['message']));
+			$order->save_meta_data();
+			return false;
+		}
+
+		if ($this->extract('status', $transaction) !== 'AUTHORIZED'
+			|| $this->extract('amount', $transaction) != $order_total_amount
+		) {
+			$order->add_order_note(__(
+				'Could not capture transaction: Transaction status is wrong or order and transaction amounts do not match.'
+			));
+			$order->save_meta_data();
+			return false;
+		}
+
+		$items = array();
+
+		$counter = 0;
+		foreach ( $order->get_items() as $order_item ) {
+			$counter ++;
+			$line_id                = strval( $counter );
+			$item_total_amount      = absint( strval( floatval( $order_item->get_total() ) * 100 ) );
+			$item_tax_amount        = absint( strval( floatval( $order_item->get_total_tax() ) * 100 ) );
+			$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $order_item,
+					true ) ) * 100 ) );
+			$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
+					2 ) * 100 ) : 0;
+			$item                   = array(
+				'id'          => 'item_' . $counter,
+				'description' => $order_item->get_name(),
+				'quantity'    => $order_item->get_quantity(),
+				'vat_amount'  => $item_tax_amount,
+				'vat'         => $item_tax_percentage,
+				'amount'      => $item_line_total_amount,
+				'line_id'     => $line_id
+			);
+			array_push( $items, $item );
+		}
+
+		if ( count( $order->get_shipping_methods() ) > 0 ) {
+			$counter ++;
+			$line_id                = strval( $counter );
+			$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
+			$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
+			$item_line_total_amount = $item_total_amount + $item_tax_amount;
+			$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
+					2 ) * 100 ) : 0;
+
+			$item = array(
+				'id'          => 'shipping',
+				'description' => 'Shipping: ' . $order->get_shipping_method(),
+				'quantity'    => 1,
+				'vat_amount'  => $item_tax_amount,
+				'vat'         => $item_tax_percentage,
+				'amount'      => $item_line_total_amount,
+				'line_id'     => $line_id
+			);
+			array_push( $items, $item );
+		}
+
+		$payload = array(
+			'amount'            => $order_total_amount,
+			'capture_reference' => strval( $order->get_id() ),
+			'items'             => $items
+		);
+
+		$response_array = self::_adapter()->capture_transaction($transaction_id, $payload);
+
+		if ( array_key_exists( 'status', $response_array ) &&
+			('CAPTURED' === $response_array['status'] || 'PARTIALLY_CAPTURED' === $response_array['status'])) {
+
+			$note = __( 'Payment captured via Dintero. Transaction ID: ' ) . $transaction_id;
+			WC_AJAX_HP::payment_complete( $order, $transaction_id, $note );
+			return true;
+		}
+		$note = __('Payment capture failed at Dintero. Transaction ID: ') . $transaction_id;
+		$order->add_order_note($note);
+		return false;
 	}
 
 	/**
