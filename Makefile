@@ -10,3 +10,6 @@ lint:
 
 lint-fix:
 	./vendor/bin/phpcbf ${PHPCS_ARGS}
+
+test:
+	./bin/run-tests.sh
