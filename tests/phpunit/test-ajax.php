@@ -17,14 +17,21 @@ class Ajax_Test extends WP_UnitTestCase {
 		$existing_order = WC_Helper_Order::create_order();
 		$order_id = $existing_order->get_id();
 
+		$customer_id = WC()->session->get_customer_id();
 		// mock transaction returned from Dintero /v1/transactions/{transaction_id}
 		$transaction = array(
 			'merchant_reference' => '',
 			'merchant_reference_2' => $order_id,
 			'status' => 'AUTHORIZED',
 		);
+		$session = array(
+			'metadata' => array(
+				'woo_customer_id' => $customer_id
+			),
+		);
 		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
 		$adapter_stub->method('get_transaction')->willReturn($transaction);
+		$adapter_stub->method('get_session')->willReturn($session);
 		$ajax::$_adapter = $adapter_stub;
 
 		// perform callback to create order
