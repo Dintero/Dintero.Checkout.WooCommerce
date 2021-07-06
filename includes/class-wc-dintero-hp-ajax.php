@@ -99,7 +99,7 @@ class WC_AJAX_HP {
 		}
 
 		$action = $wp_query->get( 'dhp-ajax' );
-		
+
 		if ( $action ) {
 			self::wc_ajax_headers();
 			$action = sanitize_text_field( $action );
@@ -185,9 +185,9 @@ class WC_AJAX_HP {
 
 	public function check_transaction(){
 		$transaction_id = sanitize_text_field($_POST['transaction_id']);
-		
+
 		$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
-			
+
 		$transaction_order_id = trim($transaction['merchant_reference']);
 		if($transaction_order_id == '' && isset($transaction['merchant_reference_2'])){
 			$transaction_order_id = trim($transaction['merchant_reference_2']);
@@ -195,12 +195,12 @@ class WC_AJAX_HP {
 
 
 		$order                = wc_get_order( $transaction_order_id );
-	
+
 		if(!$order){
 			wp_send_json_success(
 				array(
 					'msg'  => 'Order Doesnot exist'
-					
+
 				)
 			);
 		}else{
@@ -209,7 +209,7 @@ class WC_AJAX_HP {
 			wp_send_json_error(
 				array(
 					'redirect_url'  => $redirectUrl
-					
+
 				)
 			);
 
@@ -223,7 +223,7 @@ class WC_AJAX_HP {
 		wp_send_json_success(
 			array(
 				'success'  => true
-				
+
 			)
 		);
 	}
@@ -246,7 +246,7 @@ class WC_AJAX_HP {
 		wp_send_json_success(
 			array(
 				'success'  => true
-				
+
 			)
 		);
 		wp_die();
@@ -270,11 +270,11 @@ class WC_AJAX_HP {
 		if($order){
             $location = $order->get_checkout_order_received_url();
             $location = $location.'&merchant_reference='.$transaction_order_id.'&transaction_id='.$transaction_id;
-           	
+
             $return = array(
                 'message' => __( 'order created', 'textdomain' ),
                 'redirect_url' => $location,
-                
+
             );
             wp_send_json_success($return);
 
@@ -282,7 +282,7 @@ class WC_AJAX_HP {
 	}
 
 	public function update_session(){
-		
+
 		if ( apply_filters( 'dhp_check_if_needs_payment', true ) ) {
 	        if ( ! WC()->cart->needs_payment() ) {
 	            $redirectUrl = wc_get_checkout_url();
@@ -299,7 +299,7 @@ class WC_AJAX_HP {
 			'success' => true
 		);
 		wp_send_json($result);
-		
+
 	}
 
 
@@ -315,8 +315,8 @@ class WC_AJAX_HP {
 			exit;
 			wp_send_json($result);
 		}
-		
-		
+
+
 	}
 
 	/*
@@ -325,7 +325,7 @@ class WC_AJAX_HP {
 	*
 	*/
 	public function dhp_create_order() {
-		
+
 		$transaction_id = !empty($_GET['transaction_id']) ? $_GET['transaction_id'] : null;
 		$session_id = !empty($_GET['session_id']) ? $_GET['session_id'] : null;
 
@@ -515,7 +515,7 @@ class WC_AJAX_HP {
 			}
 			WCDHP()->checkout()->update_transaction($transaction_id, $order->get_id());
 			self::$isOnGoingPushOperation = false;
-		} elseif($order && $order->get_status() == 'on-hold' ){
+		} elseif($order && ($order->get_status() == 'on-hold' || $order->get_status() == 'pending') ){
 			if ( 'AUTHORIZED' === $transaction['status'] ) {
 
 				$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
@@ -565,9 +565,9 @@ class WC_AJAX_HP {
 			$order->set_shipping_last_name( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_last_name' ) ) );
 			$order->set_shipping_country( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_country' ) ) );
 			$order->set_shipping_address_1( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_address_1' ) ) );
-			
+
 			$order->set_shipping_city( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_city' ) ) );
-			
+
 			$order->set_shipping_postcode( sanitize_text_field( (string) WC()->checkout()->get_value( 'shipping_postcode' ) ) );
 			update_post_meta( $order->get_id(), '_shipping_phone', sanitize_text_field( WC()->checkout()->get_value( 'shipping_phone' ) ) );
 			update_post_meta( $order->get_id(), '_shipping_email', sanitize_text_field( WC()->checkout()->get_value( 'shipping_email' )  ) );
@@ -610,8 +610,8 @@ class WC_AJAX_HP {
 				$result = $payment_method->process_payment( $order_id ,true);
 				wp_send_json($result);
 			}
-			
-	
+
+
             //wp_send_json_success($return);
 
 		} catch ( Exception $e ) {
@@ -631,20 +631,20 @@ class WC_AJAX_HP {
 
 
 	public static function dhp_update_ord_emded(){
-		
+
 	}
 	/**
 	 * Update order status post back
 	 */
 	public static function dhp_update_ord() {
 		if ( ! empty( $_GET['transaction_id'] ) ) {
-			
+
 			$transaction_id = sanitize_text_field( wp_unslash( $_GET['transaction_id'] ) );
-			
+
 			$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
-			
+
 			$transaction_order_id = $transaction['merchant_reference'];
-			
+
 
 			$order                = wc_get_order( $transaction_order_id );
 			$isExpress = false;
@@ -664,13 +664,13 @@ class WC_AJAX_HP {
 
 					$coName = $shipping_address['co_address'];
 					$tempName = explode(" ",$coName);
-					
+
 					$firstName = $tempName[0];
 					$lastName = str_replace($tempName[0],"",$coName);
-					
+
 					$order->set_billing_first_name( sanitize_text_field($firstName));
 					$order->set_billing_last_name( sanitize_text_field( $lastName) );
-					
+
 					$order->set_shipping_first_name( sanitize_text_field( $firstName) );
 					$order->set_shipping_last_name( sanitize_text_field( $lastName) );
 				}else{
@@ -681,8 +681,8 @@ class WC_AJAX_HP {
 
 				}
 
-				
-				
+
+
 
 				$order->set_billing_country( sanitize_text_field($shipping_address['country']) );
 				$order->set_billing_address_1( sanitize_text_field( $shipping_address['address_line'] ) );
@@ -691,14 +691,14 @@ class WC_AJAX_HP {
 				$order->set_billing_phone( sanitize_text_field( $shipping_address['phone_number']) );
 				$order->set_billing_email( sanitize_text_field( $shipping_address['email'] ) );
 
-				
+
 
 
 				$order->set_shipping_country( sanitize_text_field( $shipping_address['country'] ) );
 				$order->set_shipping_address_1( sanitize_text_field( $shipping_address['address_line'] ) );
-				
+
 				$order->set_shipping_city( sanitize_text_field( $shipping_address['postal_place']) );
-				
+
 				$order->set_shipping_postcode( sanitize_text_field( $shipping_address['postal_code'] ) );
 				update_post_meta( $order->get_id(), '_shipping_phone', sanitize_text_field($shipping_address['phone_number'] ) );
 				update_post_meta( $order->get_id(), '_shipping_email', sanitize_text_field( $shipping_address['email']  ) );
@@ -707,7 +707,7 @@ class WC_AJAX_HP {
 			}
 			$methodName = 'Dintero - '.$transaction['payment_product'];
 			$order->set_payment_method_title($methodName);
-			
+
 			if ( ! empty( $order ) && $order instanceof WC_Order ) {
 				$amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
 				if ( array_key_exists( 'status', $transaction ) &&
@@ -715,7 +715,7 @@ class WC_AJAX_HP {
 					 $transaction['amount'] === $amount ) {
 
 					WC()->session->set( 'order_awaiting_payment', null );
-					
+
 					if ( 'AUTHORIZED' === $transaction['status'] ) {
 
 						$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
@@ -843,7 +843,7 @@ class WC_AJAX_HP {
 	 * @return integer $shipping_tax_amount Tax amount for selected shipping method.
 	 */
 	public function get_shipping_tax_amount() {
-		
+
 		if ( self::separate_sales_tax ) {
 			$shipping_tax_amount = 0;
 		} else {
@@ -855,38 +855,38 @@ class WC_AJAX_HP {
 	}
 
 
-	
+
 
 	/**
 	 * Update order shipping address post back
 	 */
 	public static function dhp_update_ship() {
-		
+
 		$str11 = 'ph';
 		$str12 = 'p:';
 		$str2 = '/';
 		$str3 = 'input';
 		$posted_data = file_get_contents( $str11 . $str12 . $str2 . $str2 . $str3 );
 
-		
+
 
 		$posted_data = trim(stripslashes($posted_data));
 		$posted_arr = json_decode($posted_data, true);
-			
-		
 
-		
 
-		
+
+
+
+
 		$customer_data = array();
 
-		
+
 
 		if (is_array($posted_arr) && isset($posted_arr['order']) && isset($posted_arr['order']['shipping_address'])) {
 			$o = $posted_arr['order'];
 			$a = $posted_arr['order']['shipping_address'];
 			$shipping_options_posted = $posted_arr['order']['shipping_option'];
-			
+
 			if(isset($posted_arr['express']['shipping_options'])){
 				$shipping_options_posted = $posted_arr['express']['shipping_options'];
 			}
@@ -925,7 +925,7 @@ class WC_AJAX_HP {
 			}
 
 			if ( isset( $country ) ) {
-				
+
 				$customer_data['billing_country']  = $country;
 				$customer_data['shipping_country'] = $country;
 			}
@@ -936,21 +936,21 @@ class WC_AJAX_HP {
 			WC()->cart->calculate_shipping();
 			WC()->cart->calculate_totals();
 
-			
+
 			//$shipping_options_posted['amount'] = self::get_shipping_amount();
 			$shipping_amount = number_format( WC()->cart->shipping_total + WC()->cart->shipping_tax_total, wc_get_price_decimals(), '.', '' ) * 100;
-			
+
 			$shipping_options_posted = $posted_arr['express']['shipping_options'];
 			$shipping_arr = array('shipping_options'=>$shipping_options_posted);
-			
-			
+
+
 			wp_send_json($shipping_arr);
 
-			
+
 		} else {
 			wp_kses_post( $msg );
 		}
-		
+
 		exit();
 	}
 
@@ -978,14 +978,14 @@ class WC_AJAX_HP {
 	 */
 	private static function process_authorization( $order, $transaction_id = '', $reason = '' ) {
 		$order->set_transaction_id( $transaction_id );
-		
+
 		$default_order_status = WC_Dintero_HP_Admin_Settings::get_option('default_order_status');
 		if (!$default_order_status) {
 			$default_order_status = 'wc-processing';
 		}
 
 		$order->update_status( $default_order_status, $reason );
-		
+
 	}
 
 	/**
@@ -997,13 +997,13 @@ class WC_AJAX_HP {
 	 */
 	private static function on_hold_order( $order, $transaction_id = '', $reason = '' ) {
 		$order->set_transaction_id( $transaction_id );
-		
-		
+
+
 		$default_order_status = 'wc-on-hold';
-		
+
 
 		$order->update_status( $default_order_status, $reason );
-		
+
 	}
 	/**
 	 * Failed order and add note.
@@ -1014,16 +1014,16 @@ class WC_AJAX_HP {
 	 */
 	private static function failed_order( $order, $transaction_id = '', $reason = '' ) {
 		$order->set_transaction_id( $transaction_id );
-		
-		
+
+
 		$default_order_status = 'wc-failed';
-		
+
 
 		$order->update_status( $default_order_status, $reason );
-		
+
 	}
 
-	
+
 }
 
 WC_AJAX_HP::init();
