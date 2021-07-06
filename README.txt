@@ -43,6 +43,11 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2021.07.06
+
+* Fixed decimals in shipping option amount
+* Update order status on callback if current status is pending
+
 2021.06.22
 
 * Fix error when creating redirect session
