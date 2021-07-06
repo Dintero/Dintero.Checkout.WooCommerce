@@ -1,33 +1,34 @@
-name: Lint
+name: Unit testing
 
 on:
-  pull_request:
-    branches: [ master ]
+  pull_request
 
 env:
   WP_VERSION: latest
   WC_VERSION: 4.5.1
 
 jobs:
-  lint:
-    if: ${{ false }}  # disable for now
+  test:
+    name: PHP testing
     runs-on: ubuntu-latest
-
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        php: [ '7.4', '8.0' ]
     steps:
+      # clone the repository
       - uses: actions/checkout@v2
-
       # enable dependencies caching
       - uses: actions/cache@v2
         with:
           path: ~/.cache/composer/
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-
+          key:  ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
       # setup PHP, but without debug extensions for reasonable performance
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
+          php-version: ${{ matrix.php }}
           tools:       composer
           coverage:    none
-
-      # install dependencies and run linter
-      - run: composer self-update 2.1.3 && composer install --no-progress && make lint
+      # run CI checks
+      - run: bash bin/run-ci-tests.bash
