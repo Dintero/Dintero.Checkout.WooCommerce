@@ -34,7 +34,6 @@ jobs:
       - run: bash bin/run-ci-tests.bash
       - uses: codecov/codecov-action@v1
         with:
-          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
           files: /home/runner/work/Dintero.Checkout.WooCommerce/Dintero.Checkout.WooCommerce/clover.xml
           flags: unittests # optional
           name: codecov-umbrella # optional
