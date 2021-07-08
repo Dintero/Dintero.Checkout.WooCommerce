@@ -3,4 +3,4 @@ docker/wordpress
 docker/data
 docker/logs
 .wp/
-.vendor/
+vendor/
