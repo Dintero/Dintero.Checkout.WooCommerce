@@ -32,3 +32,11 @@ jobs:
           coverage:    none
       # run CI checks
       - run: bash bin/run-ci-tests.bash
+      - uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          files: ./clover.xml
+          flags: unittests # optional
+          name: codecov-umbrella # optional
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)
