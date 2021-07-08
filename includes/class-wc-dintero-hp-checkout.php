@@ -2813,7 +2813,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			|| $this->extract('amount', $transaction) != $order_total_amount
 		) {
 			$order->add_order_note(__(
-				'Could not capture transaction: Transaction status is wrong or order and transaction amounts do not match.'
+				sprintf(
+					'Could not capture transaction: Transaction status is wrong (%s) or order and transaction amounts do not match. Transaction amount: %s. Order amount: %s',
+					$this->extract('status', $transaction),
+					$this->extract('amount', $transaction),
+					$order_total_amount
+				)
 			));
 			$order->save_meta_data();
 			return false;
