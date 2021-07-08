@@ -11,5 +11,6 @@ echo "Running the tests..."
 
 docker-compose exec -u www-data wordpress \
 	/var/www/html/wp-content/plugins/dintero-checkout-express/vendor/bin/phpunit \
+	--coverage-clover .clover.xml \
 	--configuration /var/www/html/wp-content/plugins/dintero-checkout-express/phpunit.xml.dist \
 	$*
