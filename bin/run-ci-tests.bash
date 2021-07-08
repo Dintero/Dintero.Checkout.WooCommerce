@@ -10,5 +10,4 @@ WC_DINTERO_DIR="$GITHUB_WORKSPACE"
 composer self-update 2.0.6 && composer install --no-progress
 sudo systemctl start mysql.service
 bash bin/install-wp-tests.sh woocommerce_test root root localhost $WP_VERSION $WC_VERSION false
-sleep 5
 bash bin/phpunit.sh
