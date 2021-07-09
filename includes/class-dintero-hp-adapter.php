@@ -115,6 +115,43 @@ class Dintero_HP_Adapter
 	}
 
 	/**
+	 * Update Transaction
+	 *
+	 * @param $transaction_id
+	 * @param $payload
+	 * @return mixed
+	 */
+	public function update_transaction($transaction_id, $payload)
+	{
+		$request = $this->_init_request($this->get_access_token())
+			->set_body(wp_json_encode($payload));
+		$payload = Dintero_HP_Request_Builder::instance()->build($request);
+		$payload['method'] = 'PUT';
+		$response = _wp_http_get_object()->request(
+			$this->_endpoint(sprintf('/transactions/%s', $transaction_id)),
+			$payload
+		);
+		return json_decode(wp_remote_retrieve_body( $response ), true );
+	}
+
+	/**
+	 * @param string $transaction_id
+	 * @param array $payload
+	 * @return array
+	 */
+	public function capture_transaction($transaction_id, $payload)
+	{
+		$request = $this->_init_request($this->get_access_token())
+			->set_body(wp_json_encode($payload));
+		$payload = Dintero_HP_Request_Builder::instance()->build($request);
+		$response = _wp_http_get_object()->post(
+			$this->_endpoint(sprintf('/transactions/%s/capture', $transaction_id)),
+			$payload
+		);
+		return json_decode(wp_remote_retrieve_body( $response ), true );
+	}
+
+	/**
 	 * Initializing session
 	 *
 	 * @param array $payload
