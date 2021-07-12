@@ -2084,7 +2084,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 
 						if ( array_sum( $method->taxes ) > 0 && ( ! $separate_sales_tax && 'excl' !== $tax_display ) ) {
 							$method_tax_amount = intval( round( array_sum( $method->taxes ), wc_get_rounding_precision() ) * 100 );
-							$method_tax_rate   = intval( round( ( array_sum( $method->taxes ) / $method->cost ) * 100, 2 ) * 100 );
+							$method_tax_rate   = intval( round( array_sum( $method->taxes ) / $method->cost, 2 ) * 100 );
 						} else {
 							$method_tax_amount = intval(round(array_sum($method->taxes), wc_get_price_decimals()) * 100);
 							$method_tax_rate   = $this->get_shipping_tax_rate();
