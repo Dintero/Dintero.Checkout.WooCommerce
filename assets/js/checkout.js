@@ -124,7 +124,7 @@ jQuery( function( $ ) {
 		},
 		updateShippingInfo: function(checkout){
 		
-			if (isShippingInIframe != 0) {
+			if (typeof(isShippingInIframe) != 'undefined' && isShippingInIframe != 0) {
 	  			jQuery('#shipping_method').hide();
 	  			if(jQuery('#shipping_method .dintero-shipping-label').length == 0){
 	  				jQuery('.dintero-shipping-label').remove();
