@@ -469,15 +469,16 @@ final class WC_Dintero_HP {
         		}
         	</script>
             <style>
-                .site-header-cart .widget_shopping_cart a.button.dintero-express-checkout {
+                .widget_shopping_cart a.button.dintero-express-checkout {
                     background-color: #03435d;
                     background-repeat: no-repeat;
                     height: 54px;
                     border: 1px solid #00e590;
                     background-size: contain;
+                    background-position: center;
                 }
 
-                .site-header-cart .widget_shopping_cart a.button.dintero-express-checkout.light {
+                .widget_shopping_cart a.button.dintero-express-checkout.light {
                     background-color: #ffffff;
                     background-repeat: no-repeat;
                     height: 54px;
@@ -485,11 +486,11 @@ final class WC_Dintero_HP {
                     background-size: 168px;
                     background-position: center;
                 }
-                .site-header-cart .widget_shopping_cart a.button.dintero-express-checkout:hover
+                .widget_shopping_cart a.button.dintero-express-checkout:hover {
                   background-color:#03435d;
                 }
 
-                .site-header-cart .widget_shopping_cart a.button.dintero-express-checkout.light:hover{
+                .widget_shopping_cart a.button.dintero-express-checkout.light:hover{
                   background-color:#ffffff;
                 }
 
