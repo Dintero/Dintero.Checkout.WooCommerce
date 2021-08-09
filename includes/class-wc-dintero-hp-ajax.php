@@ -347,7 +347,7 @@ class WC_AJAX_HP {
 		$session_data = WC()->session->get_session($session['metadata']['woo_customer_id']);
 
 		$transaction_order_id = trim($transaction['merchant_reference']);
-		if($transaction_order_id == '' && isset($transaction['merchant_reference_2'])){
+		if ($transaction_order_id == '' && isset($transaction['merchant_reference_2'])) {
 			$transaction_order_id = trim($transaction['merchant_reference_2']);
 		}
 
@@ -396,6 +396,8 @@ class WC_AJAX_HP {
 			$shipping_item_id = $transaction['shipping_option']['id'];
 			$total_vat = $session['order']['vat_amount'] / 100;
 			$real_shipping_tax = 0;
+
+			/** @var WC_Order_Item $item */
 			foreach ($items as $item) {
 				$vat_amount = $item['vat_amount'] / 100;
 				$amount = $item['amount'] / 100;
@@ -405,7 +407,7 @@ class WC_AJAX_HP {
 					$real_shipping_tax = $vat_amount;
 					$order_item = new WC_Order_Item_Shipping();
 					$order_item->set_method_id(substr($item['id'], 0, strpos($item['id'], ':')));
-					$order_item->set_method_title('Shipping: ' . $item['description']);
+					$order_item->set_method_title(!empty($item['description']) ? $item['description'] : __('Shipping'));
 					$order_item->set_total($amount - $vat_amount);
 					$order_item->set_instance_id($transaction['shipping_option']['operator_product_id'] ); // set an existing Shipping method instance ID
 					$order_item->set_taxes(array(
@@ -463,6 +465,10 @@ class WC_AJAX_HP {
 			/** @var WC_Order_Item_Shipping $shipping_item */
 			$shipping_item = current($order->get_items('shipping'));
 
+			$shipping_item->add_meta_data(__('Items', 'woocommerce'), implode(', ', array_map(function($item) {
+		 		return $item->get_name() . ' &times; ' . $item->get_quantity();
+			}, $order->get_items())));
+
 			/** @var WC_Order_Item_Tax $tax_item */
 			$tax_item = current($order->get_items('tax'));
 			if ($shipping_item && $shipping_item->get_total_tax() != $real_shipping_tax) {
@@ -483,7 +489,7 @@ class WC_AJAX_HP {
 			do_action( 'woocommerce_checkout_update_order_meta', $order_id, $data );
 
 			// The text for the note
-			$orderNote = __("Order Created Via CallBack");
+			$orderNote = __('Order Created Via CallBack');
 
 			// Add the note
 			$order->add_order_note( $orderNote );
