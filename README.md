@@ -11,12 +11,10 @@ With this plugin, you can embed or redirect our checkout in your WooCommerce ins
 
 ## Running locally
 
-See https://nimiq.github.io/tutorials/wordpress-woocommerce-installation for how to run locally from `~/wordpress`.
-
-Run this command to sync the current code to the local running instance:
+Run this:
 
 ```
-sudo cp -r . ~/wordpress/data/plugins/dintero-checkout-express && sudo chmod -R g+ ~/wordpress/data/plugins/dintero-checkout-express &&  sudo chown www-data:www-data -R ~/wordpress/data/plugins/dintero-checkout-express
+docker-compose up --build --force-recreate -d && ./bin/docker-setup.sh
 ```
 
 Add this to `/etc/hosts`
@@ -25,7 +23,15 @@ Add this to `/etc/hosts`
 127.0.0.1       localshop
 ```
 
-Go to `localshop:8080` to see your installation.
+Go to `localshop:8123` to see your installation, and change the site url to localshop instead of localhost.
+
+## Testing locally
+
+```
+docker-compose up --build --force-recreate -d && ./bin/docker-setup.sh
+# Wait for the startup to finish
+make test
+```
 
 
 
