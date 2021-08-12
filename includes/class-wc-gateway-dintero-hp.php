@@ -317,7 +317,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				'type'        => 'checkbox',
 				'description' => __( 'Shipping methods will be pushed in the iframe, Recomended to use only when shipping method are of type flat i.e. Price not dependent on Shipping postcode' ),
 				'default'     => 'no',
-				
+
 			),
 			'express_button_type'                        => array(
 				'title'       => __( 'Express Button Image Type:' ),
@@ -1479,7 +1479,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 						if($shippingLineId[0] != ''){
 							$item['line_id'] = $shippingLineId[0];
 						}
-						
+
 					}
 
 					array_push( $items, $item );
@@ -1520,6 +1520,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 					$note = __( 'Payment captured via Dintero. Transaction ID: ' ) . $transaction_id;
 					$this->payment_complete( $order, $transaction_id, $note );
 				} else {
+
 					$note = __( 'Payment capture failed at Dintero. Transaction ID: ' ) . $transaction_id;
 					$order->add_order_note( $note );
 				}
