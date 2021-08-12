@@ -73,7 +73,10 @@ final class WC_Dintero_HP {
 		add_action( 'woocommerce_pay_order_after_submit', array( $this, 'init_pay' ), 50);
 
 		add_action( 'woocommerce_cancelled_order', array( $this, 'cancel_order' ) );
-		add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
+
+		if ($embed_enable != 'yes') {
+			add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
+		}
 
 		add_action( 'woocommerce_applied_coupon', array( $this, 'applied_coupon' ), 10, 3 );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'removed_coupon' ), 10, 3 );
