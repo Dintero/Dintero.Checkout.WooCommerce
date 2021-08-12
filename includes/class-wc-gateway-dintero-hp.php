@@ -73,7 +73,9 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			add_action( 'woocommerce_thankyou', array( $this, 'callback' ));
 		}
 
-		add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
+		if (WCDHP()->setting()->get('embed_enable') == 'yes') {
+			add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
+		}
 	}
 
 	/**
