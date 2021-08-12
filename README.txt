@@ -43,7 +43,7 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
-2021.08.09
+2021.08.12
 
 * Fix issue where the wrong shipping title was displayed when order was created from callback
 * Fix issue with multiple Checkout Express buttons
