@@ -2115,7 +2115,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 							'delivery_method' => 'delivery',
 							'operator' => '',
 							'operator_product_id' => (string)$method->instance_id,
-							
+
 						);
 
 						if ($j == 0) {
@@ -2123,7 +2123,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 						}
 						$j++;
 					}
-					
+
 				}
 			} else {
 				// If shipping is not In Iframe
@@ -2257,7 +2257,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 		$response_trace_id = wp_remote_retrieve_header( $response, 'request-id');
 		$response_code = wp_remote_retrieve_response_code( $response );
 		$response_array = json_decode( $response_body, true );
-		
+
 		if ( ! array_key_exists( 'url', $response_array ) ) {
 			$msg = isset($response_array['error']) && isset($response_array['error']['message']) ? $response_array['error']['message'] : 'Unknown Error';
 			echo '<p class="dintero-error-message">Problems creating payment, please contact Dintero with this message: ' . $response_trace_id . ', ';
@@ -2740,8 +2740,13 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			return false;
 		}
 
+		if ('dintero-hp' !== $order->get_payment_method()) {
+			return false;
+		}
 		$transaction_id = $order->get_transaction_id();
-		if (empty($transaction_id) || 'dintero-hp' !== $order->get_payment_method()) {
+		if (empty($transaction_id)) {
+			$order->add_order_note('Payment capture failed at Dintero because the order lacks transaction_id. Contact integration@dintero.com with order information.');
+			$order->save_meta_data();
 			return false;
 		}
 

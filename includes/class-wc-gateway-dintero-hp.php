@@ -1374,13 +1374,18 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 		if ( ! empty( $order ) &&
 			 $order instanceof WC_Order &&
-			 $order->get_transaction_id() &&
 			 'dintero-hp' === $order->get_payment_method() ) {
 
 			$transaction_id = $order->get_transaction_id();
+			if (empty($transaction_id)) {
+				$order->add_order_note('Payment capture failed at Dintero because the order lacks transaction_id. Contact integration@dintero.com with order information.');
+				return false;
+			}
 			$transaction    = $this->get_transaction( $transaction_id );
 
 			if ( ! array_key_exists( 'merchant_reference', $transaction ) ) {
+				$order->add_order_note(__('Could not capture transaction: Merchant reference id not found'));
+				$order->save_meta_data();
 				return false;
 			}
 
