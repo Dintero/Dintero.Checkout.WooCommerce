@@ -3,7 +3,7 @@ Contributors: moogruppen, dintero
 Tags: woocommerce, Payment, Checkout, Vipps, Visa, Mastercard, Invoice, Instalment, Installment, Swish, Gateway, payment, dintero, Betalingsløsning, Checkout, Betaling, Vipps, Visa, Mastercard, Faktura, Delbetaling, Swish, Betalingsgateway, vipps, Betaling, nettbutikk
 Donate link: https://dintero.com
 Requires at least: 4.0
-Tested up to: 5.7
+Tested up to: 5.8
 Requires PHP: 5.6
 WC requires at least: 3.4.0
 WC tested up to: 4.0.0
@@ -42,6 +42,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 
 == Changelog ==
+
+2021.08.17
+
+* Fix issue for embedded shipping options where order is not updated after cart update
 
 2021.08.13
 
