@@ -1183,8 +1183,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 					var homeUrl = \"" .home_url(). "\";
 					document.addEventListener('DOMContentLoaded', function(event) { 
 					  	jQuery( document ).on( 'updated_checkout', function(){
-					  		if(checkoutSession && isShippingInIframe == 0){
-					  			// If shipping in Iframe then we dont need the lock session 
+					  		if(checkoutSession){
 								checkoutSession.lockSession();
 							}
 						});
