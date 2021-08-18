@@ -352,7 +352,7 @@ class WC_AJAX_HP {
 		}
 
 		$order = wc_get_order( $transaction_order_id );
-unset($transaction['merchant_reference_2']);
+
 		if(!$order && $transaction['merchant_reference_2'] == '') {
 			$coupon_codes = maybe_unserialize($session_data['applied_coupons']);
 			$items = $transaction['items'];
