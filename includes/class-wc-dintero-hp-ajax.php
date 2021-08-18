@@ -352,7 +352,7 @@ class WC_AJAX_HP {
 		}
 
 		$order = wc_get_order( $transaction_order_id );
-
+unset($transaction['merchant_reference_2']);
 		if(!$order && $transaction['merchant_reference_2'] == '') {
 			$coupon_codes = maybe_unserialize($session_data['applied_coupons']);
 			$items = $transaction['items'];
@@ -398,7 +398,7 @@ class WC_AJAX_HP {
 			$real_shipping_tax = 0;
 
 			/** @var WC_Order_Item $item */
-			foreach ($items as $item) {
+			foreach ($items as $key => $item) {
 				$vat_amount = $item['vat_amount'] / 100;
 				$amount = $item['amount'] / 100;
 
@@ -414,6 +414,14 @@ class WC_AJAX_HP {
 						'total' => array($vat_amount)
 					));
 					$order_item->save();
+
+					/**
+					 * Action hook to adjust item before save.
+					 *
+					 * @since 3.0.0
+					 */
+					do_action('woocommerce_checkout_create_order_shipping_item', $order_item, $key, $item, $order);
+
 					$order->add_item($order_item);
 					$order->set_shipping_total($amount - $vat_amount);
 					$order->set_shipping_tax($vat_amount);
@@ -425,7 +433,24 @@ class WC_AJAX_HP {
 				if (!$product = wc_get_product( $item['id'] )) {
 					continue;
 				}
-				$order->add_product($product, $item['quantity']);
+
+				$item_id = $order->add_product($product, $item['quantity']);
+
+				$order_item = $order->get_item($item_id);
+
+				/**
+				 * Action hook to adjust item before save.
+				 *
+				 * @since 3.0.0
+				 */
+				do_action(
+					'woocommerce_checkout_create_order_line_item',
+					$order_item,
+					$order_item->get_id(),
+					$order_item->get_data(),
+					$order
+				);
+				$order_item->save_meta_data();
 			}
 
 			if($transaction['shipping_address']['business_name']){ // if Business Checkout
