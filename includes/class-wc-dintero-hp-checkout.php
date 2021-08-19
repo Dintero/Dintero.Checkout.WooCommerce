@@ -1181,10 +1181,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 					var checkoutSession;
 					var isShippingInIframe = ".$isShippingInIframe.";
 					var homeUrl = \"" .home_url(). "\";
+					var checkoutUpdates = 0;
 					document.addEventListener('DOMContentLoaded', function(event) { 
-					  	jQuery( document ).on( 'updated_checkout', function(){
-					  		if(checkoutSession){
+					  	jQuery( document ).on( 'updated_checkout', function(data){
+					  		if(checkoutSession && (!isShippingInIframe || (isShippingInIframe && checkoutUpdates === 0))){
 								checkoutSession.lockSession();
+								checkoutUpdates += 1;
 							}
 						});
 
