@@ -43,6 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2021.08.19
+
+* Fix issue with missing metadata when creating order via callback
+
 2021.08.17
 
 * Fix issue for embedded shipping options where order is not updated after cart update
