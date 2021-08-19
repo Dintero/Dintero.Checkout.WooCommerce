@@ -121,6 +121,7 @@ class WC_AJAX_HP {
 			'express_pay',
 			'dhp_update_ord',
 			'dhp_update_ord_emded',
+			'dhp_update_ship', // For backwards compatibility
 			'dhp_shipping_options',
 			'create_order',
 			'dhp_create_order',
@@ -901,6 +902,13 @@ class WC_AJAX_HP {
 	}
 
 
+	/**
+	 * For backwards compatibility
+	 */
+	public static function dhp_update_ship()
+	{
+		self::dhp_shipping_options();
+	}
 
 	/**
 	 * Update order shipping address post back

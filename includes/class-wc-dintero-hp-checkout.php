@@ -2341,7 +2341,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			$order_total_amount = $total_amount;
 			$hasShippingOptions = count($order->get_shipping_methods()) > 0;
 			if ($express) {
-				$ship_callback_url = home_url() . '?dhp-ajax=dhp_shipping_options';
 				$selectedShippingReference = $this->get_shipping_reference();
 				$customer_types = array();
 				if ($express_customer_types == 'b2c') {
