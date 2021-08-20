@@ -1605,8 +1605,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			'.',
 			''
 		);
-		$intval = intval(round($formatted * 100, 2));
-		return $intval;
+		return intval(round($formatted * 100, 2));
 	}
 
 	/**
