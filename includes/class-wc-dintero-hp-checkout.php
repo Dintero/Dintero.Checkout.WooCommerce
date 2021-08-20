@@ -1562,13 +1562,16 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 
 			if ( '' !== $chosen_method ) {
 				$package_rates = $package['rates'];
+				$j = 0;
 				foreach ( $package_rates as $rate_key => $rate_value ) {
 					if ( $rate_key === $chosen_method ) {
 
 						$shipping_reference['id'] = $rate_value->id;
 						$shipping_reference['instance_id'] = $rate_value->instance_id;
 						$shipping_reference['label'] = $rate_value->label;
+						$shipping_reference['index'] = $j;
 					}
+					$j++;
 				}
 			}
 		}
@@ -1978,16 +1981,14 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				'vat_amount'         => $order_tax_amount ,
 				'currency'           => $currency,
 				'merchant_reference' => '',
-
 				'items'              => $this->order_lines,
 			)
-
 		);
 
 		if (WC()->shipping->get_packages() && WC()->session->get( 'chosen_shipping_methods' )[0]) {
 			$payload["order"]['shipping_option'] = array(
 				'id'=> (string)$selectedShippingReference['id'],
-				'line_id'=>'shipping_method',
+				'line_id'=>'shipping_method_'.$selectedShippingReference['index'],
 				'amount'=> (int) $this->get_shipping_amount(),
 				'vat_amount'=> (int)$this->get_shipping_tax_amount(),
 				'vat'=> $this->get_shipping_tax_rate(),
