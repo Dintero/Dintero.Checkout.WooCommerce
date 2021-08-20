@@ -10,7 +10,7 @@
 - In incognito mode, go to shop.dintero.com
 - Add "Extra branding material" to cart
 - Click "View cart"
-- Click "Proceed to checkout" directly
+- Click "Proceed to checkout" diource /FULL/PATH/TO/wp-completion.bashrectly
 - Enter email
 - Enter address
   - Phone number: 48059134
