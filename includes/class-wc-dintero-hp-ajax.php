@@ -17,6 +17,7 @@ class WC_AJAX_HP {
 	 * @var null
 	 */
 	static $_adapter = null;
+	static $_request_helpers = null;
 
 	public $separate_sales_tax = false;
 	public static $isOnGoingPushOperation = false;
@@ -30,6 +31,17 @@ class WC_AJAX_HP {
 			self::$_adapter = new Dintero_HP_Adapter();
 		}
 		return self::$_adapter;
+	}
+
+	/**
+	 * @return RequestHelpers|null
+	 */
+	protected static function _request_helpers()
+	{
+		if (!self::$_request_helpers) {
+			self::$_request_helpers = new RequestHelpers();
+		}
+		return self::$_request_helpers;
 	}
 
 	/**
@@ -919,7 +931,7 @@ class WC_AJAX_HP {
 			wp_send_json_error(array('message' => __('Method not allowed')), 403);
 		}
 
-		$post_data = json_decode(stripslashes(trim(file_get_contents('php://input'))), true);
+		$post_data = json_decode(stripslashes(trim(self::_request_helpers()->get_input())), true);
 		if (!is_array($post_data) || !isset($post_data['order']) || !isset($post_data['order']['shipping_address'])) {
 			wp_send_json_error(array('message' => __('Bad request')), 400);
 		}
@@ -996,7 +1008,7 @@ class WC_AJAX_HP {
 			}
 		}
 
-		wp_send_json(array(
+		self::_request_helpers()->send_json(array(
 			'shipping_options' => $shipping_options,
 		));
 	}

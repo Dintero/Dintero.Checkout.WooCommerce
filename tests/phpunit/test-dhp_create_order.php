@@ -1,10 +1,10 @@
 <?php
 /**
- * WC_Ajax_Test class.
+ * Ajax_Create_Order_Test class.
  *
- * Testing HTTP functions
+ * Testing Callback function
  */
-class Ajax_Test extends WP_UnitTestCase {
+class Ajax_Create_Order_Test extends WP_UnitTestCase {
 
 	public function test_updating_order_with_new_authorization() {
 		$ajax = new WC_AJAX_HP();

@@ -24,7 +24,7 @@ class WC_Helper_Shipping {
 			'enabled'      => 'yes',
 			'title'        => 'Flat rate',
 			'availability' => 'all',
-			'countries'    => '',
+			'countries'    => 'NO',
 			'tax_status'   => 'taxable',
 			'cost'         => $cost,
 		];
