@@ -1597,12 +1597,16 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				''
 			);
 		}
-		return intval(number_format(
-			WC()->cart->shipping_total + WC()->cart->shipping_tax_total,
+		$shipping_total = WC()->cart->shipping_total;
+		$shipping_tax_total = WC()->cart->shipping_tax_total;
+		$formatted = number_format(
+			$shipping_total + $shipping_tax_total,
 			min(array(2, wc_get_price_decimals())),
 			'.',
 			''
-		) * 100);
+		);
+		$intval = intval(round($formatted * 100, 2));
+		return $intval;
 	}
 
 	/**
@@ -2078,7 +2082,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 
 						$method_price = intval(round( $method->cost, 2 ) * 100 );
 
-						if ( array_sum( $method->taxes ) > 0 && ( ! $separate_sales_tax && 'excl' !== $tax_display ) ) {
+						if ( array_sum( $method->taxes ) > 0 && ( ! $this->separate_sales_tax && 'excl' !== $tax_display ) ) {
 							$method_tax_amount = intval( round( array_sum( $method->taxes ), wc_get_rounding_precision() ) * 100 );
 							$method_tax_rate   = intval( round( array_sum( $method->taxes ) / $method->cost, 2 ) * 100 );
 						} else {
@@ -2343,6 +2347,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			$order_total_amount = $total_amount;
 			$hasShippingOptions = count($order->get_shipping_methods()) > 0;
 			if ($express) {
+				$ship_callback_url = home_url() . '?dhp-ajax=dhp_shipping_options';
 				$selectedShippingReference = $this->get_shipping_reference();
 				$customer_types = array();
 				if ($express_customer_types == 'b2c') {
