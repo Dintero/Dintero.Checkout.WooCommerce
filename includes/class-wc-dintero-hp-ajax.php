@@ -955,44 +955,50 @@ class WC_AJAX_HP {
 
 		WC()->cart->calculate_totals();
 
+		$isShippingInIframe = 'yes' == WCDHP()->setting()->get('shipping_method_in_iframe');
+		if(!$isShippingInIframe){
+			$isShippingInIframe = 0;
+		}
 		$shipping_options = array();
-		foreach (WC()->shipping()->get_packages() as $package) {
+		if ($isShippingInIframe) {
+			foreach ( WC()->shipping()->get_packages() as $package ) {
 
-			if (empty($package['rates'])) {
-				continue;
-			}
-
-			foreach ( $package['rates'] as $method ) {
-				$method_id   = $method->id;
-				$method_name = $method->label;
-				$tax_display      = get_option( 'woocommerce_tax_display_cart' );
-				$method_price = intval(round( $method->cost, 2 ) * 100 );
-				if ( array_sum( $method->taxes ) > 0 && ('excl' !== $tax_display ) ) {
-					$method_tax_amount = intval( round( array_sum( $method->taxes ), wc_get_rounding_precision() ) * 100 );
-					$method_tax_rate   = intval( round( ( array_sum( $method->taxes ) / $method->cost ) * 100, 2 ));
-				} else {
-					$method_tax_amount = intval(round(array_sum($method->taxes), wc_get_price_decimals()) * 100);
-					$method_tax_rate   = Dintero_HP_Helper::instance()->get_shipping_tax_rate();
+				if ( empty($package['rates']) ) {
+					continue;
 				}
 
-				$shipping_options[] = array(
-					'id'          => $method_id,
-					'line_id' 	  => 'shipping_method_'.$j,
-					'title'       => $method_name,
-					'amount'      => (int) ($method_price + $method_tax_amount),
-					'vat_amount'  => (int) $method_tax_amount,
-					'vat'    => $method_tax_rate,
-					'description' => '',
-					'delivery_method' => 'delivery',
-					'operator' => '',
-					'operator_product_id' => (string) $method->instance_id,
+				foreach ( $package['rates'] as $method ) {
+					$method_id = $method->id;
+					$method_name = $method->label;
+					$tax_display = get_option('woocommerce_tax_display_cart');
+					$method_price = intval(round($method->cost, 2) * 100);
+					if ( array_sum($method->taxes) > 0 && ('excl' !== $tax_display) ) {
+						$method_tax_amount = intval(round(array_sum($method->taxes), wc_get_rounding_precision()) * 100);
+						$method_tax_rate = intval(round((array_sum($method->taxes) / $method->cost) * 100, 2));
+					} else {
+						$method_tax_amount = intval(round(array_sum($method->taxes), wc_get_price_decimals()) * 100);
+						$method_tax_rate = Dintero_HP_Helper::instance()->get_shipping_tax_rate();
+					}
 
-				);
-				if($j == 0){
-					WC()->session->set( 'dintero_shipping_line_id', 'shipping_method_'.$j );
+					$shipping_options[] = array(
+						'id' => $method_id,
+						'line_id' => 'shipping_method_' . $j,
+						'title' => $method_name,
+						'amount' => (int)($method_price + $method_tax_amount),
+						'vat_amount' => (int)$method_tax_amount,
+						'vat' => $method_tax_rate,
+						'description' => '',
+						'delivery_method' => 'delivery',
+						'operator' => '',
+						'operator_product_id' => (string)$method->instance_id,
+
+					);
+					if ( $j == 0 ) {
+						WC()->session->set('dintero_shipping_line_id', 'shipping_method_' . $j);
+					}
+
+					$j++;
 				}
-
-				$j++;
 			}
 		}
 

@@ -2055,9 +2055,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 		$shipping_option = array();
 		$order_total_amount = $total_amount;
 
-		$express_option = array();
 		$ship_callback_url = home_url() . '?dhp-ajax=dhp_shipping_options';
-		$selectedShippingReference = $this->get_shipping_reference();
 		$customer_types = array();
 		if ($express_customer_types == 'b2c') {
 			array_push($customer_types, 'b2c');
@@ -2112,28 +2110,14 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 
 				}
 			} else {
-				// If shipping is not In Iframe
-				$dintero_shipping_options = array(
-					array(
-						'id' => (string)$selectedShippingReference['id'],
-						'line_id' => 'shipping_method',
-						'amount' => (int) $this->get_shipping_amount() + $this->get_shipping_tax_amount(),
-						'vat_amount' => (int) $this->get_shipping_tax_amount(),
-						'vat' => $this->get_shipping_tax_rate(),
-						'title' => $this->get_shipping_name(),
-						'description' => '',
-						'delivery_method' => 'delivery',
-						'operator' => '',
-						'operator_product_id' => (string)$selectedShippingReference['instance_id'],
-					)
-				);
+				// If shipping is not in iframe, express.shipping_options should be empty
+				$dintero_shipping_options = array();
 			}
 
 			$express_option = array(
 				'shipping_address_callback_url' => $ship_callback_url,
 				'customer_types' => $customer_types,
-				// 'shipping_options'=> $dintero_shipping_options
-				'shipping_options'=> array()
+				'shipping_options'=> $dintero_shipping_options
 			);
 		} else {
 			$express_option = array(

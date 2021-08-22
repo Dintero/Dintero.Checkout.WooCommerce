@@ -802,7 +802,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			update_post_meta( $order_id, '_transaction_id', sanitize_key( $dintero_order_transaction_id ) );
 
 			// Update Shipping Line Id
-			update_post_meta($order_id,'_wc_dintero_shipping_line_id',sanitize_key(WC()->session->get( 'dintero_shipping_line_id')));
+			update_post_meta($order_id,'_wc_dintero_shipping_line_id',sanitize_key(sanitize_text_field( $dintero_order_session_detail['order']['shipping_option']['line_id']  )));
 
 			// Update the Dintero order with new confirmation merchant reference.  TO DO
 			$transaction = WCDHP()->checkout()->update_transaction($dintero_order_transaction_id, $order_id);
