@@ -760,6 +760,16 @@ class WC_AJAX_HP {
 						$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
 						self::payment_complete( $order, $transaction_id, $note );
 					}
+				} else {
+					if (array_key_exists( 'amount', $transaction ) &&
+						$transaction['amount'] !== $amount ) {
+						$note = sprintf(
+							'Failed to authorize order: Order and transaction amounts do not match. Transaction amount: %s. Order amount: %s. ',
+							$transaction['amount'],
+							$amount
+						) . $transaction_id;
+						$order->add_order_note($note);
+					}
 				}
 			}
 
@@ -959,8 +969,14 @@ class WC_AJAX_HP {
 		if(!$isShippingInIframe){
 			$isShippingInIframe = 0;
 		}
+		$express_button_query_param = sanitize_text_field($_GET['express_button']);
+		$isExpressButton = 'true' == $express_button_query_param;
+		if(!$isExpressButton) {
+			$isExpressButton = 0;
+		}
+
 		$shipping_options = array();
-		if ($isShippingInIframe) {
+		if ($isShippingInIframe || $isExpressButton) {
 			foreach ( WC()->shipping()->get_packages() as $package ) {
 
 				if ( empty($package['rates']) ) {

@@ -660,7 +660,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 		$order_total_amount = $total_amount;
 		$hasShippingOptions = count($order->get_shipping_methods()) > 0;
 		if ($isExpress) {
-			$ship_callback_url = home_url() . '?dhp-ajax=dhp_shipping_options';
+			$ship_callback_url = home_url() . '?dhp-ajax=dhp_shipping_options&express_button=true';
 			$customer_types = array();
 			if ($express_customer_types == 'b2c') {
 				array_push($customer_types, 'b2c');
