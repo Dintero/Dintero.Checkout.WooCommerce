@@ -74,7 +74,12 @@ final class WC_Dintero_HP {
 
 		add_action( 'woocommerce_cancelled_order', array( $this, 'cancel_order' ) );
 
+		$pluginlog = plugin_dir_path(__FILE__).'debug.log';
+		$message = 'capture 1. embed_enable='.$embed_enable.PHP_EOL;
+		error_log($message, 3, $pluginlog);
+
 		if ($embed_enable != 'yes') {
+			error_log('inside check_status 1', 3, $pluginlog);
 			add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
 		}
 
