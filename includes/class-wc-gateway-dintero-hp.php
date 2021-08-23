@@ -660,6 +660,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 		$order_total_amount = $total_amount;
 		$hasShippingOptions = count($order->get_shipping_methods()) > 0;
 		if ($isExpress) {
+			// This is as far as I know the only place that creates sessions for express button-clicks,
+			// and it doesn't create sessions for any other type of payment
 			$ship_callback_url = home_url() . '?dhp-ajax=dhp_shipping_options&express_button=true';
 			$customer_types = array();
 			if ($express_customer_types == 'b2c') {
@@ -669,11 +671,30 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			} else {
 				array_push($customer_types, 'b2b', 'b2c');
 			}
-
+			$dintero_shipping_options = array();
+			if ($hasShippingOptions) {
+				$dintero_shipping_options = array(
+					0 => array(
+						'id' => 'shipping_express',
+						'line_id' => $line_id,
+						'amount' => intval($item_line_total_amount),
+						'vat_amount' => intval($item_tax_amount),
+						'vat' => $item_tax_percentage,
+						'title' => 'Shipping: ' . $order->get_shipping_method(),
+						'description' => '',
+						'delivery_method' => 'delivery',
+						'operator' => '',
+						'operator_product_id' => '',
+					)
+				);
+			}
 			$express_option = array(
-				'shipping_address_callback_url' => $ship_callback_url,
+				// Temporarily disable shipping_address callback,
+				// as order update after payment doesn't handle
+				// that the session was actually updated with new shipping options
+//				'shipping_address_callback_url' => $ship_callback_url,
 				'customer_types'=>$customer_types,
-				'shipping_options' => array(),
+				'shipping_options' => $dintero_shipping_options,
 			);
 		}
 
