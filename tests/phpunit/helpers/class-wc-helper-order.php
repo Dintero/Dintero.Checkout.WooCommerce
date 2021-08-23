@@ -43,13 +43,13 @@ class WC_Helper_Order {
 	 *
 	 * @return WC_Order
 	 */
-	public static function create_order( $customer_id = 1, $product = null ) {
+	public static function create_order( $customer_id = 1, $product = null, $shipping_cost = 10, $shipping_tax = 2.5) {
 
 		if ( ! is_a( $product, 'WC_Product' ) ) {
 			$product = WC_Helper_Product::create_simple_product();
 		}
 
-		WC_Helper_Shipping::create_simple_flat_rate();
+		WC_Helper_Shipping::create_simple_flat_rate($shipping_cost);
 
 		$order_data = [
 			'status'        => 'pending',
@@ -88,8 +88,8 @@ class WC_Helper_Order {
 		$order->set_billing_phone( '555-32123' );
 
 		// Add shipping costs.
-		$shipping_taxes = WC_Tax::calc_shipping_tax( '10', WC_Tax::get_shipping_tax_rates() );
-		$rate           = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', $shipping_taxes, 'flat_rate' );
+		$shipping_taxes = WC_Tax::calc_shipping_tax( $shipping_cost . '', WC_Tax::get_shipping_tax_rates() );
+		$rate           = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', $shipping_cost . '', $shipping_taxes, 'flat_rate' );
 		$item           = new WC_Order_Item_Shipping();
 		$item->set_props(
 			[
@@ -109,11 +109,11 @@ class WC_Helper_Order {
 		$order->set_payment_method( $payment_gateways['dintero-hp'] );
 
 		// Set totals.
-		$order->set_shipping_total( 10 );
+		$order->set_shipping_total( $shipping_cost );
+		$order->set_shipping_tax( $shipping_tax );
 		$order->set_discount_total( 0 );
 		$order->set_discount_tax( 0 );
 		$order->set_cart_tax( 0 );
-		$order->set_shipping_tax( 0 );
 		$order->set_total( 50 ); // 4 x $10 simple helper product
 		$order->save();
 
@@ -138,8 +138,12 @@ class WC_Helper_Order {
 
 		$shipping_item = new WC_Order_Item_Shipping();
 		$shipping_item->set_order_id( $order->get_id() );
+		$shipping_item->set_taxes(array(14));
 		$shipping_item->set_name( 'Flat shipping' );
-		$shipping_item->set_total( 25 );
+		$shipping_item->set_total( 22 );
+
+		$order->set_shipping_total("256.03");
+		$order->set_shipping_tax("64.01");
 
 		$order->add_item( $fee_item );
 		$order->add_item( $shipping_item );

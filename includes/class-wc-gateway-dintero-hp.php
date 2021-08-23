@@ -19,7 +19,7 @@
 class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 {
 	/** @var null | Dintero_HP_Adapter */
-	protected static $_adapter = null;
+	static $_adapter = null;
 
 	/**
 	 * Class constructor.
@@ -635,8 +635,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 		$counter ++;
 		$line_id                = strval( $counter );
-		$item_total_amount      = absint( round($order->get_shipping_total(), 2) * 100 );
-		$item_tax_amount        = absint( round( $order->get_shipping_tax(), 2) * 100 );
+		$item_total_amount      = absint( round($order->get_shipping_total() * 100, 2));
+		$item_tax_amount        = absint( round( $order->get_shipping_tax() * 100, 2 ));
 		$item_line_total_amount = $item_total_amount + $item_tax_amount;
 		$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
 				2 ) * 100 ) : 0;
@@ -655,7 +655,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 			$total_amount += $item_line_total_amount;
 		}
-
 		$order_total_amount = $total_amount;
 		$hasShippingOptions = count($order->get_shipping_methods()) > 0;
 		if ($isExpress) {
@@ -760,7 +759,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				'operator' => ''
 			);
 		}
-
 		$response = self::_adapter()->init_session($payload);
 		return isset($response['url']) ? $response['url'] : '';
 	}
@@ -1011,7 +1009,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
 				$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
 				$item_line_total_amount = $item_total_amount + $item_tax_amount;
-
 				$item = array(
 					'id'           => 'shipping',
 					'description'  => 'Shipping: ' . $order->get_shipping_method(),
