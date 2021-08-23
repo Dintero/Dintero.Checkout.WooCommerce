@@ -344,7 +344,15 @@ class WC_AJAX_HP {
 			wp_send_json_error(__('Invalid response'), 400);
 		}
 
-		$session = self::_adapter()->get_session($session_id);
+		// TODO: Can be removed when all callbacks with ?include_session contain session.metadata.woo_customer_id
+		if (array_key_exists('session', $transaction) &&
+			array_key_exists('metadata', $transaction['session']) &&
+			array_key_exists('woo_customer_id', $transaction['session']['metadata'])
+		) {
+			$session = $transaction['session'];
+		} else {
+			$session = self::_adapter()->get_session($session_id);
+		}
 		$session_data = WC()->session->get_session($session['metadata']['woo_customer_id']);
 
 		$transaction_order_id = trim($transaction['merchant_reference']);
@@ -956,9 +964,10 @@ class WC_AJAX_HP {
 			$customer_data[$field] = isset($shipping_address[$name]) ? $shipping_address[$name] : null;
 		}
 
-		$session_data = WC()->session->get_session($dintero_session['metadata']['woo_customer_id']);
+		$woo_customer_id = $dintero_session['metadata']['woo_customer_id'];
+		$session_data = WC()->session->get_session($woo_customer_id);
 		self::update_session_prop('_data', $session_data);
-		self::update_session_prop('_customer_id', $dintero_session['metadata']['woo_customer_id']);
+		self::update_session_prop('_customer_id', $woo_customer_id);
 		WC()->cart->get_cart_from_session();
 		// below code does not reflect changes in Checkout Onject as it cannot be access in callback
 		WC()->customer->set_props( $customer_data );

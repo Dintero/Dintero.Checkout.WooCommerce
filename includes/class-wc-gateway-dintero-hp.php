@@ -72,12 +72,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			//Use thank you page to check for transactions, only if callbacks are unavailable
 			add_action( 'woocommerce_thankyou', array( $this, 'callback' ));
 		}
-		$pluginlog = plugin_dir_path(__FILE__).'debug.log';
-		$message = 'capture 2. embed_enable='.WCDHP()->setting()->get('embed_enable').PHP_EOL;
-		error_log($message, 3, $pluginlog);
-
 		if (WCDHP()->setting()->get('embed_enable') == 'yes') {
-			error_log('inside check_status 2'.PHP_EOL, 3, $pluginlog);
 			add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
 		}
 	}
@@ -1359,15 +1354,9 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 	private function check_capture( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		$pluginlog = plugin_dir_path(__FILE__).'debug.log';
-		$message = 'inside check_capture 2'.PHP_EOL;
-		error_log($message, 3, $pluginlog);
-
 		if ( ! empty( $order ) &&
 			 $order instanceof WC_Order &&
 			 'dintero-hp' === $order->get_payment_method() ) {
-			$message = 'inside non_empty order 2'.PHP_EOL;
-			error_log($message, 3, $pluginlog);
 			$transaction_id = $order->get_transaction_id();
 			if (empty($transaction_id)) {
 				$order->add_order_note('Payment capture failed at Dintero because the order lacks transaction_id. Contact integration@dintero.com with order information.');
