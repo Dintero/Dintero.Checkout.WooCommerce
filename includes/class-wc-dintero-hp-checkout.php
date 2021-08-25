@@ -1181,10 +1181,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 					var checkoutSession;
 					var isShippingInIframe = ".$isShippingInIframe.";
 					var homeUrl = \"" .home_url(). "\";
+					var checkoutUpdates = 0;
 					document.addEventListener('DOMContentLoaded', function(event) { 
-					  	jQuery( document ).on( 'updated_checkout', function(){
-					  		if(checkoutSession){
+					  	jQuery( document ).on( 'updated_checkout', function(data){
+					  		if(checkoutSession && (!isShippingInIframe || (isShippingInIframe && checkoutUpdates === 0))){
 								checkoutSession.lockSession();
+								checkoutUpdates += 1;
 							}
 						});
 
@@ -1560,13 +1562,16 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 
 			if ( '' !== $chosen_method ) {
 				$package_rates = $package['rates'];
+				$j = 0;
 				foreach ( $package_rates as $rate_key => $rate_value ) {
 					if ( $rate_key === $chosen_method ) {
 
 						$shipping_reference['id'] = $rate_value->id;
 						$shipping_reference['instance_id'] = $rate_value->instance_id;
 						$shipping_reference['label'] = $rate_value->label;
+						$shipping_reference['index'] = $j;
 					}
+					$j++;
 				}
 			}
 		}
@@ -1595,12 +1600,15 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				''
 			);
 		}
-		return intval(number_format(
-			WC()->cart->shipping_total + WC()->cart->shipping_tax_total,
+		$shipping_total = WC()->cart->shipping_total;
+		$shipping_tax_total = WC()->cart->shipping_tax_total;
+		$formatted = number_format(
+			$shipping_total + $shipping_tax_total,
 			min(array(2, wc_get_price_decimals())),
 			'.',
 			''
-		) * 100);
+		);
+		return intval(round($formatted * 100, 2));
 	}
 
 	/**
@@ -1611,29 +1619,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	 *
 	 * @return integer $shipping_tax_rate Tax rate for selected shipping method.
 	 */
-	public function get_shipping_tax_rate() {
-		/*
-		if ( WC()->cart->shipping_tax_total > 0 && ! $this->separate_sales_tax ) {
-			$shipping_tax_rate = round( ( WC()->cart->shipping_tax_total / WC()->cart->shipping_total ) * 100, 2 ) * 100;
-		} else {
-			$shipping_tax_rate = 0;
-		}
-		*/
-
-		// error_log( 'tax rate ' . var_export( WC_Tax::get_shipping_tax_rates(), true ) );
-		if ( WC()->cart->shipping_tax_total > 0 && ! $this->separate_sales_tax ) {
-			$shipping_rates = WC_Tax::get_shipping_tax_rates();
-			$vat            = array_shift( $shipping_rates );
-			if ( isset( $vat['rate'] ) ) {
-				$shipping_tax_rate = round( $vat['rate'] ,2 );
-			} else {
-				$shipping_tax_rate = 0;
-			}
-		} else {
-			$shipping_tax_rate = 0;
-		}
-
-		return round( $shipping_tax_rate,2 );
+	public function get_shipping_tax_rate()
+	{
+		return Dintero_HP_Helper::instance()->get_shipping_tax_rate();
 	}
 
 	/**
@@ -1993,16 +1981,14 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				'vat_amount'         => $order_tax_amount ,
 				'currency'           => $currency,
 				'merchant_reference' => '',
-
 				'items'              => $this->order_lines,
 			)
-
 		);
 
 		if (WC()->shipping->get_packages() && WC()->session->get( 'chosen_shipping_methods' )[0]) {
 			$payload["order"]['shipping_option'] = array(
 				'id'=> (string)$selectedShippingReference['id'],
-				'line_id'=>'shipping_method',
+				'line_id'=>'shipping_method_'.$selectedShippingReference['index'],
 				'amount'=> (int) $this->get_shipping_amount(),
 				'vat_amount'=> (int)$this->get_shipping_tax_amount(),
 				'vat'=> $this->get_shipping_tax_rate(),
@@ -2069,8 +2055,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 		$shipping_option = array();
 		$order_total_amount = $total_amount;
 
-		$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
-		$selectedShippingReference = $this->get_shipping_reference();
+		$ship_callback_url = home_url() . '?dhp-ajax=dhp_shipping_options';
 		$customer_types = array();
 		if ($express_customer_types == 'b2c') {
 			array_push($customer_types, 'b2c');
@@ -2095,7 +2080,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 
 						$method_price = intval(round( $method->cost, 2 ) * 100 );
 
-						if ( array_sum( $method->taxes ) > 0 && ( ! $separate_sales_tax && 'excl' !== $tax_display ) ) {
+						if ( array_sum( $method->taxes ) > 0 && ( ! $this->separate_sales_tax && 'excl' !== $tax_display ) ) {
 							$method_tax_amount = intval( round( array_sum( $method->taxes ), wc_get_rounding_precision() ) * 100 );
 							$method_tax_rate   = intval( round( array_sum( $method->taxes ) / $method->cost, 2 ) * 100 );
 						} else {
@@ -2125,21 +2110,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 
 				}
 			} else {
-				// If shipping is not In Iframe
-				$dintero_shipping_options = array(
-					array(
-						'id' => (string)$selectedShippingReference['id'],
-						'line_id' => 'shipping_method',
-						'amount' => (int) $this->get_shipping_amount() + $this->get_shipping_tax_amount(),
-						'vat_amount' => (int) $this->get_shipping_tax_amount(),
-						'vat' => $this->get_shipping_tax_rate(),
-						'title' => $this->get_shipping_name(),
-						'description' => '',
-						'delivery_method' => 'delivery',
-						'operator' => '',
-						'operator_product_id' => (string)$selectedShippingReference['instance_id'],
-					)
-				);
+				// If shipping is not in iframe, express.shipping_options should be empty
+				$dintero_shipping_options = array();
 			}
 
 			$express_option = array(
@@ -2149,6 +2121,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			);
 		} else {
 			$express_option = array(
+				'shipping_address_callback_url' => $ship_callback_url,
 				'customer_types' => $customer_types,
 				'shipping_options'=> array(),
 			);
@@ -2358,7 +2331,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			$order_total_amount = $total_amount;
 			$hasShippingOptions = count($order->get_shipping_methods()) > 0;
 			if ($express) {
-				$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
+				$ship_callback_url = home_url() . '?dhp-ajax=dhp_shipping_options';
 				$selectedShippingReference = $this->get_shipping_reference();
 				$customer_types = array();
 				if ($express_customer_types == 'b2c') {

@@ -43,6 +43,15 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2021.08.25
+
+* Fixes double shipping options in checkout when shipping options not in iframe
+* Fixes cent-difference in redirect-mode
+* Fixes capture problem when line_id is wrong
+* Decreases number of updates when shipping in iframe
+* Adds note when capture not attempted because of diverging amounts
+* Adds note if order not authorized because of diverging amounts
+
 2021.08.19
 
 * Fix issue with missing metadata when creating order via callback

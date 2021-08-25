@@ -19,7 +19,7 @@
 class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 {
 	/** @var null | Dintero_HP_Adapter */
-	protected static $_adapter = null;
+	static $_adapter = null;
 
 	/**
 	 * Class constructor.
@@ -72,7 +72,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			//Use thank you page to check for transactions, only if callbacks are unavailable
 			add_action( 'woocommerce_thankyou', array( $this, 'callback' ));
 		}
-
 		if (WCDHP()->setting()->get('embed_enable') == 'yes') {
 			add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
 		}
@@ -636,8 +635,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 		$counter ++;
 		$line_id                = strval( $counter );
-		$item_total_amount      = absint( round($order->get_shipping_total(), 2) * 100 );
-		$item_tax_amount        = absint( round( $order->get_shipping_tax(), 2) * 100 );
+		$item_total_amount      = absint( round($order->get_shipping_total() * 100, 2));
+		$item_tax_amount        = absint( round( $order->get_shipping_tax() * 100, 2 ));
 		$item_line_total_amount = $item_total_amount + $item_tax_amount;
 		$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
 				2 ) * 100 ) : 0;
@@ -656,11 +655,12 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 			$total_amount += $item_line_total_amount;
 		}
-
 		$order_total_amount = $total_amount;
 		$hasShippingOptions = count($order->get_shipping_methods()) > 0;
 		if ($isExpress) {
-			$ship_callback_url = home_url() . '?dhp-ajax=dhp_update_ship';
+			// This is as far as I know the only place that creates sessions for express button-clicks,
+			// and it doesn't create sessions for any other type of payment
+			$ship_callback_url = home_url() . '?dhp-ajax=dhp_shipping_options&express_button=true';
 			$customer_types = array();
 			if ($express_customer_types == 'b2c') {
 				array_push($customer_types, 'b2c');
@@ -669,6 +669,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			} else {
 				array_push($customer_types, 'b2b', 'b2c');
 			}
+			$dintero_shipping_options = array();
 			if ($hasShippingOptions) {
 				$dintero_shipping_options = array(
 					0 => array(
@@ -682,41 +683,18 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 						'delivery_method' => 'delivery',
 						'operator' => '',
 						'operator_product_id' => '',
-						/*
-						"time_slot"=>array(
-								"starts_at"=>"2020-10-14T19:00:00Z",
-								"ends_at"=>"2020-10-14T20:00:00Z"
-							),
-						"pick_up_address"=>array(
-								"first_name"=>$order->get_shipping_first_name(),
-								"last_name"=>$order->get_shipping_last_name(),
-								"address_line"=>$order->get_shipping_address_1(),
-								"address_line_2"=>$order->get_shipping_address_2(),
-								"co_address"=>"",
-								"business_name"=>"",
-								"postal_code"=>$order->get_shipping_postcode(),
-								"postal_place"=>$order->get_shipping_city(),
-								"country"=>$order->get_shipping_country(),
-								"phone_number"=>"123456", //$order->get_billing_phone(),
-								"email"=>$order->get_billing_email(),
-								"latitude"=>0,
-								"longitude"=>0,
-								"comment"=>""
-								//"distance"=>0
-							)*/
 					)
 				);
-				$express_option = array(
-					'shipping_address_callback_url'=>$ship_callback_url,
-					'customer_types'=>$customer_types,
-					'shipping_options'=> $dintero_shipping_options
-				);
-			} else {
-				$express_option = array(
-					'customer_types' => $customer_types,
-					'shipping_options'=> array(),
-				);
 			}
+			$express_option = array(
+				// Temporarily disable shipping_address callback,
+				// as order update after payment doesn't handle
+				// that the session was actually updated with new shipping options
+				// TODO: Add back when we properly support updating shipping during express checkout
+//				'shipping_address_callback_url' => $ship_callback_url,
+				'customer_types'=>$customer_types,
+				'shipping_options' => $dintero_shipping_options,
+			);
 		}
 
 		$payload_url = array(
@@ -760,7 +738,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				),
 				'items'              => $items
 			),
-			'profile_id' => $this->profile_id
+			'profile_id' => $this->profile_id,
+			'metadata' => array(
+				'woo_customer_id' => WC()->session->get_customer_id(),
+			)
 		);
 
 		if ( $isExpress ) {
@@ -778,7 +759,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				'operator' => ''
 			);
 		}
-
 		$response = self::_adapter()->init_session($payload);
 		return isset($response['url']) ? $response['url'] : '';
 	}
@@ -841,7 +821,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			update_post_meta( $order_id, '_transaction_id', sanitize_key( $dintero_order_transaction_id ) );
 
 			// Update Shipping Line Id
-			update_post_meta($order_id,'_wc_dintero_shipping_line_id',sanitize_key(WC()->session->get( 'dintero_shipping_line_id')));
+			update_post_meta($order_id,'_wc_dintero_shipping_line_id',sanitize_key(sanitize_text_field( $dintero_order_session_detail['order']['shipping_option']['line_id']  )));
 
 			// Update the Dintero order with new confirmation merchant reference.  TO DO
 			$transaction = WCDHP()->checkout()->update_transaction($dintero_order_transaction_id, $order_id);
@@ -1029,7 +1009,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
 				$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
 				$item_line_total_amount = $item_total_amount + $item_tax_amount;
-
 				$item = array(
 					'id'           => 'shipping',
 					'description'  => 'Shipping: ' . $order->get_shipping_method(),
@@ -1375,7 +1354,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 		if ( ! empty( $order ) &&
 			 $order instanceof WC_Order &&
 			 'dintero-hp' === $order->get_payment_method() ) {
-
 			$transaction_id = $order->get_transaction_id();
 			if (empty($transaction_id)) {
 				$order->add_order_note('Payment capture failed at Dintero because the order lacks transaction_id. Contact integration@dintero.com with order information.');
@@ -1529,6 +1507,13 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 					$note = __( 'Payment capture failed at Dintero. Transaction ID: ' ) . $transaction_id;
 					$order->add_order_note( $note );
 				}
+			} else {
+				$note = sprintf(
+						'Payment capture failed. Order and transaction amounts do not match. Transaction amount: %s. Order amount: %s. ',
+						$transaction['amount'],
+						$order_total_amount
+					) . $transaction_id;
+				$order->add_order_note( $note );
 			}
 		}
 	}
