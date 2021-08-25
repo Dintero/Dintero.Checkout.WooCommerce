@@ -928,6 +928,10 @@ class WC_AJAX_HP {
 		self::dhp_shipping_options();
 	}
 
+	public static function get_input() {
+		return json_decode(stripslashes(trim(file_get_contents('php://input'))), true);
+	}
+
 	/**
 	 * Update order shipping address post back
 	 */
@@ -936,12 +940,10 @@ class WC_AJAX_HP {
 		if ($_SERVER['REQUEST_METHOD'] != 'POST') {
 			wp_send_json_error(array('message' => __('Method not allowed')), 403);
 		}
-
 		$post_data = json_decode(stripslashes(trim(file_get_contents('php://input'))), true);
 		if (!is_array($post_data) || !isset($post_data['order']) || !isset($post_data['order']['shipping_address'])) {
 			wp_send_json_error(array('message' => __('Bad request')), 400);
 		}
-
 		$dintero_session = self::_adapter()->get_session($post_data['id']);
 
 		$shipping_address = $post_data['order']['shipping_address'];
@@ -978,33 +980,42 @@ class WC_AJAX_HP {
 		if(!$isShippingInIframe){
 			$isShippingInIframe = 0;
 		}
-		$express_button_query_param = sanitize_text_field($_GET['express_button']);
+		$express_button_query_param = isset($_GET['express_button']) ? sanitize_text_field($_GET['express_button']) : 'false';
 		$isExpressButton = 'true' == $express_button_query_param;
 		if(!$isExpressButton) {
 			$isExpressButton = 0;
 		}
-
 		$shipping_options = array();
 		if ($isShippingInIframe || $isExpressButton) {
+			$j = 0;
 			foreach ( WC()->shipping()->get_packages() as $package ) {
 
 				if ( empty($package['rates']) ) {
 					continue;
 				}
+				$pluginlog = plugin_dir_path(__FILE__).'debug.log';
 
 				foreach ( $package['rates'] as $method ) {
 					$method_id = $method->id;
 					$method_name = $method->label;
 					$tax_display = get_option('woocommerce_tax_display_cart');
-					$method_price = intval(round($method->cost, 2) * 100);
+					$method_price = intval(round($method->cost * 100, 2));
 					if ( array_sum($method->taxes) > 0 && ('excl' !== $tax_display) ) {
-						$method_tax_amount = intval(round(array_sum($method->taxes), wc_get_rounding_precision()) * 100);
+						$message = 'branch a'.PHP_EOL;
+						error_log($message, 3, $pluginlog);
+						error_log('method_taxes'.json_encode($method->taxes), 3, $pluginlog);
+						$taxes_sum = array_sum($method->taxes);
+						error_log('taxes_sum='.$taxes_sum.PHP_EOL, 3, $pluginlog);
+						$method_tax_amount = intval(round($taxes_sum * 100, 2));
 						$method_tax_rate = intval(round((array_sum($method->taxes) / $method->cost) * 100, 2));
 					} else {
+						$message = 'branch b'.PHP_EOL;
+						error_log($message, 3, $pluginlog);
 						$method_tax_amount = intval(round(array_sum($method->taxes), wc_get_price_decimals()) * 100);
 						$method_tax_rate = Dintero_HP_Helper::instance()->get_shipping_tax_rate();
 					}
-
+					error_log('method_price='.$method_price.PHP_EOL, 3, $pluginlog);
+					error_log('method_tax_amount='.$method_tax_amount.PHP_EOL, 3, $pluginlog);
 					$shipping_options[] = array(
 						'id' => $method_id,
 						'line_id' => 'shipping_method_' . $j,
