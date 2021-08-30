@@ -32,7 +32,7 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 			'order' => array(
 				'amount' => 46004,
 				'vat_amount' => 6401,
-				'currency' => 'USD',
+				'currency' => 'NOK',
 				'merchant_reference' => ''.$order->get_id(),
 				'shipping_address' => array(
 					'first_name' => '',
