@@ -43,7 +43,7 @@ class WC_Helper_Order {
 	 *
 	 * @return WC_Order
 	 */
-	public static function create_order( $customer_id = 1, $product = null, $shipping_cost = 10, $shipping_tax = 2.5) {
+	public static function create_order( $customer_id = 1, $product = null, $shipping_cost = 10, $shipping_tax = 2.5, $fee_items = array()) {
 
 		if ( ! is_a( $product, 'WC_Product' ) ) {
 			$product = WC_Helper_Product::create_simple_product();
@@ -73,6 +73,13 @@ class WC_Helper_Order {
 		);
 		$item->save();
 		$order->add_item( $item );
+
+		if (count($fee_items) > 0) {
+			foreach ( $fee_items as $fee) {
+				$fee->set_order_id( $order->get_id() );
+				$order->add_item($fee);
+			}
+		}
 
 		// Set billing address.
 		$order->set_billing_first_name( 'Jeroen' );

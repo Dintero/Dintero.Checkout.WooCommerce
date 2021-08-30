@@ -655,6 +655,28 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 			$total_amount += $item_line_total_amount;
 		}
+		$fee_counter = 0;
+		foreach( $order->get_items('fee') as $item_id => $item_fee ){
+			$fee_counter++;
+			$line_id                = 'fee_'.$fee_counter;
+			$item_total_amount      = absint( strval( floatval( $item_fee->get_total() ) * 100 ) );
+			$item_tax_amount        = absint( strval( floatval( $item_fee->get_total_tax() ) * 100 ) );
+			$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $item_fee,
+					true ) ) * 100 ) );
+			$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
+					2 ) * 100 ) : 0;
+			$item = array(
+				'id'          => 'fee_'.$fee_counter,
+				'description' => $item_fee->get_name(),
+				'quantity'    => $item_fee->get_quantity(),
+				'vat_amount'  => $item_tax_amount,
+				'vat'         => $item_tax_percentage,
+				'amount'      => $item_line_total_amount,
+				'line_id'     => $line_id
+			);
+			array_push( $items, $item );
+			$total_amount += $item_line_total_amount;
+		}
 		$order_total_amount = $total_amount;
 		$hasShippingOptions = count($order->get_shipping_methods()) > 0;
 		if ($isExpress) {
@@ -767,7 +789,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 	 * We're processing the payment here.
 	 */
 	public function process_payment( $order_id, $isExpress = false ) {
-
 		$embed_enable = WCDHP()->setting()->get('embed_enable');
 		if ($embed_enable == 'yes' && !$isExpress  && !isset($_GET['pay_for_order'])) { // If its an Iframe
 			$redirect_url = $this->process_payment_handler( $order_id , true);
