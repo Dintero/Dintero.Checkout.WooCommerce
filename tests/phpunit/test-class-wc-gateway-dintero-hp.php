@@ -105,11 +105,11 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 		$fee_item = new WC_Order_Item_Fee();
 		$fee_item->set_name( 'extra_fee' );
 		$fee_item->set_total( 100 );
+		$product = WC_Helper_Product::create_simple_product();
 
-		$order = WC_Helper_Order::create_order(1, null, $shipping_cost, $shipping_tax, array($fee_item));
+		$order = WC_Helper_Order::create_order(1, $product, $shipping_cost, $shipping_tax, array($fee_item));
 		$order->set_transaction_id('P12345678.abcdefghijklmnop');
 		$order->save();
-		echo($order->get_total() * 100);
 
 		$transaction = array(
 			'amount' => 5000,
@@ -140,13 +140,13 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 						'capture_reference' => ''.$order->get_id(),
 						'items' => array(
 							array(
-								'id' => '18',
+								'id' => ''.$product->get_id(),
 								'description' => 'Dummy Product',
 								'quantity' => 4,
 								'vat_amount' => 0,
 								'vat' => 0.0,
 								'amount' => 4000,
-								'line_id' => '18'
+								'line_id' => ''.$product->get_id()
 							), array(
 								'id' => 'flat_rate_shipping:',
 								'description' => ', Shipping: Flat rate shipping',
