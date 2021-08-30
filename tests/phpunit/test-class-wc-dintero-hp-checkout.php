@@ -25,9 +25,6 @@ class WC_Dintero_HP_Checkout_Test extends WP_UnitTestCase {
 	}
 
 	public function test_capture() {
-		$checkout = new WC_Gateway_Dintero_HP();
-		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
-
 		// These together should of course be 320.04, but were 320.03 previously
 		$shipping_cost = 256.03;
 		$shipping_tax = 64.01;
@@ -55,6 +52,7 @@ class WC_Dintero_HP_Checkout_Test extends WP_UnitTestCase {
 			'status' => 'CAPTURED',
 		);
 
+		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
 		$adapter_stub
 			->expects($this->exactly(1))
 			->method('get_transaction')
