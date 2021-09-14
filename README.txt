@@ -43,7 +43,7 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
-2021.08.30
+2021.09.14
 
 * Support fee for redirect payments
 
