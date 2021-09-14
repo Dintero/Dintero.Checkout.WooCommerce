@@ -23,7 +23,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	/**
 	 * @var Dintero_HP_Adapter $_adapter
 	 */
-	protected static $_adapter;
+	static $_adapter;
 
 	private $id = 'dintero-hp';
 	private $enabled;
@@ -2838,6 +2838,28 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				'id'          => 'shipping',
 				'description' => 'Shipping: ' . $order->get_shipping_method(),
 				'quantity'    => 1,
+				'vat_amount'  => $item_tax_amount,
+				'vat'         => $item_tax_percentage,
+				'amount'      => $item_line_total_amount,
+				'line_id'     => $line_id
+			);
+			array_push( $items, $item );
+		}
+
+		$fee_counter = 0;
+		foreach( $order->get_items('fee') as $item_id => $item_fee ){
+			$fee_counter++;
+			$line_id                = 'fee_'.$fee_counter;
+			$item_total_amount      = absint( strval( floatval( $item_fee->get_total() ) * 100 ) );
+			$item_tax_amount        = absint( strval( floatval( $item_fee->get_total_tax() ) * 100 ) );
+			$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $item_fee,
+					true ) ) * 100 ) );
+			$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
+					2 ) * 100 ) : 0;
+			$item = array(
+				'id'          => 'fee_'.$fee_counter,
+				'description' => $item_fee->get_name(),
+				'quantity'    => $item_fee->get_quantity(),
 				'vat_amount'  => $item_tax_amount,
 				'vat'         => $item_tax_percentage,
 				'amount'      => $item_line_total_amount,
