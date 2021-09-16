@@ -131,6 +131,11 @@ class Dintero_HP_Adapter
 			$this->_endpoint(sprintf('/transactions/%s', $transaction_id)),
 			$payload
 		);
+		$response_code = wp_remote_retrieve_response_code($response);
+		$response_body_raw = wp_remote_retrieve_body( $response );
+		if ($response_code  < 200 || $response_code > 299) {
+			return new WP_Error($response_code, $response_body_raw);
+		}
 		return json_decode(wp_remote_retrieve_body( $response ), true );
 	}
 

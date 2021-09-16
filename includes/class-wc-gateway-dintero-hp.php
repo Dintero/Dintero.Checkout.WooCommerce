@@ -846,6 +846,16 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 			// Update the Dintero order with new confirmation merchant reference.  TO DO
 			$transaction = WCDHP()->checkout()->update_transaction($dintero_order_transaction_id, $order_id);
+			if (is_wp_error($transaction)) {
+				$updated_transaction = self::_adapter()->get_transaction($transaction_id);
+				if (isset($updated_transaction['merchant_reference_2'])) {
+					$fail_reason = __( 'Duplicate order of order ' ) . $updated_transaction['merchant_reference_2'] . '.';
+					self::failed_order( $order, $transaction_id, $fail_reason );
+				} else {
+					$fail_reason = __( 'Failed updating transaction with order_id ' ) . '.';
+					self::failed_order( $order, $transaction_id, $fail_reason );
+				}
+			}
 
 			$methodName = 'Dintero - '.$transaction['payment_product'];
 			$order->set_payment_method_title($methodName);

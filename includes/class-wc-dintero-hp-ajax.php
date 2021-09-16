@@ -363,7 +363,7 @@ class WC_AJAX_HP {
 		$order = wc_get_order( $transaction_order_id );
 
 		if(!$order && $transaction['merchant_reference_2'] == '') {
-			$coupon_codes = maybe_unserialize($session_data['applied_coupons']);
+			$coupon_codes = isset($session_data['applied_coupons']) ? maybe_unserialize($session_data['applied_coupons']) : array();
 			$items = $transaction['items'];
 			$order = wc_create_order( array( 'status' => 'pending' ) );
 			$order->set_transaction_id( $transaction_id );
@@ -462,7 +462,7 @@ class WC_AJAX_HP {
 				$order_item->save_meta_data();
 			}
 
-			if($transaction['shipping_address']['business_name']){ // if Business Checkout
+			if(isset($transaction['shipping_address']['business_name']) && $transaction['shipping_address']['business_name']){ // if Business Checkout
 				update_post_meta( $order->get_id(), '_shipping_vat_number', sanitize_text_field($transaction['shipping_address']['organization_number'] ) );
 				update_post_meta( $order->get_id(), '_shipping_company', sanitize_text_field($transaction['shipping_address']['business_name'] ) );
 				update_post_meta( $order->get_id(), '_billing_company', sanitize_text_field($transaction['shipping_address']['business_name'] ) );
@@ -537,8 +537,8 @@ class WC_AJAX_HP {
 
 					if ( 'AUTHORIZED' === $transaction['status'] ) {
 
-						$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
-						self::process_authorization( $order, $transaction_id, $hold_reason );
+						$note = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
+						self::process_authorization( $order, $transaction_id, $note );
 					} elseif ( 'CAPTURED' === $transaction['status'] ) {
 
 						$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
@@ -547,19 +547,29 @@ class WC_AJAX_HP {
 						$hold_reason = __( 'The payment is put on on-hold for manual review. The status of the payment will be updated when the manual review is finished. Transaction ID: ' ) . $transaction_id;
 						self::on_hold_order( $order, $transaction_id, $hold_reason );
 					} elseif('FAILED' === $transaction['status'] ) {
-						$hold_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;
-						self::failed_order( $order, $transaction_id, $hold_reason );
+						$fail_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;
+						self::failed_order( $order, $transaction_id, $fail_reason );
 					}
 					WC()->session->delete_session($session['metadata']['woo_customer_id']);
 				}
 			}
-			WCDHP()->checkout()->update_transaction($transaction_id, $order->get_id());
+			$update_response = WCDHP()->checkout()->update_transaction($transaction_id, $order->get_id());
+			if (is_wp_error($update_response)) {
+				$updated_transaction = self::_adapter()->get_transaction($transaction_id);
+				if (isset($updated_transaction['merchant_reference_2'])) {
+					$fail_reason = __( 'Duplicate order of order ' ) . $updated_transaction['merchant_reference_2'] . '.';
+					self::failed_order( $order, $transaction_id, $fail_reason );
+				} else {
+					$fail_reason = __( 'Failed updating transaction with order_id ' ) . '.';
+					self::failed_order( $order, $transaction_id, $fail_reason );
+				}
+			}
 			self::$isOnGoingPushOperation = false;
 		} elseif($order && ($order->get_status() == 'on-hold' || $order->get_status() == 'pending') ){
 			if ( 'AUTHORIZED' === $transaction['status'] ) {
 
-				$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
-				self::process_authorization( $order, $transaction_id, $hold_reason );
+				$note = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
+				self::process_authorization( $order, $transaction_id, $note );
 			} elseif ( 'CAPTURED' === $transaction['status'] ) {
 
 				$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
@@ -568,8 +578,8 @@ class WC_AJAX_HP {
 				$hold_reason = __( 'The payment is put on on-hold for manual review. The status of the payment will be updated when the manual review is finished. Transaction ID: ' ) . $transaction_id;
 				self::on_hold_order( $order, $transaction_id, $hold_reason );
 			} elseif('FAILED' === $transaction['status'] ){
-				$hold_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;
-				self::failed_order( $order, $transaction_id, $hold_reason );
+				$fail_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;
+				self::failed_order( $order, $transaction_id, $fail_reason );
 			}
 		}
 	}
@@ -761,8 +771,8 @@ class WC_AJAX_HP {
 
 					if ( 'AUTHORIZED' === $transaction['status'] ) {
 
-						$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
-						self::process_authorization( $order, $transaction_id, $hold_reason );
+						$note = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
+						self::process_authorization( $order, $transaction_id, $note );
 					} elseif ( 'CAPTURED' === $transaction['status'] ) {
 
 						$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
