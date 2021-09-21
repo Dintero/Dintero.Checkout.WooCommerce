@@ -43,6 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2021.09.21
+
+* Handle race condition between callback and redirect
+
 2021.09.14
 
 * Support fee for redirect payments
