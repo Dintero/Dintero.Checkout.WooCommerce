@@ -185,16 +185,12 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 		$checkout = new WC_Gateway_Dintero_HP();
 		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
 
-		// These together should of course be 320.04, but were 320.03 previously
 		$shipping_cost = 256.03;
 		$shipping_tax = 64.01;
 
-		$fee_item = new WC_Order_Item_Fee();
-		$fee_item->set_name( 'extra_fee' );
-		$fee_item->set_total( 100 );
 		$product = WC_Helper_Product::create_simple_product();
 
-		$order = WC_Helper_Order::create_order(1, $product, $shipping_cost, $shipping_tax, array($fee_item));
+		$order = WC_Helper_Order::create_order(1, $product, $shipping_cost, $shipping_tax);
 		$order->set_transaction_id('P12345678.abcdefghijklmnop');
 		$order->save();
 
