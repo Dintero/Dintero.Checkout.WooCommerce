@@ -181,5 +181,52 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 		$this->assertEquals('Payment captured via Dintero. Transaction ID: P12345678.abcdefghijklmnop', end($note)->content);
 	}
 
+	public function test_capture_on_auto_captured() {
+		$checkout = new WC_Gateway_Dintero_HP();
+		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
+
+		// These together should of course be 320.04, but were 320.03 previously
+		$shipping_cost = 256.03;
+		$shipping_tax = 64.01;
+
+		$fee_item = new WC_Order_Item_Fee();
+		$fee_item->set_name( 'extra_fee' );
+		$fee_item->set_total( 100 );
+		$product = WC_Helper_Product::create_simple_product();
+
+		$order = WC_Helper_Order::create_order(1, $product, $shipping_cost, $shipping_tax, array($fee_item));
+		$order->set_transaction_id('P12345678.abcdefghijklmnop');
+		$order->save();
+
+		$captured_transaction = array(
+			'amount' => 5000,
+			'merchant_reference' => '',
+			'merchant_reference_2' => $order->get_id(),
+			'status' => 'CAPTURED',
+		);
+
+		$adapter_stub
+			->expects($this->exactly(1))
+			->method('get_transaction')
+			->willReturn($captured_transaction);
+
+		$adapter_stub
+			->expects($this->exactly(0))
+			->method('capture_transaction')
+			->willReturn($captured_transaction);
+		$checkout::$_adapter = $adapter_stub;
+
+		$checkout->check_status($order->get_id(), '', 'completed');
+
+		// check that the order has been updated with the new status
+		$note = wc_get_order_notes(array(
+				'order_id' => $order->get_id(),
+				'limit'    => 10,
+				'orderby'  => 'date_created_gmt',
+			)
+		);
+		$this->assertEquals('Payment captured via Dintero, already captured from before. Transaction ID: P12345678.abcdefghijklmnop', end($note)->content);
+	}
+
 
 }
