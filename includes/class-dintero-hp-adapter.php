@@ -172,6 +172,15 @@ class Dintero_HP_Adapter
 			Dintero_HP_Request_Builder::instance()->build($request)
 		);
 
-		return json_decode(wp_remote_retrieve_body($response), true);
+		$response_code = wp_remote_retrieve_response_code($response);
+		$response_body_raw = wp_remote_retrieve_body( $response );
+		if ($response_code  < 200 || $response_code > 299) {
+			$response_trace_id = wp_remote_retrieve_header( $response, 'request-id');
+			return new WP_Error($response_code, $response_body_raw, array(
+				'response_trace_id' => $response_trace_id,
+			));
+		}
+
+		return json_decode($response_body_raw, true);
 	}
 }

@@ -2040,9 +2040,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	 */
 	private function get_iframe()
 	{
-		$access_token = $this->get_access_token();
-		$api_endpoint = $this->checkout_endpoint . '/sessions-profile';
-
 		$return_url   = $this->get_return_url( );
         $express_customer_types = WCDHP()->setting()->get('express_customer_types');
 
@@ -2130,16 +2127,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			);
 		}
 
-		$headers = array(
-			'Content-type'  => 'application/json; charset=utf-8',
-			'Accept'        => 'application/json',
-			'Authorization' => 'Bearer ' . $access_token,
-			'Dintero-System-Name' => 'woocommerce',
-			'Dintero-System-Version' =>  WC()->version,
-			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
-			'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
-		);
-
 		$payload_url = array(
 			'return_url'   => $return_url,
 			'callback_url' => $callback_url
@@ -2219,22 +2206,22 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 
 		//}
 
-		$response = wp_remote_post( $api_endpoint, array(
-			'method'    => 'POST',
-			'headers'   => $headers,
-			'body'      => wp_json_encode( $payload ),
-			'timeout'   => 90,
-			'sslverify' => false
-		) );
+		
 
-		// Retrieve the body's response if no errors found
-		$response_body  = wp_remote_retrieve_body( $response );
-		$response_trace_id = wp_remote_retrieve_header( $response, 'request-id');
-		$response_code = wp_remote_retrieve_response_code( $response );
-		$response_array = json_decode( $response_body, true );
+		$response_array = self::_adapter()->init_session($payload);
 
-		if ( ! array_key_exists( 'url', $response_array ) ) {
-			$msg = isset($response_array['error']) && isset($response_array['error']['message']) ? $response_array['error']['message'] : 'Unknown Error';
+		if (is_wp_error($response_array)) {
+			$error_data = $response_array->get_error_data($response_array->get_error_code());
+
+			$response_code = 0;
+			$response_trace_id = '';
+			if (is_array($error_data)) {
+				$response_trace_id = null !== $error_data['response_trace_id'] ? $error_data['response_trace_id'] : '';
+			}
+			$response_code = $response_array->get_error_code();
+			$response_body = $response_array->get_error_message();
+			
+			$msg = 'Unknown Error';
 			echo '<p class="dintero-error-message">Problems creating payment, please contact Dintero with this message: ' . $response_trace_id . ', ';
 			echo 'by sending an email to: <a href="mailto:integration@dintero.com&subject=WooCommerce%20session%20creation%20failed%20for%20' . $this->account_id  . '&body=Session%20creation%20failed%20with%20request_id%20' . $response_trace_id . '">integration@dintero.com</a>. ';
 			echo( "<script type=\"text/javascript\">
