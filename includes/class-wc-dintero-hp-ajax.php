@@ -364,6 +364,9 @@ class WC_AJAX_HP {
 
 		if(!$order && $transaction['merchant_reference_2'] == '') {
 			$coupon_codes = isset($session_data['applied_coupons']) ? maybe_unserialize($session_data['applied_coupons']) : array();
+			if (count($coupon_codes) == 0 && isset($session['order']['discount_codes']) && count($session['order']['discount_codes']) > 0) {
+				$coupon_codes = $session['order']['discount_codes'];
+			}
 			$items = $transaction['items'];
 			$order = wc_create_order( array( 'status' => 'pending' ) );
 			$order->set_transaction_id( $transaction_id );
@@ -534,7 +537,6 @@ class WC_AJAX_HP {
 				) {
 
 					WC()->session->set( 'order_awaiting_payment', null );
-
 					if ( 'AUTHORIZED' === $transaction['status'] ) {
 
 						$note = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;

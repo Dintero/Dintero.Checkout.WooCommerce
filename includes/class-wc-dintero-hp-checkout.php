@@ -1982,6 +1982,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				'currency'           => $currency,
 				'merchant_reference' => '',
 				'items'              => $this->order_lines,
+				'discount_codes'	 => WC()->cart->get_applied_coupons(),
 			)
 		);
 
