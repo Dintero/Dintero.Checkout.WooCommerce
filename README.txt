@@ -43,6 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2021.10.14
+
+* Fix missing discount code on callback order
+
 2021.09.24
 
 * Fix wrong order note when payment was auto-captured
