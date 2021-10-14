@@ -932,36 +932,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 	 * Update transaction with woocommerce Order Number.
 	 */
 	private function update_transaction( $transaction_id , $order_id ) {
-
-
-		$access_token = $this->get_access_token();
-		$api_endpoint = $this->checkout_endpoint . '/transactions';
-
-
-		$headers = array(
-
-			'Content-type'  => 'application/json; charset=utf-8',
-			'Accept'        => 'application/json',
-			'Authorization' => 'Bearer ' . $access_token,
-
-			'Dintero-System-Name' => 'woocommerce',
-			'Dintero-System-Version' =>  WC()->version,
-			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
-			'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
-		);
-
 		$payload = array(
 			'merchant_reference_2' => (string)$order_id
 		);
-		$url = $api_endpoint . '/' . $transaction_id;
-		$response = wp_remote_request( $url, array(
-			'method'    => 'PUT',
-			'headers'   => $headers,
-			'body'      => json_encode( $payload )
-		) );
-		$response_body  = wp_remote_retrieve_body( $response );
-		$transaction = json_decode( $response_body, true );
-		return $transaction;
+		return self::_adapter()->update_transaction($transaction_id, $payload);
 	}
 
 	/**
