@@ -2100,7 +2100,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 							'delivery_method' => 'delivery',
 							'operator' => '',
 							'operator_product_id' => (string)$method->instance_id,
-
+							'metadata' => $method->meta_data,
 						);
 
 						if ($j == 0) {
