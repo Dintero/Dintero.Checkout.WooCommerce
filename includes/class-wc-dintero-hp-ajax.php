@@ -425,6 +425,12 @@ class WC_AJAX_HP {
 					$order_item->set_taxes(array(
 						'total' => array($vat_amount)
 					));
+
+					if (isset($transaction['shipping_option']['metadata'])) {
+						foreach ($transaction['shipping_option']['metadata'] as $meta_key => $meta_item) {
+							$order_item->add_meta_data($meta_key, $meta_item);
+						}
+					}
 					$order_item->save();
 
 					/**
@@ -504,7 +510,7 @@ class WC_AJAX_HP {
 
 			$shipping_item->add_meta_data(__('Items', 'woocommerce'), implode(', ', array_map(function($item) {
 		 		return $item->get_name() . ' &times; ' . $item->get_quantity();
-			}, $order->get_items())));
+			}, $order->get_items())), true);
 
 			/** @var WC_Order_Item_Tax $tax_item */
 			$tax_item = current($order->get_items('tax'));
@@ -555,7 +561,12 @@ class WC_AJAX_HP {
 					WC()->session->delete_session($session['metadata']['woo_customer_id']);
 				}
 			}
-			$update_response = WCDHP()->checkout()->update_transaction($transaction_id, $order->get_id());
+			$update_response = self::_adapter()->update_transaction(
+				$transaction_id,
+				array(
+					'merchant_reference_2' => (string) $order->get_id()
+				)
+			);
 			if (is_wp_error($update_response)) {
 				$updated_transaction = self::_adapter()->get_transaction($transaction_id);
 				if (isset($updated_transaction['merchant_reference_2'])) {
@@ -1028,7 +1039,7 @@ class WC_AJAX_HP {
 						'delivery_method' => 'delivery',
 						'operator' => '',
 						'operator_product_id' => (string)$method->instance_id,
-
+						'metadata' => $method->meta_data,
 					);
 					if ( $j == 0 ) {
 						WC()->session->set('dintero_shipping_line_id', 'shipping_method_' . $j);
