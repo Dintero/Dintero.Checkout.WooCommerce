@@ -121,4 +121,32 @@ class Dintero_HP_Helper
 		}
 		return array_keys($arr) !== range(0, count($arr) - 1);
 	}
+
+	/**
+	 *
+	 */
+	public function get_coupon_lines()
+	{
+		$dintero_items = [];
+		// PW Gift Cards.
+		if (!empty(WC()->session->get('pw-gift-card-data'))) {
+			$pw_gift_cards = WC()->session->get('pw-gift-card-data');
+			foreach ($pw_gift_cards['gift_cards'] as $code => $value) {
+				$coupon_amount       = $value * 100 * -1;
+				$label               = esc_html__('Gift card', 'pw-woocommerce-gift-cards') . ' ' . $code;
+				$id = 'pw_gift_cards_'. $code;
+				$gift_card           = array(
+					'id' => $id,
+					'line_id' => $id,
+					'description'           => $label,
+					'quantity'              => 1,
+					'amount'            => $coupon_amount,
+					'vat'              => 0,
+					'vat_amount'              => 0,
+				);
+				$dintero_items[] = $gift_card;
+			}
+		}
+		return $dintero_items;
+	}
 }
