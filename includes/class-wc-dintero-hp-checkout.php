@@ -1569,6 +1569,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 						$shipping_reference['id'] = $rate_value->id;
 						$shipping_reference['instance_id'] = $rate_value->instance_id;
 						$shipping_reference['label'] = $rate_value->label;
+						$shipping_reference['meta_data'] = $rate_value->meta_data;
 						$shipping_reference['index'] = $j;
 					}
 					$j++;
@@ -1998,6 +1999,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				'delivery_method'=>'delivery',
 				'operator'=>'',
 				'operator_product_id'=> (string)$selectedShippingReference['instance_id'],
+				'metadata'=>$selectedShippingReference['meta_data'],
 			);
 
 		} else {
@@ -2357,6 +2359,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 							'delivery_method'=>'delivery',
 							'operator'=>'',
 							'operator_product_id'=>(string)$selectedShippingReference['instance_id'],
+							'metadata'=>$selectedShippingReference['meta_data'],
 						)
 					);
 					$express_option = array(
