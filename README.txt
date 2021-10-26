@@ -43,6 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2021.10.27
+
+* Add shipping option metadata on session update
+
 2021.10.21
 
 * Transfer shipping option metadata to session
