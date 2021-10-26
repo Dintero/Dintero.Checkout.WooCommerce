@@ -125,7 +125,7 @@ class Dintero_HP_Helper
 	/**
 	 *
 	 */
-	public function get_coupon_lines()
+	public function get_coupon_lines($order_total)
 	{
 		$dintero_items = [];
 		// PW Gift Cards.
@@ -133,6 +133,9 @@ class Dintero_HP_Helper
 			$pw_gift_cards = WC()->session->get('pw-gift-card-data');
 			foreach ($pw_gift_cards['gift_cards'] as $code => $value) {
 				$coupon_amount       = $value * 100 * -1;
+				if (abs($coupon_amount) > $order_total) {
+					$coupon_amount = $order_total * -1;
+				}
 				$label               = esc_html__('Gift card', 'pw-woocommerce-gift-cards') . ' ' . $code;
 				$id = 'pw_gift_cards_'. $code;
 				$gift_card           = array(

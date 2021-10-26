@@ -409,6 +409,8 @@ class WC_AJAX_HP {
 			$total_vat = $session['order']['vat_amount'] / 100;
 			$real_shipping_tax = 0;
 
+			$gift_cards = array();
+
 			/** @var WC_Order_Item $item */
 			foreach ($items as $key => $item) {
 				$vat_amount = $item['vat_amount'] / 100;
@@ -450,6 +452,9 @@ class WC_AJAX_HP {
 
 				// skipping if no product found
 				if (!$product = wc_get_product( $item['id'] )) {
+					if (substr($item['id'], 0, 4 ) === 'gift_card_') {
+
+					}
 					continue;
 				}
 
@@ -498,6 +503,21 @@ class WC_AJAX_HP {
 			if(count($coupon_codes) > 0){
 				foreach ($coupon_codes as $coupon_code) {
 					$order->apply_coupon($coupon_code);
+				}
+			}
+
+			foreach ( $session_data['gift_cards'] as $card_number => $amount ) {
+				$pw_gift_card = new PW_Gift_Card( $card_number );
+				if ( $pw_gift_card->get_id() ) {
+	
+					$item = new WC_Order_Item_PW_Gift_Card();
+	
+					$item->set_props( array(
+						'card_number'   => $pw_gift_card->get_number(),
+						'amount'        => apply_filters( 'pwgc_to_default_currency', $amount ),
+					) );
+	
+					$order->add_item( $item );
 				}
 			}
 

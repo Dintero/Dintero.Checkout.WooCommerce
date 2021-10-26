@@ -1758,6 +1758,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				$this->order_lines[] = $dintero_item;
 			}
 		}
+
+		$coupon_items = Dintero_HP_Helper::instance()->get_coupon_lines($this->get_order_lines_total_amount());
+		foreach ( $coupon_items as $dintero_item ) {
+			$this->order_lines[] = $dintero_item;
+		}
+
 	}
 
 	public function get_order_lines_total_amount( ) {
@@ -1774,7 +1780,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	 */
 	public function update_session( $session_id ) {
 		$cart = WC()->cart;
-
 		$totals = $cart->get_totals();
 		$order_tax_amount   = absint( strval( floatval( $totals['total_tax'] ) * 100 ) );
 		WC()->cart->calculate_shipping();
@@ -1828,6 +1833,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				'operator' => ''
 			);
 		}
+
 		$response_array = self::_adapter()->update_session($session_id, $payload);
 		return $response_array;
 	}
