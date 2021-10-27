@@ -408,14 +408,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 	}
 
 	/**
-	 * Requesting access token
-	 */
-	private function get_access_token() {
-		$access_token = self::_adapter()->get_access_token();
-		return $access_token;
-	}
-
-	/**
 	 * Get shipping method name.
 	 *
 	 * @since  1.0
@@ -877,7 +869,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 	private function create_receipt( $order ) {
 		if ( ! empty( $order ) && $order instanceof WC_Order ) {
 			$order_id     = $order->get_id();
-			$access_token = $this->get_access_token();
+			$access_token = self::_adapter()->get_access_token();
 			$api_endpoint = $this->api_endpoint . '/accounts';
 
 			$order_total_amount = absint( strval( floatval( $order->get_total() ) * 100 ) );

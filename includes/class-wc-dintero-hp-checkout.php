@@ -957,15 +957,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	}
 
 	/**
-	 * Requesting access token
-	 */
-	private function get_access_token() {
-		$access_token = self::_adapter()->get_access_token();
-		return $access_token;
-	}
-
-
-	/**
 	 * Gets Dintero order from WC_Session
 	 * Added by Ritesh | MooGruppen
 	 * @return string
@@ -2710,7 +2701,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	public function create_receipt( $order ) {
 		if ( ! empty( $order ) && $order instanceof WC_Order ) {
 			$order_id     = $order->get_id();
-			$access_token = $this->get_access_token();
+			$access_token = self::_adapter()->get_access_token();
 			$api_endpoint = $this->api_endpoint . '/accounts';
 
 			$order_total_amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
