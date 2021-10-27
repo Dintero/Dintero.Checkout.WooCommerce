@@ -140,6 +140,31 @@ class Dintero_HP_Adapter
 	}
 
 	/**
+	 * Update session
+	 *
+	 * @param $session_id
+	 * @param $payload
+	 * @return mixed
+	 */
+	public function update_session($session_id, $payload)
+	{
+		$request = $this->_init_request($this->get_access_token())
+			->set_body(wp_json_encode($payload));
+		$payload = Dintero_HP_Request_Builder::instance()->build($request);
+		$payload['method'] = 'PUT';
+		$response = _wp_http_get_object()->request(
+			$this->_endpoint(sprintf('/sessions/%s', $session_id)),
+			$payload
+		);
+		$response_code = wp_remote_retrieve_response_code($response);
+		$response_body_raw = wp_remote_retrieve_body( $response );
+		if ($response_code  < 200 || $response_code > 299) {
+			return new WP_Error($response_code, $response_body_raw);
+		}
+		return json_decode(wp_remote_retrieve_body( $response ), true );
+	}
+
+	/**
 	 * @param string $transaction_id
 	 * @param array $payload
 	 * @return array
@@ -151,6 +176,23 @@ class Dintero_HP_Adapter
 		$payload = Dintero_HP_Request_Builder::instance()->build($request);
 		$response = _wp_http_get_object()->post(
 			$this->_endpoint(sprintf('/transactions/%s/capture', $transaction_id)),
+			$payload
+		);
+		return json_decode(wp_remote_retrieve_body( $response ), true );
+	}
+
+	/**
+	 * @param string $transaction_id
+	 * @param array $payload
+	 * @return array
+	 */
+	public function refund_transaction($transaction_id, $payload)
+	{
+		$request = $this->_init_request($this->get_access_token())
+			->set_body(wp_json_encode($payload));
+		$payload = Dintero_HP_Request_Builder::instance()->build($request);
+		$response = _wp_http_get_object()->post(
+			$this->_endpoint(sprintf('/transactions/%s/refund', $transaction_id)),
 			$payload
 		);
 		return json_decode(wp_remote_retrieve_body( $response ), true );
@@ -182,5 +224,28 @@ class Dintero_HP_Adapter
 		}
 
 		return json_decode($response_body_raw, true);
+	}
+
+	/**
+	 * @param string $transaction_id
+	 * @return array
+	 */
+	public function void_transaction($transaction_id)
+	{
+		$request = $this->_init_request($this->get_access_token());
+		$payload = Dintero_HP_Request_Builder::instance()->build($request);
+		$response = _wp_http_get_object()->post(
+			$this->_endpoint(sprintf('/transactions/%s/void', $transaction_id)),
+			$payload,
+		);
+		$response_code = wp_remote_retrieve_response_code($response);
+		$response_body_raw = wp_remote_retrieve_body( $response );
+		if ($response_code  < 200 || $response_code > 299) {
+			$response_trace_id = wp_remote_retrieve_header( $response, 'request-id');
+			return new WP_Error($response_code, $response_body_raw, array(
+				'response_trace_id' => $response_trace_id,
+			));
+		}
+		return json_decode(wp_remote_retrieve_body( $response ), true );
 	}
 }

@@ -960,40 +960,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	 * Requesting access token
 	 */
 	private function get_access_token() {
-		$api_endpoint = $this->api_endpoint . '/accounts';
-
-		$headers = array(
-			'Content-type'  => 'application/json; charset=utf-8',
-			'Accept'        => 'application/json',
-			'Authorization' => 'Basic ' . base64_encode( $this->client_id . ':' . $this->client_secret ),
-			'Dintero-System-Name' => 'woocommerce',
-			'Dintero-System-Version' =>  WC()->version,
-			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
-			'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
-		);
-
-		$payload = array(
-			'grant_type' => 'client_credentials',
-			'audience'   => $api_endpoint . '/' . $this->oid
-		);
-
-		$response = wp_remote_post( $api_endpoint . '/' . $this->oid . '/auth/token', array(
-			'method'    => 'POST',
-			'headers'   => $headers,
-			'body'      => wp_json_encode( $payload ),
-			'timeout'   => 90,
-			'sslverify' => false
-		) );
-
-		// Retrieve the body's response if no errors found
-		$response_body  = wp_remote_retrieve_body( $response );
-		$response_array = json_decode( $response_body, true );
-
-		if ( ! array_key_exists( 'access_token', $response_array ) ) {
-			return false;
-		}
-		$access_token = $response_array['access_token'];
-
+		$access_token = self::_adapter()->get_access_token();
 		return $access_token;
 	}
 
@@ -1947,23 +1914,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	 * Update Session .
 	 */
 	public function update_session( $session_id ) {
-		$access_token = $this->get_access_token();
-		$api_endpoint = $this->checkout_endpoint . '/sessions/'.$session_id;
-
-
-		$headers = array(
-
-			'Content-type'  => 'application/json; charset=utf-8',
-			'Accept'        => 'application/json',
-			'Authorization' => 'Bearer ' . $access_token,
-
-			'Dintero-System-Name' => 'woocommerce',
-			'Dintero-System-Version' =>  WC()->version,
-			'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
-			'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
-		);
-		$load = array('session_id' => $session_id) ;
-
 		$cart = WC()->cart;
 
 		$totals = $cart->get_totals();
@@ -1971,7 +1921,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 		WC()->cart->calculate_shipping();
 		$this->process_cart();
 		$total_amount = $this->get_order_lines_total_amount();
-		$billingAddress = WC()->customer->get_billing();
 
 		$order_total_amount = $total_amount;
 		$selectedShippingReference = $this->get_shipping_reference();
@@ -2013,23 +1962,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				'operator' => ''
 			);
 		}
-
-
-		$args = array(
-		    'headers' => $headers,
-		    'body'      => json_encode($payload),
-		    'method'    => 'PUT'
-		);
-
-
-
-		$response = wp_remote_request( $api_endpoint, array(
-			'method'    => 'PUT',
-			'headers'   => $headers,
-			'body'      => json_encode( $payload )
-		) );
-		$response_body  = wp_remote_retrieve_body( $response );
-		$response_array = json_decode( $response_body, true );
+		$response_array = self::_adapter()->update_session($session_id, $payload);
 		return $response_array;
 	}
 
@@ -2201,12 +2134,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			);
 		}
 
-		//if ($express) {
 		$payload['express'] = $express_option;
-
-		//}
-
-		
 
 		$response_array = self::_adapter()->init_session($payload);
 
@@ -2243,12 +2171,8 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	 * Creating checkout session and requesting payment page URL
 	 */
 	private function get_payment_page_url( $order, $express = false ) {
-
 		if ( ! empty( $order ) && $order instanceof WC_Order ) {
 			$order_id     = $order->get_id();
-			// init session
-			$access_token = $this->get_access_token();
-			$api_endpoint = $this->checkout_endpoint . '/sessions-profile';
 
 			$return_url   = $this->get_return_url( $order );
 			$callback_url = home_url() . '?dhp-ajax=dhp_update_ord';
@@ -2266,30 +2190,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			$this->process_cart();
 			$total_amount = $this->get_order_lines_total_amount();
 
-			// foreach ( $order->get_items() as $order_item ) {
-			// 	$counter ++;
-			// 	$line_id                = strval( $counter );
-			// 	$item_total_amount      = absint( strval( floatval( $order_item->get_total() ) * 100 ) );
-			// 	$item_tax_amount        = absint( strval( floatval( $order_item->get_total_tax() ) * 100 ) );
-			// 	$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $order_item,
-			// 			true ) ) * 100 ) );
-			// 	$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
-			// 			2 ) * 100 ) : 0;
-			// 	$item                   = array(
-			// 		'id'          => 'item_' . $counter,
-			// 		'description' => $order_item->get_name(),
-			// 		'quantity'    => $order_item->get_quantity(),
-			// 		'vat_amount'  => $item_tax_amount,
-			// 		'vat'         => $item_tax_percentage,
-			// 		'amount'      => $item_line_total_amount,
-			// 		'line_id'     => $line_id
-			// 	);
-			// 	array_push( $items, $item );
-
-			// 	$total_amount += $item_line_total_amount;
-			// }
-
-			$shipping_option = array();
 			$express_option = array();
 
 			$counter ++;
@@ -2297,9 +2197,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
 			$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
 			$item_line_total_amount = $item_total_amount + $item_tax_amount;
-			$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
-					2 ) * 100 ) : 0;
-
 
 			if (!$express) {
 				$item = array(
@@ -2362,23 +2259,10 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				}
 			}
 
-
-
-			$headers = array(
-				'Content-type'  => 'application/json; charset=utf-8',
-				'Accept'        => 'application/json',
-				'Authorization' => 'Bearer ' . $access_token,
-				'Dintero-System-Name' => 'woocommerce',
-				'Dintero-System-Version' =>  WC()->version,
-				'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
-				'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
-			);
-
-
 			$payload_url = array(
-					'return_url'   => $return_url,
-					'callback_url' => $callback_url
-				);
+				'return_url'   => $return_url,
+				'callback_url' => $callback_url
+			);
 
 			$terms_page_id   = wc_terms_and_conditions_page_id();
 			$terms_link      = esc_url( get_permalink( $terms_page_id ) );
@@ -2440,19 +2324,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				);
 			}
 
-			$response = wp_remote_post( $api_endpoint, array(
-				'method'    => 'POST',
-				'headers'   => $headers,
-				'body'      => wp_json_encode( $payload ),
-				'timeout'   => 90,
-				'sslverify' => false
-			) );
-
-			// Retrieve the body's response if no errors found
-			$response_body  = wp_remote_retrieve_body( $response );
-			$response_array = json_decode( $response_body, true );
-
-
+			$response_array = self::_adapter()->init_session($payload);
 
 			if ( ! array_key_exists( 'url', $response_array ) ) {
 				$msg = isset($response_array['error']) && isset($response_array['error']['message']) ? $response_array['error']['message'] : 'Unknown Error';
@@ -2555,29 +2427,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				 array_key_exists( 'status', $transaction ) &&
 				 'AUTHORIZED' === $transaction['status'] ) {
 
-				$access_token = $this->get_access_token();
-				$api_endpoint = $this->checkout_endpoint . '/transactions';
-
-				$headers = array(
-					'Content-type'  => 'application/json; charset=utf-8',
-					'Accept'        => 'application/json',
-					'Authorization' => 'Bearer ' . $access_token,
-					'Dintero-System-Name' => 'woocommerce',
-					'Dintero-System-Version' =>  WC()->version,
-					'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
-					'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
-				);
-
-				$response = wp_remote_post( $api_endpoint . '/' . $transaction_id . '/void', array(
-					'method'    => 'POST',
-					'headers'   => $headers,
-					'timeout'   => 90,
-					'sslverify' => false
-				) );
-
-				// Retrieve the body's response if no errors found
-				$response_body  = wp_remote_retrieve_body( $response );
-				$response_array = json_decode( $response_body, true );
+				$response_array = self::_adapter()->void_transaction($transaction_id);
 
 				if ( array_key_exists( 'status', $response_array ) &&
 					 'AUTHORIZATION_VOIDED' === $response_array['status'] ) {
@@ -2618,9 +2468,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				 array_key_exists( 'amount', $transaction ) &&
 				 ( 'CAPTURED' === $transaction['status'] || 'PARTIALLY_REFUNDED' === $transaction['status'] ) ) {
 
-				$access_token = $this->get_access_token();
-				$api_endpoint = $this->checkout_endpoint . '/transactions';
-
 				if ( empty( $amount ) ) {
 					$amount = $transaction['amount'];
 				} else {
@@ -2636,35 +2483,13 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 					)
 				);
 
-				$headers = array(
-					'Content-type'  => 'application/json; charset=utf-8',
-					'Accept'        => 'application/json',
-					'User-Agent' => 'Dintero.Checkout.Woocomerce.1.2.1 (+https://github.com/Dintero/Dintero.Checkout.Woocomerce)',
-					'Authorization' => 'Bearer ' . $access_token,
-					'Dintero-System-Name' => 'woocommerce',
-					'Dintero-System-Version' =>  WC()->version,
-					'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
-					'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
-				);
-
 				$payload = array(
 					'amount' => $amount,
 					'reason' => $reason,
 					'items'  => $items
 				);
 
-				$response = wp_remote_post( $api_endpoint . '/' . $transaction_id . '/refund', array(
-					'method'    => 'POST',
-					'headers'   => $headers,
-					'body'      => wp_json_encode( $payload ),
-					'timeout'   => 90,
-					'sslverify' => false
-				) );
-
-				// Retrieve the body's response if no errors found
-				$response_body  = wp_remote_retrieve_body( $response );
-				$response_array = json_decode( $response_body, true );
-
+				$response_array = self::_adapter()->refund_transaction($transaction_id, $payload);
 				if ( array_key_exists( 'status', $response_array ) ) {
 
 					$note = '';
