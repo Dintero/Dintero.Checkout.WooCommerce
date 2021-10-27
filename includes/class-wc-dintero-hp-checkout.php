@@ -2600,21 +2600,27 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 
 		if (isset($transaction['error'])) {
 			$order->add_order_note(__('Could not capture transaction: ' . $transaction['message']));
+			$order->set_status( 'on-hold' );
+			$order->save();
 			$order->save_meta_data();
 			return false;
 		}
 
-		if ($this->extract('status', $transaction) !== 'AUTHORIZED'
-			|| $this->extract('amount', $transaction) != $order_total_amount
-		) {
+		if ($this->extract('status', $transaction) === 'CAPTURED') {
+			$order->add_order_note('Payment captured via Dintero, already captured from before.');
+			$order->save_meta_data();
+			return false;
+		};
+
+		if ($this->extract('status', $transaction) !== 'AUTHORIZED') {
 			$order->add_order_note(__(
 				sprintf(
-					'Could not capture transaction: Transaction status is wrong (%s) or order and transaction amounts do not match. Transaction amount: %s. Order amount: %s',
+					'Could not capture transaction: Transaction status is wrong (%s).',
 					$this->extract('status', $transaction),
-					$this->extract('amount', $transaction),
-					$order_total_amount
 				)
 			));
+			$order->set_status( 'on-hold' );
+			$order->save();
 			$order->save_meta_data();
 			return false;
 		}
@@ -2697,13 +2703,22 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 		if ( array_key_exists( 'status', $response_array ) &&
 			('CAPTURED' === $response_array['status'] || 'PARTIALLY_CAPTURED' === $response_array['status'])) {
 
-			$note = __( 'Payment captured via Dintero. Transaction ID: ' ) . $transaction_id;
-			WC_AJAX_HP::payment_complete( $order, $transaction_id, $note );
+			$note = __(
+				sprintf(
+					'Payment captured via Dintero. Transaction ID: %s. Status: %s',
+					$transaction_id,
+					$this->extract('status', $transaction),
+				)
+			);
+			WC_AJAX_HP::payment_complete($order, $transaction_id, $note);
 			return true;
+		} else {
+			$note = __('Payment capture failed at Dintero. Transaction ID: ') . $transaction_id;
+			$order->set_status( 'on-hold' );
+			$order->save();
+			$order->add_order_note($note);
+			return false;
 		}
-		$note = __('Payment capture failed at Dintero. Transaction ID: ') . $transaction_id;
-		$order->add_order_note($note);
-		return false;
 	}
 
 	/**
