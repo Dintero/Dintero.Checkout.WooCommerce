@@ -24,4 +24,9 @@ class WC_Dintero_HP_Checkout_Test extends WP_UnitTestCase {
 		$this->assertEquals(15620, $shipping_amount);
 	}
 
+	public function test_shipping_amount2() {
+		$checkout = new WC_Dintero_HP_Checkout();
+		$checkout->cancel_order();
+	}
+
 }
