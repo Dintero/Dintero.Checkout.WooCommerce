@@ -1263,7 +1263,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			if ( array_key_exists( 'status', $response_array ) &&
 				('CAPTURED' === $response_array['status'] || 'PARTIALLY_CAPTURED' === $response_array['status'])) {
 
-				$note = __( 'Payment captured via Dintero. Transaction ID: ' ) . $transaction_id;
+				$note = sprintf('Payment captured via Dintero. Transaction ID: %s. Dintero status: %s', $transaction_id, $response_array['status']);
 				$this->payment_complete( $order, $transaction_id, $note );
 			} else {
 				$error_message = 'unknown';
@@ -1273,6 +1273,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				$note = sprintf('Payment capture failed at Dintero. Transaction ID: %s. Error message: %s', $transaction_id, $error_message);
 				$order->add_order_note( $note );
 				$order->set_status('on-hold');
+				$order->save();
 			}
 		}
 	}
