@@ -39,11 +39,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	private $oid;
 
 	private $checkout_logo_width;
-	private $default_order_status;
-	private $manual_capture_status;
-	private $additional_manual_capture_status;
-	private $additional_cancel_status;
-	private $additional_refund_status;
 
 	public $separate_sales_tax = false;
 
@@ -62,17 +57,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 		$this->client_secret                    = $this->test_mode ? $this->get_option( 'test_client_secret' ) : $this->get_option( 'production_client_secret' );
 		$this->profile_id                       = $this->test_mode ? $this->get_option( 'test_profile_id' ) : $this->get_option( 'production_profile_id' );
 		$this->checkout_logo_width              = $this->get_option( 'checkout_logo_width' ) ? $this->get_option( 'checkout_logo_width' ) : 600;
-		$this->default_order_status             = $this->get_option('default_order_status') ? $this->get_option('default_order_status') : 'wc-processing';
-		$this->manual_capture_status            = str_replace( 'wc-', '',
-			$this->get_option( 'manual_capture_status' ) );
-		$this->additional_manual_capture_status = str_replace( 'wc-', '',
-			$this->get_option( 'additional_manual_capture_status' ) );
-		$this->additional_cancel_status         = str_replace( 'wc-', '',
-			$this->get_option( 'additional_cancel_status' ) );
-		$this->additional_refund_status         = str_replace( 'wc-', '',
-			$this->get_option( 'additional_refund_status' ) );
-		//$this->api_endpoint                     = 'https://api.dintero.com/v1';
-		//$this->checkout_endpoint                = 'https://checkout.dintero.com/v1';
 		$environment_character                  = $this->test_mode ? 'T' : 'P';
 		$this->oid                              = $environment_character . $this->account_id;
 
