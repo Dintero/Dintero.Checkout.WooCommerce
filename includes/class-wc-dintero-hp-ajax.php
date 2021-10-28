@@ -1039,7 +1039,7 @@ class WC_AJAX_HP {
 						'delivery_method' => 'delivery',
 						'operator' => '',
 						'operator_product_id' => (string)$method->instance_id,
-						'metadata' => $method->meta_data,
+						'metadata' => Dintero_HP_Helper::instance()->get_metadata($method->meta_data),
 					);
 					if ( $j == 0 ) {
 						WC()->session->set('dintero_shipping_line_id', 'shipping_method_' . $j);

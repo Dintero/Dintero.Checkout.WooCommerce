@@ -1999,7 +1999,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				'delivery_method'=>'delivery',
 				'operator'=>'',
 				'operator_product_id'=> (string)$selectedShippingReference['instance_id'],
-				'metadata'=>$selectedShippingReference['meta_data'],
+				'metadata' => Dintero_HP_Helper::instance()->get_metadata($selectedShippingReference['meta_data']),
 			);
 
 		} else {
@@ -2099,7 +2099,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 							'delivery_method' => 'delivery',
 							'operator' => '',
 							'operator_product_id' => (string)$method->instance_id,
-							'metadata' => $method->meta_data,
+							'metadata' => Dintero_HP_Helper::instance()->get_metadata($method->meta_data),
 						);
 
 						if ($j == 0) {
@@ -2346,7 +2346,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 							'delivery_method'=>'delivery',
 							'operator'=>'',
 							'operator_product_id'=>(string)$selectedShippingReference['instance_id'],
-							'metadata'=>$selectedShippingReference['meta_data'],
+							'metadata' => Dintero_HP_Helper::instance()->get_metadata($selectedShippingReference['meta_data']),
 						)
 					);
 					$express_option = array(
