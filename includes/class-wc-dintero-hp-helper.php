@@ -76,4 +76,24 @@ class Dintero_HP_Helper
 
 		return round( $shipping_tax_rate,2 );
 	}
+
+	public function convert_to_dintero_metadata($meta_data) {
+		if (null == $meta_data) {
+			return null;
+		}
+		if (count($meta_data) === 0) {
+			return null;
+		}
+		if (!$this->is_associative_array($meta_data)) {
+			return null;
+		}
+		return $meta_data;
+	}
+
+	private function is_associative_array(array $arr) {
+		if (array() === $arr) {
+			return false;
+		}
+		return array_keys($arr) !== range(0, count($arr) - 1);
+	}
 }

@@ -1988,7 +1988,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 		);
 
 		if (WC()->shipping->get_packages() && WC()->session->get( 'chosen_shipping_methods' )[0]) {
-			$payload["order"]['shipping_option'] = array(
+			$shipping_option = array(
 				'id'=> (string)$selectedShippingReference['id'],
 				'line_id'=>'shipping_method_'.$selectedShippingReference['index'],
 				'amount'=> (int) $this->get_shipping_amount(),
@@ -1999,8 +1999,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				'delivery_method'=>'delivery',
 				'operator'=>'',
 				'operator_product_id'=> (string)$selectedShippingReference['instance_id'],
-				'metadata'=>$selectedShippingReference['meta_data'],
 			);
+			$metadata = Dintero_HP_Helper::instance()->convert_to_dintero_metadata($selectedShippingReference['meta_data']);
+			if (!is_null($metadata)) {
+				$shipping_option['metadata'] = $metadata;
+			}
+			$payload["order"]['shipping_option'] = $shipping_option;
 
 		} else {
 			$payload["order"]["shipping_option"]	= array(
@@ -2088,7 +2092,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 							$method_tax_rate   = $this->get_shipping_tax_rate();
 						}
 
-						$dintero_shipping_options[] = array(
+						$express_shipping_option = array(
 							'id'          => $method_id,
 							'line_id' 	  => 'shipping_method_'.$j,
 							'title'       =>  $method_name,
@@ -2099,8 +2103,12 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 							'delivery_method' => 'delivery',
 							'operator' => '',
 							'operator_product_id' => (string)$method->instance_id,
-							'metadata' => $method->meta_data,
 						);
+						$metadata = Dintero_HP_Helper::instance()->convert_to_dintero_metadata($method->meta_data);
+						if (!is_null($metadata)) {
+							$express_shipping_option['metadata'] = $metadata;
+						}
+						$dintero_shipping_options[] = $express_shipping_option;
 
 						if ($j == 0) {
 							WC()->session->set( 'dintero_shipping_line_id', 'shipping_method_'.$j );
@@ -2289,7 +2297,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			// 	$total_amount += $item_line_total_amount;
 			// }
 
-			$shipping_option = array();
 			$express_option = array();
 
 			$counter ++;
@@ -2332,22 +2339,25 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 					array_push($customer_types, 'b2b', 'b2c');
 				}
 				if ($hasShippingOptions) {
+					$shipping_option = array(
+						'id'=> (string)$selectedShippingReference['id'],
+						'line_id'=>$line_id,
+						'country'=>$order->get_shipping_country(),
+						'amount'=> $this->get_shipping_amount(),
+						'vat_amount'=> $this->get_shipping_tax_amount(),
+						'vat'=> $this->get_shipping_tax_rate(),
+						'title'=> $this->get_shipping_name(),
+						'description'=>'',
+						'delivery_method'=>'delivery',
+						'operator'=>'',
+						'operator_product_id'=>(string)$selectedShippingReference['instance_id'],
+					);
+					$metadata = Dintero_HP_Helper::instance()->convert_to_dintero_metadata($selectedShippingReference['meta_data']);
+					if (!is_null($metadata)) {
+						$shipping_option['metadata'] = $metadata;
+					}
 					$dintero_shipping_options = array(
-						0=>array(
-							'id'=> (string)$selectedShippingReference['id'],
-							'line_id'=>$line_id,
-							//"countries"=>array($order->get_shipping_country()),
-							'country'=>$order->get_shipping_country(),
-							'amount'=> $this->get_shipping_amount(),
-							'vat_amount'=> $this->get_shipping_tax_amount(),
-							'vat'=> $this->get_shipping_tax_rate(),
-							'title'=> $this->get_shipping_name(),
-							'description'=>'',
-							'delivery_method'=>'delivery',
-							'operator'=>'',
-							'operator_product_id'=>(string)$selectedShippingReference['instance_id'],
-							'metadata'=>$selectedShippingReference['meta_data'],
-						)
+						0=>$shipping_option,
 					);
 					$express_option = array(
 						'shipping_address_callback_url' => $ship_callback_url,
