@@ -1241,42 +1241,32 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 			$order_total_amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
 
-			if ( array_key_exists( 'status', $transaction ) &&
-				 array_key_exists( 'amount', $transaction ) &&
-				 $transaction['amount'] >= $order_total_amount ) {
+			if ($this->is_redirect_payment($transaction)) {
+				$items = $this->get_items_to_capture_redirect($order);
+			} else {
+				$items = $this->get_items_to_capture_embed($order);
+			}
 
-				if ($this->is_redirect_payment($transaction)) {
-					$items = $this->get_items_to_capture_redirect($order);
-				} else {
-					$items = $this->get_items_to_capture_embed($order);
-				}
+			$payload = array(
+				'amount'            => $order_total_amount,
+				'capture_reference' => strval( $order_id ),
+				'items'             => $items
+			);
+			$response_array = self::_adapter()->capture_transaction($transaction_id, $payload);
 
-				$payload = array(
-					'amount'            => $order_total_amount,
-					'capture_reference' => strval( $order_id ),
-					'items'             => $items
-				);
-				$response_array = self::_adapter()->capture_transaction($transaction_id, $payload);
+			if ( array_key_exists( 'status', $response_array ) &&
+				('CAPTURED' === $response_array['status'] || 'PARTIALLY_CAPTURED' === $response_array['status'])) {
 
-				if ( array_key_exists( 'status', $response_array ) &&
-					('CAPTURED' === $response_array['status'] || 'PARTIALLY_CAPTURED' === $response_array['status'])) {
-
-					$note = __( 'Payment captured via Dintero. Transaction ID: ' ) . $transaction_id;
-					$this->payment_complete( $order, $transaction_id, $note );
-				} else {
-					$note = __( 'Payment capture failed at Dintero. Transaction ID: ' ) . $transaction_id;
-					$order->add_order_note( $note );
-				}
-			} else if ('CAPTURED' === $transaction['status']) {
-				$note = __( 'Payment captured via Dintero, already captured from before. Transaction ID: ' ) . $transaction_id;
+				$note = __( 'Payment captured via Dintero. Transaction ID: ' ) . $transaction_id;
 				$this->payment_complete( $order, $transaction_id, $note );
 			} else {
-				$note = sprintf(
-						'Payment capture failed. Order and transaction amounts do not match. Transaction amount: %s. Order amount: %s. ',
-						$transaction['amount'],
-						$order_total_amount
-					) . $transaction_id;
+				$error_message = 'unknown';
+				if (array_key_exists('error', $response_array) && isset($response_array['error']['message'])) {
+					$error_message = $response_array['error']['message'];
+				}
+				$note = sprintf('Payment capture failed at Dintero. Transaction ID: %s. Error message: %s', $transaction_id, $error_message);
 				$order->add_order_note( $note );
+				$order->set_status('on-hold');
 			}
 		}
 	}
