@@ -2092,7 +2092,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 							$method_tax_rate   = $this->get_shipping_tax_rate();
 						}
 
-						$shipping_option = array(
+						$express_shipping_option = array(
 							'id'          => $method_id,
 							'line_id' 	  => 'shipping_method_'.$j,
 							'title'       =>  $method_name,
@@ -2106,9 +2106,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 						);
 						$metadata = Dintero_HP_Helper::instance()->convert_to_dintero_metadata($method->meta_data);
 						if (!is_null($metadata)) {
-							$shipping_option['metadata'] = $metadata;
+							$express_shipping_option['metadata'] = $metadata;
 						}
-						$dintero_shipping_options[] = $shipping_option;
+						$dintero_shipping_options[] = $express_shipping_option;
 
 						if ($j == 0) {
 							WC()->session->set( 'dintero_shipping_line_id', 'shipping_method_'.$j );
