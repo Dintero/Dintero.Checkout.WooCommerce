@@ -8,6 +8,8 @@
  * @subpackage dintero-hp/includes
  */
 
+use PHP_CodeSniffer\Tokenizers\PHP;
+
 /**
  * The custom gateway class.
  *
@@ -1085,7 +1087,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			 $order instanceof WC_Order &&
 			 $order->get_transaction_id() &&
 			 'dintero-hp' === $order->get_payment_method() ) {
-
 
 			$transaction_id = $order->get_transaction_id();
 			$transaction = self::_adapter()->get_transaction($transaction_id);

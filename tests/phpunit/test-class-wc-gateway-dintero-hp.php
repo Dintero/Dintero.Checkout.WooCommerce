@@ -121,7 +121,7 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 			'status' => 'AUTHORIZED',
 		);
 
-		$captured_error = array(
+		$captured_transaction = array(
 			'amount' => 5000,
 			'merchant_reference' => '',
 			'merchant_reference_2' => $order->get_id(),
@@ -169,7 +169,7 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 							))
 					)
 				))
-			->willReturn($captured_error);
+			->willReturn($captured_transaction);
 		$checkout::$_adapter = $adapter_stub;
 
 		$checkout->check_status($order->get_id(), '', 'completed');
@@ -440,7 +440,14 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 			'amount' => 5000,
 			'merchant_reference' => '',
 			'merchant_reference_2' => $order->get_id(),
-			'status' => 'INITIATED',
+			'status' => 'AUTHORIZED',
+		);
+
+		$cancelled_transaction = array(
+			'amount' => 5000,
+			'merchant_reference' => '',
+			'merchant_reference_2' => $order->get_id(),
+			'status' => 'AUTHORIZATION_VOIDED',
 		);
 
 		$adapter_stub
@@ -448,8 +455,13 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 			->method('get_transaction')
 			->willReturn($transaction);
 
+		$adapter_stub
+			->expects($this->exactly(1))
+			->method('void_transaction')
+			->willReturn($cancelled_transaction);
+
 		$checkout::$_adapter = $adapter_stub;
-		$checkout->check_status($order->get_id(), '', 'completed');
+		$checkout->check_status($order->get_id(), '', 'cancelled');
 
 		// check that the order has been updated with the new status
 		$note = wc_get_order_notes(
@@ -459,7 +471,7 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 				'orderby'  => 'date_created_gmt',
 			)
 		);
-		$this->assertEquals('Could not capture transaction: Transaction status is wrong (INITIATED).', end($note)->content);
+		$this->assertEquals('Transaction cancelled via Dintero. Transaction ID: P12345678.abcdefghijklmnop', end($note)->content);
 	}
 
 
