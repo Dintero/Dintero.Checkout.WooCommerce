@@ -227,7 +227,7 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 				'orderby'  => 'date_created_gmt',
 			)
 		);
-		$this->assertEquals('Payment captured via Dintero, already captured from before. Transaction ID: P12345678.abcdefghijklmnop', end($note)->content);
+		$this->assertEquals('Payment captured via Dintero, already captured from before.', end($note)->content);
 	}
 
 	/**

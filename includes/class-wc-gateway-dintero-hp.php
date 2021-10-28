@@ -72,9 +72,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			//Use thank you page to check for transactions, only if callbacks are unavailable
 			add_action( 'woocommerce_thankyou', array( $this, 'callback' ));
 		}
-		if (WCDHP()->setting()->get('embed_enable') == 'yes') {
-			add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
-		}
+		add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
+		add_action( 'woocommerce_cancelled_order', array( $this, 'cancel_order' ) );
 	}
 
 	/**
@@ -1065,6 +1064,13 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				$this->process_refund( $order_id );
 			}
 		}
+	}
+
+	/**
+	 * Cancel the order by order id
+	 */
+	public function cancel_order( $order_id) {
+		$this->cancel($order_id);
 	}
 
 	/**

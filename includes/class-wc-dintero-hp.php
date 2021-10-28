@@ -72,8 +72,6 @@ final class WC_Dintero_HP {
 		add_action( 'dhp_after_checkout_form', array( $this, 'init_checkout' ), 50);
 		add_action( 'woocommerce_pay_order_after_submit', array( $this, 'init_pay' ), 50);
 
-		add_action( 'woocommerce_cancelled_order', array( $this, 'cancel_order' ) );
-
 		add_action( 'woocommerce_applied_coupon', array( $this, 'applied_coupon' ), 10, 3 );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'removed_coupon' ), 10, 3 );
 
@@ -752,14 +750,6 @@ final class WC_Dintero_HP {
 					</style>';
 
 		wp_kses_post( $custom_css );
-	}
-
-	/**
-	 * Cancel the order by order id
-	 * TODO: Call new cancel-method
-	 */
-	public function cancel_order( $order_id) {
-		WCDHP()->checkout()->cancel($order_id);
 	}
 
 	/**
