@@ -8,7 +8,6 @@
  * @subpackage dintero-hp/includes
  */
 
-use PHP_CodeSniffer\Tokenizers\PHP;
 
 /**
  * The custom gateway class.
