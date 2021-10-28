@@ -74,10 +74,6 @@ final class WC_Dintero_HP {
 
 		add_action( 'woocommerce_cancelled_order', array( $this, 'cancel_order' ) );
 
-		if ($embed_enable != 'yes') {
-			add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
-		}
-
 		add_action( 'woocommerce_applied_coupon', array( $this, 'applied_coupon' ), 10, 3 );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'removed_coupon' ), 10, 3 );
 
@@ -760,16 +756,10 @@ final class WC_Dintero_HP {
 
 	/**
 	 * Cancel the order by order id
+	 * TODO: Call new cancel-method
 	 */
 	public function cancel_order( $order_id) {
 		WCDHP()->checkout()->cancel($order_id);
-	}
-
-	/**
-	 * Check order status by order id
-	 */
-	public function check_status( $order_id, $previous_status, $current_status) {
-		WCDHP()->checkout()->check_status( $order_id, $previous_status, $current_status );
 	}
 
 	/**
