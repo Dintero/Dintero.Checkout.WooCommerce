@@ -2342,7 +2342,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 					$shipping_option = array(
 						'id'=> (string)$selectedShippingReference['id'],
 						'line_id'=>$line_id,
-						//"countries"=>array($order->get_shipping_country()),
 						'country'=>$order->get_shipping_country(),
 						'amount'=> $this->get_shipping_amount(),
 						'vat_amount'=> $this->get_shipping_tax_amount(),
