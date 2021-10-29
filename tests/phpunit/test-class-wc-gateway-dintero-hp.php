@@ -265,7 +265,7 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 			)
 		);
 
-		$captured_error = array(
+		$captured_transaction = array(
 			'amount' => 5000,
 			'merchant_reference' => '',
 			'merchant_reference_2' => $order->get_id(),
@@ -313,7 +313,7 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 							))
 					)
 				))
-			->willReturn($captured_error);
+			->willReturn($captured_transaction);
 
 		$checkout::$_adapter = $adapter_stub;
 		$checkout->check_status($order->get_id(), '', 'completed');

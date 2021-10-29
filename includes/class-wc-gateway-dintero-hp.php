@@ -804,13 +804,13 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			// Update the Dintero order with new confirmation merchant reference.  TO DO
 			$transaction = WCDHP()->checkout()->update_transaction($dintero_order_transaction_id, $order_id);
 			if (is_wp_error($transaction)) {
-				$updated_transaction = self::_adapter()->get_transaction($transaction_id);
+				$updated_transaction = self::_adapter()->get_transaction($dintero_order_transaction_id);
 				if (isset($updated_transaction['merchant_reference_2'])) {
 					$fail_reason = __( 'Duplicate order of order ' ) . $updated_transaction['merchant_reference_2'] . '.';
-					self::failed_order( $order, $transaction_id, $fail_reason );
+					self::failed_order( $order, $dintero_order_transaction_id, $fail_reason );
 				} else {
 					$fail_reason = __( 'Failed updating transaction with order_id ' ) . '.';
-					self::failed_order( $order, $transaction_id, $fail_reason );
+					self::failed_order( $order, $dintero_order_transaction_id, $fail_reason );
 				}
 			}
 
@@ -1135,7 +1135,9 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			if (  ($merchant_reference === $order_id  || $merchant_reference_2 === $order_id ) &&
 				 array_key_exists( 'status', $transaction ) &&
 				 array_key_exists( 'amount', $transaction ) &&
-				 ( 'CAPTURED' === $transaction['status'] || 'PARTIALLY_REFUNDED' === $transaction['status'] ) ) {
+				 ( 'CAPTURED' === $transaction['status'] || 
+				 'PARTIALLY_CAPTURED' === $transaction['status'] || 
+				 'PARTIALLY_REFUNDED' === $transaction['status'] ) ) {
 
 				if ( empty( $amount ) ) {
 					$amount = $transaction['amount'];
@@ -1300,7 +1302,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 		$counter = 0;
 		foreach ( $order->get_items() as $order_item ) {
 			$counter ++;
-			$line_id                = strval( $counter );
 			$item_total_amount      = absint( strval( floatval( $order_item->get_total() ) * 100 ) );
 			$item_tax_amount        = absint( strval( floatval( $order_item->get_total_tax() ) * 100 ) );
 			$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $order_item,
@@ -1329,7 +1330,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 		if ( count( $order->get_shipping_methods() ) > 0 ) {
 			$counter ++;
-			$line_id                = strval( $counter );
 			$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
 			$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
 			$item_line_total_amount = $item_total_amount + $item_tax_amount;
