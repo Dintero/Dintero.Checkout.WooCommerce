@@ -200,7 +200,7 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 		$order->set_transaction_id('P12345678.abcdefghijklmnop');
 		$order->save();
 
-		$captured_error = array(
+		$captured_transaction = array(
 			'amount' => 5000,
 			'merchant_reference' => '',
 			'merchant_reference_2' => $order->get_id(),
@@ -210,12 +210,12 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 		$adapter_stub
 			->expects($this->exactly(1))
 			->method('get_transaction')
-			->willReturn($captured_error);
+			->willReturn($captured_transaction);
 
 		$adapter_stub
 			->expects($this->exactly(0))
 			->method('capture_transaction')
-			->willReturn($captured_error);
+			->willReturn($captured_transaction);
 		$checkout::$_adapter = $adapter_stub;
 
 		$checkout->check_status($order->get_id(), '', 'completed');
