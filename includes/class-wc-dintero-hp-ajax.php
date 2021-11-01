@@ -1074,7 +1074,6 @@ class WC_AJAX_HP {
 		$order->set_transaction_id( $transaction_id );
 		$order->payment_complete( $transaction_id );
 		wc_reduce_stock_levels( $order->get_id() );
-		WCDHP()->checkout()->create_receipt( $order );
 	}
 
 	/**
