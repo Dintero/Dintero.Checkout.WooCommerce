@@ -1983,7 +1983,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				'currency'           => $currency,
 				'merchant_reference' => '',
 				'items'              => $this->order_lines,
-				'discount_codes'	 => WC()->cart->get_applied_coupons(),
+				'discount_codes'	 => Dintero_HP_Helper::instance()->convert_to_dintero_discounts(WC()->cart->get_applied_coupons()),
 			)
 		);
 
@@ -2172,7 +2172,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				'amount'             => $order_total_amount ,
 				'vat_amount'         => $order_tax_amount ,
 				'currency'           => $currency,
-				'discount_codes'	=> WC()->cart->get_applied_coupons(),
+				'discount_codes'	=> Dintero_HP_Helper::instance()->convert_to_dintero_discounts(WC()->cart->get_applied_coupons()),
 				'merchant_reference' => '',
 				'shipping_address'   => array(
 					'first_name'   => (string) WC()->checkout()->get_value( 'shipping_first_name' ),

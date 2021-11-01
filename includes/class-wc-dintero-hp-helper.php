@@ -90,6 +90,17 @@ class Dintero_HP_Helper
 		return $meta_data;
 	}
 
+	public function convert_to_dintero_discounts($applied_coupons) {
+		if (is_null($applied_coupons)) {
+			return array();
+		}
+		$discount_codes = array();
+		foreach ($applied_coupons as $coupon) {
+			$discount_codes[] = $coupon;
+		}
+		return $discount_codes;
+	}
+
 	private function is_associative_array(array $arr) {
 		if (array() === $arr) {
 			return false;

@@ -45,5 +45,39 @@ class Dintero_HP_Helper_Test extends WP_UnitTestCase {
 		$this->assertEquals(array('a' => 'b'), $dintero_meta);
 	}
 
+	/**
+	 * @group helper
+	 */
+	public function test_convert_discount_object() {
+		$helper = Dintero_HP_Helper::instance();
+		
+		$discount_codes = $helper->convert_to_dintero_discounts(array(
+			'2' => 'b'
+		));
+		$this->assertEquals(array('b'), $discount_codes);
+	}
+	
+	/**
+	 * @group helper
+	 */
+	public function test_convert_discount_null() {
+		$helper = Dintero_HP_Helper::instance();
+		
+		$discount_codes = $helper->convert_to_dintero_discounts(null);
+		$this->assertEquals(array(), $discount_codes);
+	}
+	
+	/**
+	 * @group helper
+	 */
+	public function test_convert_discount_normal_array() {
+		$helper = Dintero_HP_Helper::instance();
+		
+		$discount_codes = $helper->convert_to_dintero_discounts(array(
+			'a', 'b'
+		));
+		$this->assertEquals(array('a', 'b'), $discount_codes);
+	}
+
 
 }

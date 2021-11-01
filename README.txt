@@ -43,6 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2021.11.01
+
+* Fixes bug when discount_codes are associative arrays
+
 2021.10.28
 
 * Fixes bug from 2021.10.27 when shipping option contains no metadata
