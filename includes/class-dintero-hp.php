@@ -133,13 +133,7 @@ class Dintero_HP {
 	 * @return    array     WooCommerce payment methods
 	 */
 	public function add_payment_gateway_class( $methods ) {
-		//$embed_enable = WCDHP()->setting()->get('embed_enable');
-		//$express_enable = WCDHP()->setting()->get('express_enable');
-
-		//if ( 'yes' != $express_enable || 'yes' != $embed_enable ) {
-			$methods[] = 'WC_Gateway_Dintero_HP';
-		//}
-
+		$methods[] = 'WC_Gateway_Dintero_HP';
 		return $methods;
 	}
 

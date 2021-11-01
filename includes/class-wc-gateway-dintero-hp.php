@@ -8,6 +8,7 @@
  * @subpackage dintero-hp/includes
  */
 
+
 /**
  * The custom gateway class.
  *
@@ -72,9 +73,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			//Use thank you page to check for transactions, only if callbacks are unavailable
 			add_action( 'woocommerce_thankyou', array( $this, 'callback' ));
 		}
-		if (WCDHP()->setting()->get('embed_enable') == 'yes') {
-			add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
-		}
+		add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
+		add_action( 'woocommerce_cancelled_order', array( $this, 'cancel_order' ) );
 	}
 
 	/**
@@ -804,13 +804,13 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			// Update the Dintero order with new confirmation merchant reference.  TO DO
 			$transaction = WCDHP()->checkout()->update_transaction($dintero_order_transaction_id, $order_id);
 			if (is_wp_error($transaction)) {
-				$updated_transaction = self::_adapter()->get_transaction($transaction_id);
+				$updated_transaction = self::_adapter()->get_transaction($dintero_order_transaction_id);
 				if (isset($updated_transaction['merchant_reference_2'])) {
 					$fail_reason = __( 'Duplicate order of order ' ) . $updated_transaction['merchant_reference_2'] . '.';
-					self::failed_order( $order, $transaction_id, $fail_reason );
+					self::failed_order( $order, $dintero_order_transaction_id, $fail_reason );
 				} else {
 					$fail_reason = __( 'Failed updating transaction with order_id ' ) . '.';
-					self::failed_order( $order, $transaction_id, $fail_reason );
+					self::failed_order( $order, $dintero_order_transaction_id, $fail_reason );
 				}
 			}
 
@@ -1068,6 +1068,13 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 	}
 
 	/**
+	 * Cancel the order by order id
+	 */
+	public function cancel_order( $order_id) {
+		$this->cancel($order_id);
+	}
+
+	/**
 	 * Cancel Order
 	 *
 	 * @param int $order_id Order ID.
@@ -1080,19 +1087,11 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			 $order->get_transaction_id() &&
 			 'dintero-hp' === $order->get_payment_method() ) {
 
-
 			$transaction_id = $order->get_transaction_id();
 			$transaction = self::_adapter()->get_transaction($transaction_id);
 			$merchant_reference = absint( strval(trim($transaction['merchant_reference'])));
 			$merchant_reference_2 = absint( strval(trim($transaction['merchant_reference_2'])));
 
-			$transaction_order_id = absint( strval( $transaction['merchant_reference'] ) );
-
-
-
-			if ( ! array_key_exists( 'merchant_reference', $transaction ) ) {
-				return false;
-			}
 			if ( ($merchant_reference === $order_id  || $merchant_reference_2 === $order_id ) &&
 				 array_key_exists( 'status', $transaction ) &&
 				 'AUTHORIZED' === $transaction['status'] ) {
@@ -1129,21 +1128,16 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 			$transaction_id = $order->get_transaction_id();
 			$transaction = self::_adapter()->get_transaction($transaction_id);
-			if ( ! array_key_exists( 'merchant_reference', $transaction ) ) {
-				return false;
-			}
 
 			$merchant_reference = absint( strval(trim($transaction['merchant_reference'])));
 			$merchant_reference_2 = absint( strval(trim($transaction['merchant_reference_2'])));
 
-			if ( ! array_key_exists( 'merchant_reference', $transaction ) ) {
-				return false;
-			}
-
 			if (  ($merchant_reference === $order_id  || $merchant_reference_2 === $order_id ) &&
 				 array_key_exists( 'status', $transaction ) &&
 				 array_key_exists( 'amount', $transaction ) &&
-				 ( 'CAPTURED' === $transaction['status'] || 'PARTIALLY_REFUNDED' === $transaction['status'] ) ) {
+				 ( 'CAPTURED' === $transaction['status'] || 
+				 'PARTIALLY_CAPTURED' === $transaction['status'] || 
+				 'PARTIALLY_REFUNDED' === $transaction['status'] ) ) {
 
 				if ( empty( $amount ) ) {
 					$amount = $transaction['amount'];
@@ -1197,16 +1191,11 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			$transaction_id = $order->get_transaction_id();
 			if (empty($transaction_id)) {
 				$order->add_order_note('Payment capture failed at Dintero because the order lacks transaction_id. Contact integration@dintero.com with order information.');
+				$order->set_status( 'on-hold' );
+				$order->save();
 				return false;
 			}
 			$transaction = self::_adapter()->get_transaction($transaction_id);
-
-
-			if ( ! array_key_exists( 'merchant_reference', $transaction ) ) {
-				$order->add_order_note(__('Could not capture transaction: Merchant reference id not found'));
-				$order->save_meta_data();
-				return false;
-			}
 
 			$merchant_reference = absint( strval(trim($transaction['merchant_reference'])));
 			$merchant_reference_2 = absint( strval(trim($transaction['merchant_reference_2'])));
@@ -1214,6 +1203,16 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 			if ( $merchant_reference === $order_id  || $merchant_reference_2 === $order_id ) {
 				$this->capture( $order, $transaction );
+			} else {
+				$order->add_order_note(__(
+					sprintf(
+						'Could not capture transaction: Merchant reference is wrong (%s, %s). Contact integration@dintero.com with order information.',
+						$merchant_reference, $merchant_reference_2,
+					)
+				));
+				$order->set_status( 'on-hold' );
+				$order->save();
+				$order->save_meta_data();
 			}
 		}
 	}
@@ -1233,130 +1232,240 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				$transaction = self::_adapter()->get_transaction($transaction_id);
 			}
 
+			if (isset($transaction['error'])) {
+				$order->add_order_note(__('Could not capture transaction: ' . $transaction['message']));
+				$order->set_status( 'on-hold' );
+				$order->save();
+				$order->save_meta_data();
+				return false;
+			}
+
+			if ($this->extract('status', $transaction) === 'CAPTURED') {
+				$order->add_order_note('Payment captured via Dintero, already captured from before.');
+				$order->save_meta_data();
+				return false;
+			};
+
+			if ($this->extract('status', $transaction) !== 'AUTHORIZED') {
+				$order->add_order_note(__(
+					sprintf(
+						'Could not capture transaction: Transaction status is wrong (%s).',
+						$this->extract('status', $transaction),
+					)
+				));
+				$order->set_status( 'on-hold' );
+				$order->save();
+				$order->save_meta_data();
+				return false;
+			}
+
 			$order_total_amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
 
-			if ( array_key_exists( 'status', $transaction ) &&
-				 array_key_exists( 'amount', $transaction ) &&
-				 'AUTHORIZED' === $transaction['status'] &&
-				 $transaction['amount'] >= $order_total_amount ) {
+			if ($this->is_redirect_payment($transaction)) {
+				$items = $this->get_items_to_capture_redirect($order);
+			} else {
+				$items = $this->get_items_to_capture_embed($order);
+			}
 
-				$items = array();
+			$payload = array(
+				'amount'            => $order_total_amount,
+				'capture_reference' => strval( $order_id ),
+				'items'             => $items
+			);
+			$response_array = self::_adapter()->capture_transaction($transaction_id, $payload);
 
-				$counter = 0;
-				foreach ( $order->get_items() as $order_item ) {
-					$counter ++;
-					$line_id                = strval( $counter );
-					$item_total_amount      = absint( strval( floatval( $order_item->get_total() ) * 100 ) );
-					$item_tax_amount        = absint( strval( floatval( $order_item->get_total_tax() ) * 100 ) );
-					$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $order_item,
-							true ) ) * 100 ) );
-					$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
-							2 ) * 100 ) : 0;
-					if ( $order_item['variation_id'] ) {
-						$product = wc_get_product( $order_item['variation_id'] );
-					} else {
-						$product = wc_get_product( $order_item['product_id'] );
-					}
-					$item_reference = $product->get_id();
+			if ( array_key_exists( 'status', $response_array ) &&
+				('CAPTURED' === $response_array['status'] || 'PARTIALLY_CAPTURED' === $response_array['status'])) {
 
-					$productId =  substr( (string) $item_reference, 0, 64 );
-					$item                   = array(
-						'id'          => $productId,
-						'description' => $order_item->get_name(),
-						'quantity'    => $order_item->get_quantity(),
-						'vat_amount'  => $item_tax_amount,
-						'vat'         => $item_tax_percentage,
-						'amount'      => $item_line_total_amount,
-						'line_id'     => $productId
-					);
-					array_push( $items, $item );
-				}
-
-				if ( count( $order->get_shipping_methods() ) > 0 ) {
-					$counter ++;
-					$line_id                = strval( $counter );
-					$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
-					$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
-					$item_line_total_amount = $item_total_amount + $item_tax_amount;
-					$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
-							2 ) * 100 ) : 0;
-
-
-					$shipping_method = @array_shift($order->get_shipping_methods());
-					$shipping_method_id = $shipping_method['method_id'].':'.$shipping_method['instance_id'];
-
-					// exit;
-					$item = array(
-						'id'          => (string)$shipping_method_id,
-						'description' => ', Shipping: ' . $order->get_shipping_method(),
-						'quantity'    => 1,
-						'vat_amount'  => $item_tax_amount,
-						'vat'         => $item_tax_percentage,
-						'amount'      => $item_line_total_amount,
-						'line_id'     => 'shipping_method'
-					);
-					$shippingLineId = get_post_meta($order_id,'_wc_dintero_shipping_line_id');
-
-					if($shippingLineId && count($shippingLineId)>0){
-						if($shippingLineId[0] != ''){
-							$item['line_id'] = $shippingLineId[0];
-						}
-
-					}
-
-					array_push( $items, $item );
-				}
-
-				$fee_counter = 0;
-				foreach( $order->get_items('fee') as $item_id => $item_fee ){
-					$fee_counter++;
-					$line_id                = 'fee_'.$fee_counter;
-					$item_total_amount      = absint( strval( floatval( $item_fee->get_total() ) * 100 ) );
-					$item_tax_amount        = absint( strval( floatval( $item_fee->get_total_tax() ) * 100 ) );
-					$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $item_fee,
-							true ) ) * 100 ) );
-					$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
-							2 ) * 100 ) : 0;
-					$item = array(
-						'id'          => 'fee_'.$fee_counter,
-						'description' => $item_fee->get_name(),
-						'quantity'    => $item_fee->get_quantity(),
-						'vat_amount'  => $item_tax_amount,
-						'vat'         => $item_tax_percentage,
-						'amount'      => $item_line_total_amount,
-						'line_id'     => $line_id
-					);
-					array_push( $items, $item );
-				}
-
-				$payload = array(
-					'amount'            => $order_total_amount,
-					'capture_reference' => strval( $order_id ),
-					'items'             => $items
-				);
-				$response_array = self::_adapter()->capture_transaction($transaction_id, $payload);
-
-				if ( array_key_exists( 'status', $response_array ) &&
-					('CAPTURED' === $response_array['status'] || 'PARTIALLY_CAPTURED' === $response_array['status'])) {
-
-					$note = __( 'Payment captured via Dintero. Transaction ID: ' ) . $transaction_id;
-					$this->payment_complete( $order, $transaction_id, $note );
-				} else {
-					$note = __( 'Payment capture failed at Dintero. Transaction ID: ' ) . $transaction_id;
-					$order->add_order_note( $note );
-				}
-			} else if ('CAPTURED' === $transaction['status']) {
-				$note = __( 'Payment captured via Dintero, already captured from before. Transaction ID: ' ) . $transaction_id;
+				$note = sprintf('Payment captured via Dintero. Transaction ID: %s. Dintero status: %s', $transaction_id, $response_array['status']);
 				$this->payment_complete( $order, $transaction_id, $note );
 			} else {
-				$note = sprintf(
-						'Payment capture failed. Order and transaction amounts do not match. Transaction amount: %s. Order amount: %s. ',
-						$transaction['amount'],
-						$order_total_amount
-					) . $transaction_id;
+				$error_message = 'unknown';
+				if (array_key_exists('error', $response_array) && isset($response_array['error']['message'])) {
+					$error_message = $response_array['error']['message'];
+				}
+				$note = sprintf('Payment capture failed at Dintero. Transaction ID: %s. Error message: %s', $transaction_id, $error_message);
 				$order->add_order_note( $note );
+				$order->set_status('on-hold');
+				$order->save();
 			}
 		}
+	}
+
+	private function is_redirect_payment($transaction) {
+		if (!isset($transaction['items'])) {
+			return false;
+		}
+		foreach ( $transaction['items'] as $item ) {
+			if ($this->str_starts_with($item['id'], 'item_')) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private function str_starts_with ( $haystack, $needle ) {
+		return strpos( $haystack , $needle ) === 0;
+	}
+
+	private function get_items_to_capture_embed($order) {
+		$items = array();
+
+		$counter = 0;
+		foreach ( $order->get_items() as $order_item ) {
+			$counter ++;
+			$item_total_amount      = absint( strval( floatval( $order_item->get_total() ) * 100 ) );
+			$item_tax_amount        = absint( strval( floatval( $order_item->get_total_tax() ) * 100 ) );
+			$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $order_item,
+					true ) ) * 100 ) );
+			$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
+					2 ) * 100 ) : 0;
+			if ( $order_item['variation_id'] ) {
+				$product = wc_get_product( $order_item['variation_id'] );
+			} else {
+				$product = wc_get_product( $order_item['product_id'] );
+			}
+			$item_reference = $product->get_id();
+
+			$productId =  substr( (string) $item_reference, 0, 64 );
+			$item                   = array(
+				'id'          => $productId,
+				'description' => $order_item->get_name(),
+				'quantity'    => $order_item->get_quantity(),
+				'vat_amount'  => $item_tax_amount,
+				'vat'         => $item_tax_percentage,
+				'amount'      => $item_line_total_amount,
+				'line_id'     => $productId
+			);
+			array_push( $items, $item );
+		}
+
+		if ( count( $order->get_shipping_methods() ) > 0 ) {
+			$counter ++;
+			$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
+			$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
+			$item_line_total_amount = $item_total_amount + $item_tax_amount;
+			$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
+					2 ) * 100 ) : 0;
+
+
+			$shipping_method = @array_shift($order->get_shipping_methods());
+			$shipping_method_id = $shipping_method['method_id'].':'.$shipping_method['instance_id'];
+
+			// exit;
+			$item = array(
+				'id'          => (string)$shipping_method_id,
+				'description' => ', Shipping: ' . $order->get_shipping_method(),
+				'quantity'    => 1,
+				'vat_amount'  => $item_tax_amount,
+				'vat'         => $item_tax_percentage,
+				'amount'      => $item_line_total_amount,
+				'line_id'     => 'shipping_method'
+			);
+			$shippingLineId = get_post_meta($order->get_id(),'_wc_dintero_shipping_line_id');
+
+			if($shippingLineId && count($shippingLineId)>0){
+				if($shippingLineId[0] != ''){
+					$item['line_id'] = $shippingLineId[0];
+				}
+
+			}
+
+			array_push( $items, $item );
+		}
+
+		$items = array_merge($items, $this->get_fee_items($order));
+		return $items;
+	}
+
+	private function get_items_to_capture_redirect($order) {
+		$items = array();
+
+		$counter = 0;
+		foreach ( $order->get_items() as $order_item ) {
+			$counter ++;
+			$line_id                = strval( $counter );
+			$item_total_amount      = absint( strval( floatval( $order_item->get_total() ) * 100 ) );
+			$item_tax_amount        = absint( strval( floatval( $order_item->get_total_tax() ) * 100 ) );
+			$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $order_item,
+					true ) ) * 100 ) );
+			$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
+					2 ) * 100 ) : 0;
+			$item                   = array(
+				'id'          => 'item_' . $counter,
+				'description' => $order_item->get_name(),
+				'quantity'    => $order_item->get_quantity(),
+				'vat_amount'  => $item_tax_amount,
+				'vat'         => $item_tax_percentage,
+				'amount'      => $item_line_total_amount,
+				'line_id'     => $line_id
+			);
+			array_push( $items, $item );
+		}
+
+		if ( count( $order->get_shipping_methods() ) > 0 ) {
+			$counter ++;
+			$line_id                = strval( $counter );
+			$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
+			$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
+			$item_line_total_amount = $item_total_amount + $item_tax_amount;
+			$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
+					2 ) * 100 ) : 0;
+
+			$item = array(
+				'id'          => 'shipping',
+				'description' => 'Shipping: ' . $order->get_shipping_method(),
+				'quantity'    => 1,
+				'vat_amount'  => $item_tax_amount,
+				'vat'         => $item_tax_percentage,
+				'amount'      => $item_line_total_amount,
+				'line_id'     => $line_id
+			);
+			array_push( $items, $item );
+		}
+
+		$items = array_merge($items, $this->get_fee_items($order));
+
+		return $items;
+	}
+
+	private function get_fee_items($order) {
+		$fee_items = array();
+		$fee_counter = 0;
+		foreach( $order->get_items('fee') as $item_id => $item_fee ){
+			$fee_counter++;
+			$line_id                = 'fee_'.$fee_counter;
+			$item_total_amount      = absint( strval( floatval( $item_fee->get_total() ) * 100 ) );
+			$item_tax_amount        = absint( strval( floatval( $item_fee->get_total_tax() ) * 100 ) );
+			$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $item_fee,
+					true ) ) * 100 ) );
+			$item_tax_percentage    = $item_total_amount ? ( round( ( $item_tax_amount / $item_total_amount ),
+					2 ) * 100 ) : 0;
+			$item = array(
+				'id'          => 'fee_'.$fee_counter,
+				'description' => $item_fee->get_name(),
+				'quantity'    => $item_fee->get_quantity(),
+				'vat_amount'  => $item_tax_amount,
+				'vat'         => $item_tax_percentage,
+				'amount'      => $item_line_total_amount,
+				'line_id'     => $line_id
+			);
+			array_push( $fee_items, $item );
+		}
+		return $fee_items;
+	}
+
+	/**
+	 * Extracting value from an array
+	 *
+	 * @param string $key
+	 * @param array $data
+	 * @param null $default
+	 * @return mixed|null
+	 */
+	private function extract($key, $data, $default = null)
+	{
+		return !empty($data[$key]) ? $data[$key] : $default;
 	}
 
 	/**

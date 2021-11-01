@@ -93,7 +93,10 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 
 		$checkout->process_payment($order->get_id());
 	}
-
+	
+	/**
+	 * @group capture
+	 */
 	public function test_capture() {
 		$checkout = new WC_Gateway_Dintero_HP();
 		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
@@ -178,9 +181,12 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 				'orderby'  => 'date_created_gmt',
 			)
 		);
-		$this->assertEquals('Payment captured via Dintero. Transaction ID: P12345678.abcdefghijklmnop', end($note)->content);
+		$this->assertEquals('Payment captured via Dintero. Transaction ID: P12345678.abcdefghijklmnop. Dintero status: CAPTURED', end($note)->content);
 	}
 
+	/**
+	 * @group capture
+	 */
 	public function test_capture_on_auto_captured() {
 		$checkout = new WC_Gateway_Dintero_HP();
 		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
@@ -221,7 +227,251 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 				'orderby'  => 'date_created_gmt',
 			)
 		);
-		$this->assertEquals('Payment captured via Dintero, already captured from before. Transaction ID: P12345678.abcdefghijklmnop', end($note)->content);
+		$this->assertEquals('Payment captured via Dintero, already captured from before.', end($note)->content);
+	}
+
+	/**
+	 * @group capture
+	 */
+	public function test_redirect_capture() {
+		$checkout = new WC_Gateway_Dintero_HP();
+		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
+
+		// These together should of course be 320.04, but were 320.03 previously
+		$shipping_cost = 256.03;
+		$shipping_tax = 64.01;
+
+		$fee_item = new WC_Order_Item_Fee();
+		$fee_item->set_name( 'extra_fee' );
+		$fee_item->set_total( '100' );
+		$fee_item->set_taxes(array(
+			'total' => array(10)
+		));
+		$product = WC_Helper_Product::create_simple_product();
+		$order = WC_Helper_Order::create_order(1, $product, $shipping_cost, $shipping_tax, array($fee_item));
+		$order->set_transaction_id('P12345678.abcdefghijklmnop');
+		$order->save();
+
+		$transaction = array(
+			'amount' => 5000,
+			'merchant_reference' => '',
+			'merchant_reference_2' => $order->get_id(),
+			'status' => 'AUTHORIZED',
+			'items' => array(
+				array(
+					'id' => 'item_1',
+					'line_id' => '1',
+				)
+			)
+		);
+
+		$captured_transaction = array(
+			'amount' => 5000,
+			'merchant_reference' => '',
+			'merchant_reference_2' => $order->get_id(),
+			'status' => 'CAPTURED',
+		);
+
+		$adapter_stub
+			->expects($this->exactly(1))
+			->method('get_transaction')
+			->willReturn($transaction);
+
+		$adapter_stub
+			->expects($this->exactly(1))
+			->method('capture_transaction')
+			->with(
+				$this->equalTo('P12345678.abcdefghijklmnop'),
+				$this->identicalTo(array(
+						'amount' => 5000,
+						'capture_reference' => ''.$order->get_id(),
+						'items' => array(
+							array(
+								'id' => 'item_1',
+								'description' => 'Dummy Product',
+								'quantity' => 4,
+								'vat_amount' => 0,
+								'vat' => 0.0,
+								'amount' => 4000,
+								'line_id' => '1'
+							), array(
+								'id' => 'shipping',
+								'description' => 'Shipping: Flat rate shipping',
+								'quantity' => 1,
+								'vat_amount' => 6401,
+								'vat' => 25.0,
+								'amount' => 32004,
+								'line_id' => '2',
+							), array(
+								'id' => 'fee_1',
+								'description' => 'extra_fee',
+								'quantity' => 1,
+								'vat_amount' => 1000,
+								'vat' => 10.0,
+								'amount' => 11000,
+								'line_id' => 'fee_1',
+							))
+					)
+				))
+			->willReturn($captured_transaction);
+
+		$checkout::$_adapter = $adapter_stub;
+		$checkout->check_status($order->get_id(), '', 'completed');
+
+		// check that the order has been updated with the new status
+		$note = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'limit'    => 10,
+				'orderby'  => 'date_created_gmt',
+			)
+		);
+		$this->assertEquals('Payment captured via Dintero. Transaction ID: P12345678.abcdefghijklmnop. Dintero status: CAPTURED', end($note)->content);
+
+	}
+
+	/**
+	 * @group capture
+	 */
+	public function test_capture_failed() {
+		$checkout = new WC_Gateway_Dintero_HP();
+		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order = WC_Helper_Order::create_order(1, $product);
+		$order->set_transaction_id('P12345678.abcdefghijklmnop');
+		$order->save();
+
+		$transaction = array(
+			'amount' => 5000,
+			'merchant_reference' => '',
+			'merchant_reference_2' => $order->get_id(),
+			'status' => 'AUTHORIZED',
+			'items' => array(
+				array(
+					'id' => 'item_1',
+					'line_id' => '1',
+				)
+			)
+		);
+
+		$captured_error = array(
+			'error' => array(
+				'message' => 'invalid_items'
+			)
+		);
+
+		$adapter_stub
+			->expects($this->exactly(1))
+			->method('get_transaction')
+			->willReturn($transaction);
+
+		$adapter_stub
+			->expects($this->exactly(1))
+			->method('capture_transaction')
+			->willReturn($captured_error);
+
+		$checkout::$_adapter = $adapter_stub;
+		$checkout->check_status($order->get_id(), '', 'completed');
+
+		// check that the order has been updated with the new status
+		$note = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'limit'    => 10,
+				'orderby'  => 'date_created_gmt',
+			)
+		);
+		$this->assertEquals('Payment capture failed at Dintero. Transaction ID: P12345678.abcdefghijklmnop. Error message: invalid_items', end($note)->content);
+
+	}
+
+	/**
+	 * @group capture
+	 */
+	public function test_capture_initiated() {
+		$checkout = new WC_Gateway_Dintero_HP();
+		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order = WC_Helper_Order::create_order(1, $product);
+		$order->set_transaction_id('P12345678.abcdefghijklmnop');
+		$order->save();
+
+		$transaction = array(
+			'amount' => 5000,
+			'merchant_reference' => '',
+			'merchant_reference_2' => $order->get_id(),
+			'status' => 'INITIATED',
+		);
+
+		$adapter_stub
+			->expects($this->exactly(1))
+			->method('get_transaction')
+			->willReturn($transaction);
+
+		$checkout::$_adapter = $adapter_stub;
+		$checkout->check_status($order->get_id(), '', 'completed');
+
+		// check that the order has been updated with the new status
+		$note = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'limit'    => 10,
+				'orderby'  => 'date_created_gmt',
+			)
+		);
+		$this->assertEquals('Could not capture transaction: Transaction status is wrong (INITIATED).', end($note)->content);
+	}
+
+	/**
+	 * @group cancel
+	 */
+	public function test_cancel() {
+		$checkout = new WC_Gateway_Dintero_HP();
+		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order = WC_Helper_Order::create_order(1, $product);
+		$order->set_transaction_id('P12345678.abcdefghijklmnop');
+		$order->save();
+
+		$transaction = array(
+			'amount' => 5000,
+			'merchant_reference' => '',
+			'merchant_reference_2' => $order->get_id(),
+			'status' => 'AUTHORIZED',
+		);
+
+		$cancelled_transaction = array(
+			'amount' => 5000,
+			'merchant_reference' => '',
+			'merchant_reference_2' => $order->get_id(),
+			'status' => 'AUTHORIZATION_VOIDED',
+		);
+
+		$adapter_stub
+			->expects($this->exactly(1))
+			->method('get_transaction')
+			->willReturn($transaction);
+
+		$adapter_stub
+			->expects($this->exactly(1))
+			->method('void_transaction')
+			->willReturn($cancelled_transaction);
+
+		$checkout::$_adapter = $adapter_stub;
+		$checkout->check_status($order->get_id(), '', 'cancelled');
+
+		// check that the order has been updated with the new status
+		$note = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'limit'    => 10,
+				'orderby'  => 'date_created_gmt',
+			)
+		);
+		$this->assertEquals('Transaction cancelled via Dintero. Transaction ID: P12345678.abcdefghijklmnop', end($note)->content);
 	}
 
 
