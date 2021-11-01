@@ -864,121 +864,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 	}
 
 	/**
-	 * Creating order receipt.
-	 */
-	private function create_receipt( $order ) {
-		if ( ! empty( $order ) && $order instanceof WC_Order ) {
-			$order_id     = $order->get_id();
-			$access_token = self::_adapter()->get_access_token();
-			$api_endpoint = $this->api_endpoint . '/accounts';
-
-			$order_total_amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
-			$order_tax_amount   = absint( strval( floatval( $order->get_total_tax() ) * 100 ) );
-			$order_net_amount   = $order_total_amount - $order_tax_amount;
-			$purchase_date      = strval( $order->get_date_paid() );
-			$currency           = $order->get_currency();
-			$transaction_id     = $order->get_transaction_id();
-
-			$store_name  = get_bloginfo( 'name' );
-			$store_email = get_bloginfo( 'admin_email' );
-
-			$items = array();
-
-			$counter = 0;
-			foreach ( $order->get_items() as $order_item ) {
-				$counter ++;
-				$line_id                = $counter;
-				$item_total_amount      = absint( strval( floatval( $order_item->get_total() ) * 100 ) );
-				$item_line_total_amount = absint( strval( floatval( $order->get_line_total( $order_item,
-						true ) ) * 100 ) );
-
-				$item = array(
-					'id'           => 'item_' . $counter,
-					'description'  => $order_item->get_name(),
-					'quantity'     => $order_item->get_quantity(),
-					'gross_amount' => $item_line_total_amount,
-					'net_amount'   => $item_total_amount,
-					'line_id'      => $line_id
-				);
-				array_push( $items, $item );
-			}
-
-			if ( count( $order->get_shipping_methods() ) > 0 ) {
-				$counter ++;
-				$line_id                = $counter;
-				$item_total_amount      = absint( strval( floatval( $order->get_shipping_total() ) * 100 ) );
-				$item_tax_amount        = absint( strval( floatval( $order->get_shipping_tax() ) * 100 ) );
-				$item_line_total_amount = $item_total_amount + $item_tax_amount;
-				$item = array(
-					'id'           => 'shipping',
-					'description'  => 'Shipping: ' . $order->get_shipping_method(),
-					'quantity'     => 1,
-					'gross_amount' => $item_line_total_amount,
-					'net_amount'   => $item_total_amount,
-					'line_id'      => $line_id
-				);
-				array_push( $items, $item );
-			}
-
-			$headers = array(
-				'Content-type'  => 'application/json; charset=utf-8',
-				'Accept'        => 'application/json',
-				'Authorization' => 'Bearer ' . $access_token,
-				'Dintero-System-Name' => 'woocommerce',
-				'Dintero-System-Version' =>  WC()->version,
-				'Dintero-System-Plugin-Name' => 'Dintero.Checkout.WooCommerce',
-				'Dintero-System-Plugin-Version' => DINTERO_HP_VERSION
-			);
-
-			$payload = array(
-				array(
-					'store'          => array(
-						'id'    => $store_name,
-						'name'  => $store_name,
-						'email' => $store_email,
-					),
-					'receipt_id'     => strval( $order_id ),
-					'purchase_at'    => $purchase_date,
-					'items'          => $items,
-					'gross_amount'   => $order_total_amount,
-					'net_amount'     => $order_net_amount,
-					'currency'       => $currency,
-					'order_number'   => strval( $order_id ),
-					'transaction_id' => $transaction_id
-				)
-			);
-
-			$response = wp_remote_post( $api_endpoint . '/' . $this->oid . '/receipts', array(
-				'method'    => 'POST',
-				'headers'   => $headers,
-				'body'      => wp_json_encode( $payload ),
-				'timeout'   => 90,
-				'sslverify' => false
-			) );
-
-			// Retrieve the body's response if no errors found
-			$response_body  = wp_remote_retrieve_body( $response );
-			$response_array = json_decode( $response_body, true );
-
-			if ( array_key_exists( 'receipts', $response_array ) &&
-				 count( $response_array['receipts'] ) &&
-				 array_key_exists( 'id', $response_array['receipts'][0] ) ) {
-
-				$receipt_id = $response_array['receipts'][0]['id'];
-				$order->update_meta_data( 'receipt_id', $receipt_id );
-				$order->save();
-
-				$note = 'Payment receipt created via Dintero. Receipt ID: ' . $receipt_id;
-				$order->add_order_note( $note );
-
-				return true;
-			}
-
-			return false;
-		}
-	}
-
-	/**
 	 * Complete order, add transaction ID and note.
 	 *
 	 * @param WC_Order $order Order object.
@@ -989,7 +874,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 		$order->add_order_note( $note );
 		$order->payment_complete( $transaction_id );
 		wc_reduce_stock_levels( $order->get_id() );
-		$this->create_receipt( $order );
 	}
 
 	/**
