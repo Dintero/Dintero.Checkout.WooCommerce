@@ -94,7 +94,7 @@ class Dintero_HP_Helper
 		if (is_null($applied_coupons)) {
 			return array();
 		}
-		$discount_codes = [];
+		$discount_codes = array();
 		foreach ($applied_coupons as $coupon) {
 			$discount_codes[] = $coupon;
 		}
