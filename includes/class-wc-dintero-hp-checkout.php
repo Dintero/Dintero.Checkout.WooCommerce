@@ -1654,19 +1654,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 
 		return wc_round_discount(array_sum($this->item_discounts[$key]), 2);
 
-		/*
-		if ( $cart_item['line_subtotal'] > $cart_item['line_total'] ) {
-			if ( $this->separate_sales_tax ) {
-				$item_discount_amount = $cart_item['line_subtotal'] - $cart_item['line_total'];
-			} else {
-				$item_discount_amount = $cart_item['line_subtotal'] + $cart_item['line_subtotal_tax'] - $cart_item['line_total'] - $cart_item['line_tax'];
-			}
-			$item_discount_amount = $item_discount_amount * 100;
-		} else {
-			$item_discount_amount = 0;
-		}
-		*/
-
 		$order_line_max_amount = ( number_format( wc_get_price_including_tax( $cart_item['data'] ), wc_get_price_decimals(), '.', '' ) * $cart_item['quantity'] ) * 100;
 		$order_line_amount     = number_format( ( $cart_item['line_total'] ) * ( 1 + ( $this->get_item_tax_rate( $cart_item, $product ) / 10000 ) ), wc_get_price_decimals(), '.', '' ) * 100;
 		if ( $this->separate_sales_tax ) {
@@ -1712,14 +1699,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	 * @return integer $item_total_amount Cart item total amount.
 	 */
 	public function get_item_total_amount( $cart_item, $product ) {
-		/*
-		if ( $this->separate_sales_tax ) {
-			$item_total_amount = ( $cart_item['line_total'] * 100 );
-		} else {
-			$item_total_amount = ( ( $cart_item['line_total'] + $cart_item['line_tax'] ) * 100 );
-		}
-		*/
-
 		if ( $this->separate_sales_tax ) {
 			$item_total_amount     = number_format( ( $cart_item['line_total'] ) * ( 1 + ( $this->get_item_tax_rate( $cart_item, $product ) / 10000 ) ), wc_get_price_decimals(), '.', '' ) * 100;
 			$max_order_line_amount = ( number_format( wc_get_price_including_tax( $cart_item['data'] ), wc_get_price_decimals(), '.', '' ) * $cart_item['quantity'] ) * 100;
