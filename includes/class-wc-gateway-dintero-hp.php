@@ -491,15 +491,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 	 * @return integer $shipping_tax_rate Tax rate for selected shipping method.
 	 */
 	public function get_shipping_tax_rate() {
-		/*
-		if ( WC()->cart->shipping_tax_total > 0 && ! $this->separate_sales_tax ) {
-			$shipping_tax_rate = round( ( WC()->cart->shipping_tax_total / WC()->cart->shipping_total ) * 100, 2 ) * 100;
-		} else {
-			$shipping_tax_rate = 0;
-		}
-		*/
-
-		// error_log( 'tax rate ' . var_export( WC_Tax::get_shipping_tax_rates(), true ) );
 		if ( WC()->cart->shipping_tax_total > 0 && ! $this->separate_sales_tax ) {
 			$shipping_rates = WC_Tax::get_shipping_tax_rates();
 			$vat            = array_shift( $shipping_rates );
@@ -524,13 +515,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 	 * @return integer $shipping_tax_amount Tax amount for selected shipping method.
 	 */
 	public function get_shipping_tax_amount() {
-		/*
-		if ( $this->separate_sales_tax ) {
-			$shipping_tax_amount = 0;
-		} else {
-			$shipping_tax_amount = WC()->cart->shipping_tax_total * 100;
-		}
-		*/
 		if ( $this->separate_sales_tax ) {
 			$shipping_tax_amount = 0;
 		} else {
