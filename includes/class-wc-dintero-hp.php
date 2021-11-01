@@ -72,12 +72,6 @@ final class WC_Dintero_HP {
 		add_action( 'dhp_after_checkout_form', array( $this, 'init_checkout' ), 50);
 		add_action( 'woocommerce_pay_order_after_submit', array( $this, 'init_pay' ), 50);
 
-		add_action( 'woocommerce_cancelled_order', array( $this, 'cancel_order' ) );
-
-		if ($embed_enable != 'yes') {
-			add_action( 'woocommerce_order_status_changed', array( $this, 'check_status' ), 10, 3 );
-		}
-
 		add_action( 'woocommerce_applied_coupon', array( $this, 'applied_coupon' ), 10, 3 );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'removed_coupon' ), 10, 3 );
 
@@ -206,6 +200,10 @@ final class WC_Dintero_HP {
 		if ( 'dintero_status' === $column ) {
 
 			$order = wc_get_order( $post->ID );
+			if ($order->get_payment_method() !== 'dintero-hp') {
+				echo '<mark class="order-status"><span>' . __('Not Dintero') . '</span></mark>';
+				return;
+			}
 			$notes = wc_get_order_notes([
 					'order_id' => $order->get_id(),
 					'type' => 'internal',
@@ -220,6 +218,7 @@ final class WC_Dintero_HP {
 			$last_refund_succeeded = -1;
 			$last_refund_failed = -1;
 			$last_on_hold = -1;
+			$last_cancel = -1;
 
 
 			foreach($notes as $note) {
@@ -237,9 +236,13 @@ final class WC_Dintero_HP {
 					$last_refund_failed = $note->id;
 				} else if (strpos( $note->content, 'The payment is put on on-hold') !== false) {
 					$last_on_hold = $note->id;
+				} else if (strpos( $note->content, 'Transaction cancelled via Dintero') !== false) {
+					$last_cancel = $note->id;
 				}
 			}
-			if ($last_refund_succeeded > -1) {
+			if ($last_cancel > -1) {
+				echo $backoffice_link_start . '<mark class="order-status status-cancelled"><span>' . __('Cancelled') . '</span></mark></a>';
+			} else if ($last_refund_succeeded > -1) {
 				echo $backoffice_link_start . '<mark class="order-status status-refunded"><span>' . __('Refunded') . '</span></mark></a>';
 			} else if ($last_refund_failed > -1) {
 				echo $backoffice_link_start . '<mark class="order-status status-failed"><span>' . __('Refund failed') . '</span></mark></a>';
@@ -756,20 +759,6 @@ final class WC_Dintero_HP {
 					</style>';
 
 		wp_kses_post( $custom_css );
-	}
-
-	/**
-	 * Cancel the order by order id
-	 */
-	public function cancel_order( $order_id) {
-		WCDHP()->checkout()->cancel($order_id);
-	}
-
-	/**
-	 * Check order status by order id
-	 */
-	public function check_status( $order_id, $previous_status, $current_status) {
-		WCDHP()->checkout()->check_status( $order_id, $previous_status, $current_status );
 	}
 
 	/**
