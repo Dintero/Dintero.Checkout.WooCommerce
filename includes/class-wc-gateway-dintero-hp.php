@@ -1191,6 +1191,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			$transaction_id = $order->get_transaction_id();
 			if (empty($transaction_id)) {
 				$order->add_order_note('Payment capture failed at Dintero because the order lacks transaction_id. Contact integration@dintero.com with order information.');
+				$order->set_status( 'on-hold' );
+				$order->save();
 				return false;
 			}
 			$transaction = self::_adapter()->get_transaction($transaction_id);
@@ -1201,6 +1203,16 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 			if ( $merchant_reference === $order_id  || $merchant_reference_2 === $order_id ) {
 				$this->capture( $order, $transaction );
+			} else {
+				$order->add_order_note(__(
+					sprintf(
+						'Could not capture transaction: Merchant reference is wrong (%s, %s). Contact integration@dintero.com with order information.',
+						$merchant_reference, $merchant_reference_2,
+					)
+				));
+				$order->set_status( 'on-hold' );
+				$order->save();
+				$order->save_meta_data();
 			}
 		}
 	}
