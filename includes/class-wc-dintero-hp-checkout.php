@@ -26,7 +26,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	static $_adapter;
 
 	private $id = 'dintero-hp';
-	private $enabled;
 	private $test_mode;
 	private $payment_method = 'dintero-hp';
 	private $account_id;
@@ -34,12 +33,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	private $client_secret;
 	private $profile_id;
 
-	private $api_endpoint = 'https://api.dintero.com/v1';
 	private $checkout_endpoint = 'https://checkout.dintero.com/v1';
-	private $oid;
-
-	private $checkout_logo_width;
-
 	public $separate_sales_tax = false;
 
 	// Added By Ritesh
@@ -128,8 +122,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 		//check if parameters are ready
 		if ($this->account_id && $this->client_id && $this->client_secret) {
 			$embed_enable = WCDHP()->setting()->get('embed_enable');
-			$express_enable = WCDHP()->setting()->get('express_enable');
-
 
 			if ( 'yes' == $embed_enable ) {
 				$this->start_embed( false, true );
@@ -169,8 +161,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 		//check if parameters are ready
 		if ($this->account_id && $this->client_id && $this->client_secret) {
 			$embed_enable = WCDHP()->setting()->get('embed_enable');
-			$express_enable = WCDHP()->setting()->get('express_enable');
-
 
 			if ( 'yes' == $embed_enable) {
 				$this->start_embed( false, true );
@@ -240,17 +230,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 
 			$posted_data['payment_method'] = $this->payment_method;
 
-
-
-			$user_id = get_current_user_id();
-
-			// $posted_data['billing_country'] = WC()->customer->get_billing_country();
-			// $posted_data['shipping_country'] = WC()->customer->get_shipping_country();
-			// $chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
-			// $posted_data['shipping_method'] = $chosen_shipping_methods;
-
-			// // Update session for customer and totals.
-			// $this->update_session( $posted_data );
 			$embed_enable = WCDHP()->setting()->get('embed_enable');
 			if ( !$express && $embed_enable != 'yes') {
 				// Validate posted data and cart items before proceeding.
@@ -354,7 +333,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			$template = 'dintero_left_frame'; //or dintero_top_frame
 
 			if ( 'checkout' == $type ) {
-				$logos = 'visa_mastercard_vipps_swish_instabank';
 				$variant = 'colors'; //or mono
 				$color = 'ffffff';
 				//$icon_url = 'https://checkout.dintero.com/v1/branding/logos/' . $logos . '/variant/' . $variant . '/color/' . $color . '/width/' . $w_str . '/' . $template . '.svg';
@@ -430,15 +408,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	 * @return string url
 	 */
 	public function get_icon_tab( $width = '' ) {
-		//$logos = 'visa_mastercard_vipps_swish_instabank';
-		//$variant = 'colors'; //or mono
-		//$color = 'ffffff';
-		//$template = 'dintero_top_frame';
-
-		//$icon_url = 'https://checkout.dintero.com/v1/branding/logos/' . $logos . '/variant/' . $variant . '/color/' . $color . '/width/' . $w_str . '/' . $template . '.svg';
-
-		//$icon_url = 'https://checkout.dintero.com/v1/branding/profiles/' . $this->profile_id . '/variant/' . $variant . '/color/' . $color . '/width/' . $w_str . '/' . $template . '.svg';
-
 		$icon_url = trim(WCDHP()->setting()->get('branding_checkout_url'));
 		if ('' == $icon_url) {
 			$icon_url = $this->get_icon( 'checkout', $width, false );
@@ -557,16 +526,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 
 			$posted_data['payment_method'] = $this->payment_method;
 
-			// Update session for customer and totals.
-			//$this->update_session( $posted_data );
-			/*
-			if (!$express) {
-				// Validate posted data and cart items before proceeding.
-				$this->validate_pay_hp( $posted_data, $errors );
-			} else {
-
-			}
-			*/
 			if ( ! empty( $_REQUEST['terms-field'] ) && empty( $_REQUEST['terms'] ) ) {
 				$errors->add( 'terms', __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ) );
 			}
@@ -609,46 +568,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 
 							$order->set_payment_method( $payment_method );
 							$order->save();
-							/*
-							if ( !$express ) {
-								$a = $posted_data;
-
-								$first_name = isset($a['first_name']) ? $a['first_name'] : '';
-								$last_name = isset($a['last_name']) ? $a['last_name'] : '';
-								$company = isset($a['company']) ? $a['company'] : '';
-								$addr1 = isset($a['address_line']) ? $a['address_line'] : '';
-								$addr2 = isset($a['address_line_2']) ? $a['address_line_2'] : '';
-								$city = isset($a['city']) ? $a['city'] : '';
-								$state = isset($a['postal_place']) ? $a['postal_place'] : '';
-								$postal = isset($a['postal_code']) ? $a['postal_code'] : '';
-								$country = isset($a['country']) ? $a['country'] : '';
-								$email = isset($a['email']) ? $a['email'] : '';
-								$phone_number = isset($a['phone_number']) ? $a['phone_number'] : '';
-
-								update_post_meta( $order_id, '_shipping_first_name', $first_name );
-								update_post_meta( $order_id, '_shipping_last_name', $last_name );
-								update_post_meta( $order_id, '_shipping_company', $company );
-								update_post_meta( $order_id, '_shipping_address_1', $addr1 );
-								update_post_meta( $order_id, '_shipping_address_2', $addr2 );
-								update_post_meta( $order_id, '_shipping_city', $city );
-								update_post_meta( $order_id, '_shipping_state', $state );
-								update_post_meta( $order_id, '_shipping_postcode', $postal );
-								update_post_meta( $order_id, '_shipping_country', $country );
-								//update_post_meta( $order_id, '_shipping_email', $email );
-								//update_post_meta( $order_id, '_shipping_phone', $phone_number );
-
-								update_post_meta( $order_id, '_billing_first_name', $first_name );
-								update_post_meta( $order_id, '_billing_last_name', $last_name );
-								update_post_meta( $order_id, '_billing_company', $company );
-								update_post_meta( $order_id, '_billing_address_1', $addr1 );
-								update_post_meta( $order_id, '_billing_address_2', $addr2 );
-								update_post_meta( $order_id, '_billing_city', $city );
-								update_post_meta( $order_id, '_billing_state', $state );
-								update_post_meta( $order_id, '_billing_postcode', $postal );
-								update_post_meta( $order_id, '_billing_country', $country );
-								update_post_meta( $order_id, '_billing_email', $email );
-								update_post_meta( $order_id, '_billing_phone', $phone_number );
-							}*/
 
 							$this->process_payment( $order_id, $express, true );
 						} catch ( Exception $e ) {
@@ -685,7 +604,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 		try {
 			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
 			$cart_hash          = WC()->cart->get_cart_hash();
-			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 			$order              = $order_id ? wc_get_order( $order_id ) : null;
 
 			/**
@@ -736,7 +654,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->set_customer_user_agent( wc_get_user_agent() );
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
-			//$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ] : $data['payment_method'] );
 			$order->set_payment_method( $this->payment_method );
 			$order->set_shipping_total( WC()->cart->get_shipping_total() );
 			$order->set_discount_total( WC()->cart->get_discount_total() );
@@ -1466,16 +1383,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				}
 			}
 		}
-		// if(!$shipping_packages){
-
-		// 	$method_rate_id = WC()->session->get( 'chosen_shipping_methods' )[0];
-
-		// 	$method_key_id = str_replace( ':', '_', $method_rate_id ); // Formating
-	 //        $option_name = 'woocommerce_'.$method_key_id.'_settings'; // Get the complete option slug
-
-	 //        $shipping_name = get_option( $option_name, true )['title'];
-
-		// }
 		if ( ! isset( $shipping_name ) ) {
 			$shipping_name = __( 'Shipping', 'dintero-checkout-for-woocommerce' );
 		}
