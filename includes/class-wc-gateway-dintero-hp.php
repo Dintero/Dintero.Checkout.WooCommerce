@@ -1058,7 +1058,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			 'dintero-hp' === $order->get_payment_method() ) {
 			$transaction_id = $order->get_transaction_id();
 			if (empty($transaction_id)) {
-				$order->add_order_note('Payment capture failed at Dintero because the order lacks transaction_id. Contact integration@dintero.com with order information.');
+				$order->add_order_note('Payment capture failed at Dintero because the order lacks transaction_id. Contact integration@dintero.com with order information. Changing status to on-hold.');
 				$order->set_status( 'on-hold' );
 				$order->save();
 				return false;
@@ -1074,7 +1074,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			} else {
 				$order->add_order_note(__(
 					sprintf(
-						'Could not capture transaction: Merchant reference is wrong (%s, %s). Contact integration@dintero.com with order information.',
+						'Could not capture transaction: Merchant reference is wrong (%s, %s). Contact integration@dintero.com with order information. Changing status to on-hold.',
 						$merchant_reference, $merchant_reference_2,
 					)
 				));
@@ -1101,7 +1101,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			}
 
 			if (isset($transaction['error'])) {
-				$order->add_order_note(__('Could not capture transaction: ' . $transaction['message']));
+				$order->add_order_note(__('Could not capture transaction: ' . $transaction['message'] . '. Changing status to on-hold.'));
 				$order->set_status( 'on-hold' );
 				$order->save();
 				$order->save_meta_data();
@@ -1117,7 +1117,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			if ($this->extract('status', $transaction) !== 'AUTHORIZED') {
 				$order->add_order_note(__(
 					sprintf(
-						'Could not capture transaction: Transaction status is wrong (%s).',
+						'Could not capture transaction: Transaction status is wrong (%s). Changing status to on-hold.',
 						$this->extract('status', $transaction),
 					)
 				));
@@ -1152,7 +1152,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				if (array_key_exists('error', $response_array) && isset($response_array['error']['message'])) {
 					$error_message = $response_array['error']['message'];
 				}
-				$note = sprintf('Payment capture failed at Dintero. Transaction ID: %s. Error message: %s', $transaction_id, $error_message);
+				$note = sprintf('Payment capture failed at Dintero. Transaction ID: %s. Error message: %s. Changing status to on-hold.', $transaction_id, $error_message);
 				$order->add_order_note( $note );
 				$order->set_status('on-hold');
 				$order->save();
