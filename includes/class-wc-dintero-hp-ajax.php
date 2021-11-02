@@ -552,7 +552,7 @@ class WC_AJAX_HP {
 						$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
 						self::payment_complete( $order, $transaction_id, $note );
 					} elseif('ON_HOLD' === $transaction['status'] ) {
-						$hold_reason = __( 'The payment is put on on-hold for manual review. The status of the payment will be updated when the manual review is finished. Transaction ID: ' ) . $transaction_id;
+						$hold_reason = __( 'The payment is put on on-hold for manual review by payment provider. The review will be usually be finished within 5 minutes, and the status will be updated. Transaction ID: ' ) . $transaction_id;
 						self::on_hold_order( $order, $transaction_id, $hold_reason );
 					} elseif('FAILED' === $transaction['status'] ) {
 						$fail_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;
@@ -588,7 +588,7 @@ class WC_AJAX_HP {
 				$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
 				self::payment_complete( $order, $transaction_id, $note );
 			}  elseif ( 'ON_HOLD' === $transaction['status'] ) {
-				$hold_reason = __( 'The payment is put on on-hold for manual review. The status of the payment will be updated when the manual review is finished. Transaction ID: ' ) . $transaction_id;
+				$hold_reason = __( 'The payment is put on on-hold for manual review by payment provider. The review will be usually be finished within 5 minutes, and the status will be updated. Transaction ID: ' ) . $transaction_id;
 				self::on_hold_order( $order, $transaction_id, $hold_reason );
 			} elseif('FAILED' === $transaction['status'] ){
 				$fail_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;

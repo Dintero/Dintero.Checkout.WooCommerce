@@ -814,7 +814,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 					$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $dintero_order_transaction_id;
 					self::payment_complete( $order, $dintero_order_transaction_id, $note );
 				}elseif('ON_HOLD' === $transaction['status'] ){
-					$hold_reason = __( 'The payment is put on on-hold for manual review. The status of the payment will be updated when the manual review is finished. Transaction ID: ' ) . $dintero_order_transaction_id;
+					$hold_reason = __( 'The payment is put on on-hold for manual review by payment provider. The review will be usually be finished within 5 minutes, and the status will be updated. Transaction ID: ' ) . $dintero_order_transaction_id;
 					self::on_hold_order( $order, $dintero_order_transaction_id, $hold_reason );
 				}elseif('FAILED' === $transaction['status'] ){
 					$hold_reason = __( 'The payment is not approved. Transaction ID: ' ) . $dintero_order_transaction_id;
@@ -1344,6 +1344,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 		if ( ! empty( $_GET['transaction_id'] ) ) {
 			$transaction_id = sanitize_text_field( wp_unslash( $_GET['transaction_id'] ));
 
+			// TODO: Calls with invalid id might come from here
 			$transaction = self::_adapter()->get_transaction($transaction_id);
 			if ( ! array_key_exists( 'merchant_reference', $transaction ) ) {
 				return false;
@@ -1367,7 +1368,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 						$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
 						$this->payment_complete( $order, $transaction_id, $note );
 					}elseif('ON_HOLD' === $transaction['status'] ){
-						$hold_reason = __( 'The payment is put on on-hold for manual review. The status of the payment will be updated when the manual review is finished.. Transaction ID: ' ) . $transaction_id;
+						$hold_reason = __( 'The payment is put on on-hold for manual review by payment provider. The review will be usually be finished within 5 minutes, and the status will be updated. Transaction ID: ' ) . $transaction_id;
 						$this->on_hold_order( $order, $transaction_id, $hold_reason );
 					}elseif('FAILED' === $transaction['status'] ){
 						$hold_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;
