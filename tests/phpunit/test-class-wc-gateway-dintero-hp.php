@@ -382,7 +382,7 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 				'orderby'  => 'date_created_gmt',
 			)
 		);
-		$this->assertEquals('Payment capture failed at Dintero. Transaction ID: P12345678.abcdefghijklmnop. Error message: invalid_items', end($note)->content);
+		$this->assertEquals('Payment capture failed at Dintero. Transaction ID: P12345678.abcdefghijklmnop. Error message: invalid_items. Changing status to on-hold.', end($note)->content);
 
 	}
 
@@ -421,7 +421,7 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 				'orderby'  => 'date_created_gmt',
 			)
 		);
-		$this->assertEquals('Could not capture transaction: Transaction status is wrong (INITIATED).', end($note)->content);
+		$this->assertEquals('Could not capture transaction: Transaction status is wrong (INITIATED). Changing status to on-hold.', end($note)->content);
 	}
 
 	/**
