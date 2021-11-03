@@ -92,10 +92,10 @@ class Dintero_HP_Helper_Test extends WP_UnitTestCase {
 	/**
 	 * @group helper
 	 */
-	public function test_store_url_http() {
+	public function test_store_url_http_www_trailing_slash() {
 		$helper = Dintero_HP_Helper::instance();
 		
-		$store_id = $helper->url_to_store_id('http://example.com');
+		$store_id = $helper->url_to_store_id('http://www.example.com/');
 		$this->assertEquals('example.com', $store_id);
 	}
 

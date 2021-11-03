@@ -102,7 +102,9 @@ class Dintero_HP_Helper
 	}
 
 	public function url_to_store_id($url) {
-		return str_replace( array( 'http://', 'https://'), array( '', '' ), $url);
+		$trimmed_url = str_replace( array( 'http://', 'https://', 'www.'), array( '', '', '' ), $url);
+		$trimmed_url = rtrim($trimmed_url, '/');
+		return $trimmed_url;
 	}
 
 	private function is_associative_array(array $arr) {
