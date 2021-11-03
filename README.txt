@@ -43,6 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+pending
+
+* Add store url as store_id on Dintero session and transaction
+
 2021.11.03
 
 * If capture fails, status will be set to on-hold instead of completed

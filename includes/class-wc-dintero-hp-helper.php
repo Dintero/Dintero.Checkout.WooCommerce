@@ -101,6 +101,12 @@ class Dintero_HP_Helper
 		return $discount_codes;
 	}
 
+	public function url_to_store_id($url) {
+		$trimmed_url = str_replace( array( 'http://', 'https://', 'www.'), array( '', '', '' ), $url);
+		$trimmed_url = rtrim($trimmed_url, '/');
+		return $trimmed_url;
+	}
+
 	private function is_associative_array(array $arr) {
 		if (array() === $arr) {
 			return false;

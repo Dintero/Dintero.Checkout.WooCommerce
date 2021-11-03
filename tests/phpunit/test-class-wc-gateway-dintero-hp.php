@@ -78,7 +78,10 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 						'amount' => 10000,
 						'line_id' => 'fee_1',
 					)
-				)
+				),
+				'store' => array(
+					'id' => 'example.org'
+				),
 			),
 			'profile_id' => '',
 			'metadata' => array(
