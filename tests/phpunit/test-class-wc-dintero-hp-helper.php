@@ -78,6 +78,26 @@ class Dintero_HP_Helper_Test extends WP_UnitTestCase {
 		));
 		$this->assertEquals(array('a', 'b'), $discount_codes);
 	}
+	
+	/**
+	 * @group helper
+	 */
+	public function test_store_url_https() {
+		$helper = Dintero_HP_Helper::instance();
+		
+		$store_id = $helper->url_to_store_id('https://example.com');
+		$this->assertEquals('example.com', $store_id);
+	}
+	
+	/**
+	 * @group helper
+	 */
+	public function test_store_url_http() {
+		$helper = Dintero_HP_Helper::instance();
+		
+		$store_id = $helper->url_to_store_id('http://example.com');
+		$this->assertEquals('example.com', $store_id);
+	}
 
 
 }

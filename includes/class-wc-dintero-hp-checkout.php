@@ -1794,6 +1794,10 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				'merchant_reference' => '',
 				'items'              => $this->order_lines,
 				'discount_codes'	 => Dintero_HP_Helper::instance()->convert_to_dintero_discounts(WC()->cart->get_applied_coupons()),
+				'store'				=> array(
+					'id' => Dintero_HP_Helper::instance()->url_to_store_id(get_home_url()),
+					'name' => Dintero_HP_Helper::instance()->url_to_store_id(get_home_url()),
+				)
 			)
 		);
 
@@ -1977,7 +1981,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 					'country'      => $country,
 					'email'        => (string) WC()->checkout()->get_value( 'billing_email' )
 				),
-				'items'              => $this->order_lines
+				'items'              => $this->order_lines,
+				'store'				=> array(
+					'id' => Dintero_HP_Helper::instance()->url_to_store_id(get_home_url()),
+					'name' => Dintero_HP_Helper::instance()->url_to_store_id(get_home_url()),
+				)
 			),
 			'profile_id' => $this->profile_id,
 			'metadata' => array(
@@ -2173,7 +2181,11 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 						'postal_place' => (string) WC()->checkout()->get_value( 'billing_city' ),
 						'country'      => (string) WC()->checkout()->get_value( 'billing_country' )
 					),
-					'items'              => $this->order_lines
+					'items'              => $this->order_lines,
+					'store'				=> array(
+						'id' => Dintero_HP_Helper::instance()->url_to_store_id(get_home_url()),
+						'name' => Dintero_HP_Helper::instance()->url_to_store_id(get_home_url()),
+					)
 				),
 				'profile_id' => $this->profile_id,
 				'metadata' => array(
