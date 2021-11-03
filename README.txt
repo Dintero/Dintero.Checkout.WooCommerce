@@ -43,6 +43,13 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2021.11.03
+
+* If capture fails, status will be set to on-hold instead of completed
+* Attempt capture even if amount does not match.
+* Fix issue where we could not capture redirect-order if embed was active, and vice-versa.
+* Indicate expected time in on-hold if order is put in manual review
+
 2021.11.01
 
 * Fixes bug when discount_codes are associative arrays
