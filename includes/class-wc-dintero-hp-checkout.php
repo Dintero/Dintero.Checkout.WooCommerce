@@ -1796,7 +1796,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				'discount_codes'	 => Dintero_HP_Helper::instance()->convert_to_dintero_discounts(WC()->cart->get_applied_coupons()),
 				'store'				=> array(
 					'id' => Dintero_HP_Helper::instance()->url_to_store_id(get_home_url()),
-					'name' => Dintero_HP_Helper::instance()->url_to_store_id(get_home_url()),
 				)
 			)
 		);
@@ -1984,7 +1983,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				'items'              => $this->order_lines,
 				'store'				=> array(
 					'id' => Dintero_HP_Helper::instance()->url_to_store_id(get_home_url()),
-					'name' => Dintero_HP_Helper::instance()->url_to_store_id(get_home_url()),
 				)
 			),
 			'profile_id' => $this->profile_id,
@@ -2184,7 +2182,6 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 					'items'              => $this->order_lines,
 					'store'				=> array(
 						'id' => Dintero_HP_Helper::instance()->url_to_store_id(get_home_url()),
-						'name' => Dintero_HP_Helper::instance()->url_to_store_id(get_home_url()),
 					)
 				),
 				'profile_id' => $this->profile_id,

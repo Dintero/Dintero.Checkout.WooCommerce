@@ -702,7 +702,6 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				'items'              => $items,
 				'store'				=> array(
 					'id' => Dintero_HP_Helper::instance()->url_to_store_id(get_home_url()),
-					'name' => Dintero_HP_Helper::instance()->url_to_store_id(get_home_url()),
 				)
 			),
 			'profile_id' => $this->profile_id,

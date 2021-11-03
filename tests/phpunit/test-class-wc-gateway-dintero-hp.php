@@ -80,8 +80,7 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 					)
 				),
 				'store' => array(
-					'id' => 'example.org',
-					'name' => 'example.org'
+					'id' => 'example.org'
 				),
 			),
 			'profile_id' => '',
