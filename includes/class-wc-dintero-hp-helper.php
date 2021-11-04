@@ -107,6 +107,10 @@ class Dintero_HP_Helper
 		return $trimmed_url;
 	}
 
+	public function to_dintero_amount($amount, $round_precision = 2) {
+		return intval(round($amount * 100, $round_precision));
+	}
+
 	private function is_associative_array(array $arr) {
 		if (array() === $arr) {
 			return false;

@@ -98,6 +98,19 @@ class Dintero_HP_Helper_Test extends WP_UnitTestCase {
 		$store_id = $helper->url_to_store_id('http://www.example.com/');
 		$this->assertEquals('example.com', $store_id);
 	}
+	
+	/**
+	 * @group helper
+	 */
+	public function test_dintero_amount() {
+		$helper = Dintero_HP_Helper::instance();
+		
+		$dintero_amount = $helper->to_dintero_amount(572.8);
+		$this->assertEquals(57280, $dintero_amount);
+		
+		$dintero_amount = $helper->to_dintero_amount(5730);
+		$this->assertEquals(573000, $dintero_amount);
+	}
 
 
 }

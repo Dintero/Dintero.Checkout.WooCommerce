@@ -49,7 +49,6 @@ class WC_Helper_Product {
 			];
 
 		$product->set_props( array_merge( $default_props, $props ) );
-
 		if ( $save ) {
 			$product->save();
 			return wc_get_product( $product->get_id() );

@@ -43,9 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
-pending
+2021.11.04
 
 * Add store url as store_id on Dintero session and transaction
+* Fix cent difference in session initialization
 
 2021.11.03
 

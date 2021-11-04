@@ -215,6 +215,7 @@ final class WC_Dintero_HP {
 			$last_authorize_succeeded = -1;
 			$last_capture_failed = -1;
 			$last_capture_succeeded = -1;
+			$last_partially_capture_succeeded = -1;
 			$last_refund_succeeded = -1;
 			$last_refund_failed = -1;
 			$last_on_hold = -1;
@@ -225,7 +226,11 @@ final class WC_Dintero_HP {
 				if (strpos( $note->content, 'Payment capture failed') !== false) {
 					$last_capture_failed = $note->id;
 				} else if (strpos( $note->content, 'Payment captured via Dintero') !== false) {
-					$last_capture_succeeded = $note->id;
+					if (strpos( $note->content, 'Dintero status: PARTIALLY_CAPTURED') !== false) {
+						$last_partially_capture_succeeded = $note->id;
+					} else {
+						$last_capture_succeeded = $note->id;
+					}
 				} else if (strpos( $note->content, 'Payment auto captured via Dintero') !== false) {
 					$last_capture_succeeded = $note->id;
 				} else if (strpos( $note->content, 'Transaction authorized via Dintero') !== false) {
@@ -248,6 +253,8 @@ final class WC_Dintero_HP {
 				echo $backoffice_link_start . '<mark class="order-status status-failed"><span>' . __('Refund failed') . '</span></mark></a>';
 			} else if ($last_capture_succeeded > -1) {
 				echo $backoffice_link_start . '<mark class="order-status status-completed"><span>' . __('Captured') . '</span></mark></a>';
+			} else if ($last_partially_capture_succeeded > -1) {
+				echo $backoffice_link_start . '<mark class="order-status status-completed"><span>' . __('Partially captured') . '</span></mark></a>';
 			} else if ($last_capture_failed > $last_capture_succeeded) {
 				echo $backoffice_link_start . '<mark class="order-status status-failed"><span>' . __('Capture failed') . '</span></mark></a>';
 			} else if ($last_authorize_succeeded && $order->get_status() == 'completed') {
