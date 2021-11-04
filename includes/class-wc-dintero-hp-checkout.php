@@ -118,11 +118,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 	 */
 	public function init_checkout() {
 		WC()->session->set( 'order_awaiting_payment', null );
-
 		//check if parameters are ready
 		if ($this->account_id && $this->client_id && $this->client_secret) {
 			$embed_enable = WCDHP()->setting()->get('embed_enable');
-
 			if ( 'yes' == $embed_enable ) {
 				$this->start_embed( false, true );
 			} else {
@@ -1750,9 +1748,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 					'id'          => $this->get_item_reference( $product ),
 					'description' => $this->get_item_name( $cart_item ),
 					'quantity'    => $this->get_item_quantity( $cart_item ),
-					'vat_amount'  => intval(round($tax, $round_precision) * 100),
+					'vat_amount'  => Dintero_HP_Helper::instance()->to_dintero_amount($tax, $round_precision),
 					'vat'         => $this->get_item_tax_rate( $cart_item, $product ),
-					'amount'      => intval(round($amount, $round_precision) * 100),
+					'amount'      => Dintero_HP_Helper::instance()->to_dintero_amount($amount, $round_precision),
 					'line_id'     => $this->get_item_reference( $product ),
 				);
 
