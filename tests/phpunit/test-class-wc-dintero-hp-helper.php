@@ -42,7 +42,20 @@ class Dintero_HP_Helper_Test extends WP_UnitTestCase {
 		$dintero_meta = $helper->convert_to_dintero_metadata(array(
 			'a' => 'b'
 		));
-		$this->assertEquals(array('a' => 'b'), $dintero_meta);
+		$this->assertEquals(array('a' => '"b"'), $dintero_meta);
+	}
+	/**
+	 * @group helper
+	 */
+	public function test_convert_metadata_nested_object() {
+		$helper = Dintero_HP_Helper::instance();
+		
+		$dintero_meta = $helper->convert_to_dintero_metadata(array(
+			'a' => array(
+				'foo' => 'bar'
+			)
+		));
+		$this->assertEquals(array('a' => '{"foo":"bar"}'), $dintero_meta);
 	}
 
 	/**

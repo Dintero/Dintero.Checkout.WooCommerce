@@ -428,7 +428,8 @@ class WC_AJAX_HP {
 
 					if (isset($transaction['shipping_option']['metadata'])) {
 						foreach ($transaction['shipping_option']['metadata'] as $meta_key => $meta_item) {
-							$order_item->add_meta_data($meta_key, $meta_item);
+							$meta_value = $this->isJson($meta_item) ? json_decode($meta_item) : $meta_item;
+							$order_item->add_meta_data($meta_key, $meta_value);
 						}
 					}
 					$order_item->save();
@@ -596,6 +597,11 @@ class WC_AJAX_HP {
 			}
 		}
 	}
+
+	function isJson($string) {
+		json_decode($string);
+		return json_last_error() === JSON_ERROR_NONE;
+	 }
 
 	/*
 	* The Create order function can create order in woocommcer

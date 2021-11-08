@@ -87,7 +87,11 @@ class Dintero_HP_Helper
 		if (!$this->is_associative_array($meta_data)) {
 			return null;
 		}
-		return $meta_data;
+		$metadata = array();
+		foreach ( $meta_data as $key => $value ) {
+			$metadata[$key] = json_encode($value);
+		}
+		return $metadata;
 	}
 
 	public function convert_to_dintero_discounts($applied_coupons) {
