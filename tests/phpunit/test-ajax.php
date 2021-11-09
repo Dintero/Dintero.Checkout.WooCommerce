@@ -242,6 +242,8 @@ class Ajax_Test extends WP_UnitTestCase {
 				'line_id' => $shipping_product->get_id(),
 				'operator_product_id' => $shipping_product->get_id(),
 				'metadata' => array(
+					'old_number' => 1,
+					'new_number' => '1',
 					'old_string' => 'bar',
 					'encoded_string' => '"bar"',
 					'nested_json' => '{"foo":"bar"}'
@@ -285,7 +287,7 @@ class Ajax_Test extends WP_UnitTestCase {
 		$shipping_methods = $updated_order->get_shipping_methods();
 		$shipping_meta = reset($shipping_methods)->get_meta_data();;
 
-		$this->assertEquals(4, count($shipping_meta));
+		$this->assertEquals(6, count($shipping_meta));
 	}
 
 }
