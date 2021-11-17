@@ -43,6 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2021.11.17-2
+
+* Bugfix in compatibility with Porterbuddy plugin
+
 2021.11.17
 
 * Compatibility with newest Porterbuddy plugin 
