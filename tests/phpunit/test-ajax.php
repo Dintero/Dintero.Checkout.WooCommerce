@@ -324,7 +324,22 @@ class Ajax_Test extends WP_UnitTestCase {
 					'vat_amount' => 20,
 					'description' => 'shipping',
 					'quantity' => 1
-				)
+				),
+				array(
+					'id' => 'pw_gift_cards_foo',
+					'line_id' => 'pw_gift_cards_foo',
+					'description' => 'Gift card foo',
+					'quantity' => 1,
+					'amount' => -10000,
+					'vat' => 0,
+					'vat_amount' => 0,
+					'groups' => array(
+						array(
+							'id' => 'gift_card',
+							'name' => 'Gift card'
+						)
+					)
+				),
 			),
 			'amount' => 1000,
 			'shipping_option' => array(

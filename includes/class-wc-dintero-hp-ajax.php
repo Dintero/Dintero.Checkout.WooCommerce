@@ -452,8 +452,23 @@ class WC_AJAX_HP {
 
 				// skipping if no product found
 				if (!$product = wc_get_product( $item['id'] )) {
-					if (substr($item['id'], 0, 4 ) === 'gift_card_') {
+					if (isset($item['groups']) && self::has_object_with_id($item['groups'], 'gift_card')) {
+						if (strpos( $item['id'] , 'pw_gift_cards_' ) === 0) {
+							if ( class_exists( 'PW_Gift_Card' ) && class_exists( 'WC_Order_Item_PW_Gift_Card' ) ) {
+								$card_number = $str = substr($item['id'], strpos($item['id'], 'pw_gift_cards'));
+								$pw_gift_card = new PW_Gift_Card( $card_number );
+								if ( $pw_gift_card->get_id() ) {
 
+									$item = new WC_Order_Item_PW_Gift_Card();
+
+									$item->set_props( array(
+										'card_number'   => $pw_gift_card->get_number(),
+										'amount'        => apply_filters( 'pwgc_to_default_currency', $amount ),
+									) );
+									$order->add_item( $item );
+								}
+							}
+						}
 					}
 					continue;
 				}
@@ -503,21 +518,6 @@ class WC_AJAX_HP {
 			if(count($coupon_codes) > 0){
 				foreach ($coupon_codes as $coupon_code) {
 					$order->apply_coupon($coupon_code);
-				}
-			}
-
-			foreach ( $session_data['gift_cards'] as $card_number => $amount ) {
-				$pw_gift_card = new PW_Gift_Card( $card_number );
-				if ( $pw_gift_card->get_id() ) {
-	
-					$item = new WC_Order_Item_PW_Gift_Card();
-	
-					$item->set_props( array(
-						'card_number'   => $pw_gift_card->get_number(),
-						'amount'        => apply_filters( 'pwgc_to_default_currency', $amount ),
-					) );
-	
-					$order->add_item( $item );
 				}
 			}
 
@@ -632,7 +632,17 @@ class WC_AJAX_HP {
 	static function isJson($string) {
 		json_decode($string);
 		return json_last_error() === JSON_ERROR_NONE;
-	 }
+ 	}
+
+	static function has_object_with_id($objects, $id) {
+		if (null === $objects) {
+			return false;
+		}
+    	$objects_with_id = array_filter($objects, function($toCheck) use ($id) {
+			return isset($toCheck['id']) && $toCheck['id'] == $id;
+		});
+    	return count($objects_with_id) > 0;
+    }
 
 	/*
 	* The Create order function can create order in woocommcer

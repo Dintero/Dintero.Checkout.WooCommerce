@@ -146,6 +146,12 @@ class Dintero_HP_Helper
 					'amount'            => $coupon_amount,
 					'vat'              => 0,
 					'vat_amount'              => 0,
+					'groups' => array(
+						array(
+							'id' => 'gift_card',
+							'name' => 'Gift card'
+						)
+					)
 				);
 				$dintero_items[] = $gift_card;
 			}
