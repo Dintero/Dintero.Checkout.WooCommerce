@@ -335,8 +335,8 @@ class Ajax_Test extends WP_UnitTestCase {
 					'vat_amount' => 0,
 					'groups' => array(
 						array(
-							'id' => 'gift_card',
-							'name' => 'Gift card'
+							'id' => 'gift_card_usage_added_by_dintero',
+							'name' => 'Gift card usage added by Dintero'
 						)
 					)
 				),

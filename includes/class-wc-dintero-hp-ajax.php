@@ -452,10 +452,10 @@ class WC_AJAX_HP {
 
 				// skipping if no product found
 				if (!$product = wc_get_product( $item['id'] )) {
-					if (isset($item['groups']) && self::has_object_with_id($item['groups'], 'gift_card')) {
+					if (isset($item['groups']) && self::has_object_with_id($item['groups'], 'gift_card_usage_added_by_dintero')) {
 						if (strpos( $item['id'] , 'pw_gift_cards_' ) === 0) {
 							if ( class_exists( 'PW_Gift_Card' ) && class_exists( 'WC_Order_Item_PW_Gift_Card' ) ) {
-								$card_number = $str = substr($item['id'], strpos($item['id'], 'pw_gift_cards'));
+								$card_number = $str = substr($item['id'], strpos($item['id'], 'pw_gift_cards_'));
 								$pw_gift_card = new PW_Gift_Card( $card_number );
 								if ( $pw_gift_card->get_id() ) {
 
