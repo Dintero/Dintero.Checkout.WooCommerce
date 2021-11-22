@@ -965,12 +965,11 @@ class WC_AJAX_HP {
 		if ($_SERVER['REQUEST_METHOD'] != 'POST') {
 			wp_send_json_error(array('message' => __('Method not allowed')), 403);
 		}
-
-		$post_data = json_decode(stripslashes(trim(file_get_contents('php://input'))), true);
+		$php_input = file_get_contents('php://input');
+		$post_data = json_decode($php_input, true);
 		if (!is_array($post_data) || !isset($post_data['order']) || !isset($post_data['order']['shipping_address'])) {
 			wp_send_json_error(array('message' => __('Bad request')), 400);
 		}
-
 		$dintero_session = self::_adapter()->get_session($post_data['id']);
 
 		$shipping_address = $post_data['order']['shipping_address'];
@@ -992,7 +991,6 @@ class WC_AJAX_HP {
 		foreach ($fields_mapping as $field => $name) {
 			$customer_data[$field] = isset($shipping_address[$name]) ? $shipping_address[$name] : null;
 		}
-
 		$woo_customer_id = $dintero_session['metadata']['woo_customer_id'];
 		$session_data = WC()->session->get_session($woo_customer_id);
 		self::update_session_prop('_data', $session_data);
@@ -1012,7 +1010,6 @@ class WC_AJAX_HP {
 		if(!$isExpressButton) {
 			$isExpressButton = 0;
 		}
-
 		$shipping_options = array();
 		if ($isShippingInIframe || $isExpressButton) {
 			foreach ( WC()->shipping()->get_packages() as $package ) {
@@ -1062,7 +1059,6 @@ class WC_AJAX_HP {
 				}
 			}
 		}
-
 		wp_send_json(array(
 			'shipping_options' => $shipping_options,
 		));
