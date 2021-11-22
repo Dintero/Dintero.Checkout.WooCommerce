@@ -797,7 +797,14 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 					self::failed_order( $order, $dintero_order_transaction_id, $fail_reason );
 				} else {
 					$fail_reason = __( 'Failed updating transaction with order_id ' ) . '.';
-					self::failed_order( $order, $dintero_order_transaction_id, $fail_reason );
+					$order->add_order_note( $fail_reason );
+
+					$update_response_retry = WCDHP()->checkout()->update_transaction($dintero_order_transaction_id, $order_id);
+
+					if (is_wp_error($update_response_retry)) {
+						$fail_reason = __( 'Failed updating transaction with order_id. Will stop trying ' ) . '.';
+						$order->add_order_note( $fail_reason );
+					}
 				}
 			}
 
@@ -1006,8 +1013,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			if (  ($merchant_reference === $order_id  || $merchant_reference_2 === $order_id ) &&
 				 array_key_exists( 'status', $transaction ) &&
 				 array_key_exists( 'amount', $transaction ) &&
-				 ( 'CAPTURED' === $transaction['status'] || 
-				 'PARTIALLY_CAPTURED' === $transaction['status'] || 
+				 ( 'CAPTURED' === $transaction['status'] ||
+				 'PARTIALLY_CAPTURED' === $transaction['status'] ||
 				 'PARTIALLY_REFUNDED' === $transaction['status'] ) ) {
 
 				if ( empty( $amount ) ) {
@@ -1067,24 +1074,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				return false;
 			}
 			$transaction = self::_adapter()->get_transaction($transaction_id);
-
-			$merchant_reference = absint( strval(trim($transaction['merchant_reference'])));
-			$merchant_reference_2 = absint( strval(trim($transaction['merchant_reference_2'])));
-
-
-			if ( $merchant_reference === $order_id  || $merchant_reference_2 === $order_id ) {
-				$this->capture( $order, $transaction );
-			} else {
-				$order->add_order_note(__(
-					sprintf(
-						'Could not capture transaction: Merchant reference is wrong (%s, %s). Contact integration@dintero.com with order information. Changing status to on-hold.',
-						$merchant_reference, $merchant_reference_2,
-					)
-				));
-				$order->set_status( 'on-hold' );
-				$order->save();
-				$order->save_meta_data();
-			}
+			$this->capture( $order, $transaction );
 		}
 	}
 

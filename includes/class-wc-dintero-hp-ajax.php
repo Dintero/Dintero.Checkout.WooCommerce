@@ -562,11 +562,11 @@ class WC_AJAX_HP {
 					WC()->session->delete_session($session['metadata']['woo_customer_id']);
 				}
 			}
+			$update_payload = array(
+				'merchant_reference_2' => (string) $order->get_id()
+			);
 			$update_response = self::_adapter()->update_transaction(
-				$transaction_id,
-				array(
-					'merchant_reference_2' => (string) $order->get_id()
-				)
+				$transaction_id, $update_payload
 			);
 			if (is_wp_error($update_response)) {
 				$updated_transaction = self::_adapter()->get_transaction($transaction_id);
@@ -575,7 +575,16 @@ class WC_AJAX_HP {
 					self::failed_order( $order, $transaction_id, $fail_reason );
 				} else {
 					$fail_reason = __( 'Failed updating transaction with order_id ' ) . '.';
-					self::failed_order( $order, $transaction_id, $fail_reason );
+					$order->add_order_note( $fail_reason );
+
+					$update_response_retry = self::_adapter()->update_transaction(
+						$transaction_id, $update_payload
+					);
+
+					if (is_wp_error($update_response_retry)) {
+						$fail_reason = __( 'Failed updating transaction with order_id. Will stop trying ' ) . '.';
+						$order->add_order_note( $fail_reason );
+					}
 				}
 			}
 			self::$isOnGoingPushOperation = false;
