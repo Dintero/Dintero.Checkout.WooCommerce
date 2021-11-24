@@ -1007,11 +1007,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			$transaction_id = $order->get_transaction_id();
 			$transaction = self::_adapter()->get_transaction($transaction_id);
 
-			$merchant_reference = absint( strval(trim($transaction['merchant_reference'])));
-			$merchant_reference_2 = absint( strval(trim($transaction['merchant_reference_2'])));
-
-			if (  ($merchant_reference === $order_id  || $merchant_reference_2 === $order_id ) &&
-				 array_key_exists( 'status', $transaction ) &&
+			if ( array_key_exists( 'status', $transaction ) &&
 				 array_key_exists( 'amount', $transaction ) &&
 				 ( 'CAPTURED' === $transaction['status'] ||
 				 'PARTIALLY_CAPTURED' === $transaction['status'] ||
