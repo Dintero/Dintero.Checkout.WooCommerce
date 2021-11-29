@@ -570,11 +570,11 @@ class WC_AJAX_HP {
 			);
 			if (is_wp_error($update_response)) {
 				$updated_transaction = self::_adapter()->get_transaction($transaction_id);
-				if (isset($updated_transaction['merchant_reference_2'])) {
+				if (isset($updated_transaction['merchant_reference_2']) && !empty($updated_transaction['merchant_reference_2'])) {
 					$fail_reason = __( 'Duplicate order of order ' ) . $updated_transaction['merchant_reference_2'] . '.';
 					self::failed_order( $order, $transaction_id, $fail_reason );
 				} else {
-					$fail_reason = __( 'Failed updating transaction with order_id ' ) . '.';
+					$fail_reason = __( 'Failed updating transaction with order_id. This means that it will be harder to find the order in the settlements. ' ) . '.';
 					$order->add_order_note( $fail_reason );
 
 					$update_response_retry = self::_adapter()->update_transaction(
@@ -584,6 +584,8 @@ class WC_AJAX_HP {
 					if (is_wp_error($update_response_retry)) {
 						$fail_reason = __( 'Failed updating transaction with order_id. Will stop trying ' ) . '.';
 						$order->add_order_note( $fail_reason );
+					} else {
+						$order->add_order_note( 'Order id was updated after retry');
 					}
 				}
 			}

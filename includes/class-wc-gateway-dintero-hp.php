@@ -792,11 +792,11 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			$transaction = WCDHP()->checkout()->update_transaction($dintero_order_transaction_id, $order_id);
 			if (is_wp_error($transaction)) {
 				$updated_transaction = self::_adapter()->get_transaction($dintero_order_transaction_id);
-				if (isset($updated_transaction['merchant_reference_2'])) {
+				if (isset($updated_transaction['merchant_reference_2']) && !empty($updated_transaction['merchant_reference_2'])) {
 					$fail_reason = __( 'Duplicate order of order ' ) . $updated_transaction['merchant_reference_2'] . '.';
 					self::failed_order( $order, $dintero_order_transaction_id, $fail_reason );
 				} else {
-					$fail_reason = __( 'Failed updating transaction with order_id ' ) . '.';
+					$fail_reason = __( 'Failed updating transaction with order_id. This means that it will be harder to find the order in the settlements. ' ) . '.';
 					$order->add_order_note( $fail_reason );
 
 					$update_response_retry = WCDHP()->checkout()->update_transaction($dintero_order_transaction_id, $order_id);
@@ -804,6 +804,8 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 					if (is_wp_error($update_response_retry)) {
 						$fail_reason = __( 'Failed updating transaction with order_id. Will stop trying ' ) . '.';
 						$order->add_order_note( $fail_reason );
+					} else {
+						$order->add_order_note( 'Order id was updated after retry');
 					}
 				}
 			}
