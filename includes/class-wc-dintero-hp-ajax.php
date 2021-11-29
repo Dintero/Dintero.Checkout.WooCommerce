@@ -1033,12 +1033,12 @@ class WC_AJAX_HP {
 					$method_id = $method->id;
 					$method_name = $method->label;
 					$tax_display = get_option('woocommerce_tax_display_cart');
-					$method_price = intval(round($method->cost, 2) * 100);
+					$method_price = Dintero_HP_Helper::instance()->to_dintero_amount($method->cost, 2);
 					if ( array_sum($method->taxes) > 0 && ('excl' !== $tax_display) ) {
-						$method_tax_amount = intval(round(array_sum($method->taxes), wc_get_rounding_precision()) * 100);
+						$method_tax_amount = Dintero_HP_Helper::instance()->to_dintero_amount(array_sum($method->taxes), wc_get_rounding_precision());
 						$method_tax_rate = intval(round((array_sum($method->taxes) / $method->cost) * 100, 2));
 					} else {
-						$method_tax_amount = intval(round(array_sum($method->taxes), wc_get_price_decimals()) * 100);
+						$method_tax_amount = Dintero_HP_Helper::instance()->to_dintero_amount(array_sum($method->taxes), wc_get_price_decimals());
 						$method_tax_rate = Dintero_HP_Helper::instance()->get_shipping_tax_rate();
 					}
 
