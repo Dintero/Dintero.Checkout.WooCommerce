@@ -43,6 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2021.12.01
+
+* Adjust rules for completing when transaction already refunded
+
 2021.11.29
 
 * Allow capture even if merchant_reference doesn't match

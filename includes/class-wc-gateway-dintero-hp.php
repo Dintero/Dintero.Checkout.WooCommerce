@@ -1099,17 +1099,32 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				return false;
 			}
 
-			if ($this->extract('status', $transaction) === 'CAPTURED') {
+			$transaction_status = $this->extract('status', $transaction);
+
+			if ($transaction_status === 'CAPTURED') {
 				$order->add_order_note('Payment captured via Dintero, already captured from before.');
 				$order->save_meta_data();
 				return false;
 			};
 
-			if ($this->extract('status', $transaction) !== 'AUTHORIZED') {
+			if ($transaction_status === 'REFUNDED' ||
+				$transaction_status === 'PARTIALLY_REFUNDED' ||
+				$transaction_status === 'PARTIALLY_CAPTURED_REFUNDED') {
+				$order->add_order_note(__(
+					sprintf(
+						'Dintero transaction has already been captured, and now has status (%s).',
+						$transaction_status,
+					)
+				));
+				$order->save_meta_data();
+				return false;
+			};
+
+			if ($transaction_status !== 'AUTHORIZED') {
 				$order->add_order_note(__(
 					sprintf(
 						'Could not capture transaction: Transaction status is wrong (%s). Changing status to on-hold.',
-						$this->extract('status', $transaction),
+						$transaction_status,
 					)
 				));
 				$order->set_status( 'on-hold' );
