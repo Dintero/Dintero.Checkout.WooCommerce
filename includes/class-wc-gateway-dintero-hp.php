@@ -643,7 +643,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 						'vat' => $item_tax_percentage,
 						'title' => 'Shipping: ' . $order->get_shipping_method(),
 						'description' => '',
-						'delivery_method' => 'delivery',
+						'delivery_method' => 'unspecified',
 						'operator' => '',
 						'operator_product_id' => '',
 					)

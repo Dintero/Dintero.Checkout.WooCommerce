@@ -1807,7 +1807,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				'vat'=> $this->get_shipping_tax_rate(),
 				'title'=> $this->get_shipping_name(),
 				'description'=>'',
-				'delivery_method'=>'delivery',
+				'delivery_method'=>'unspecified',
 				'operator'=>'',
 				'operator_product_id'=> (string)$selectedShippingReference['instance_id'],
 			);
@@ -1895,7 +1895,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 							'vat_amount'  =>(int) $method_tax_amount,
 							'vat'    => $method_tax_rate,
 							'description' => '',
-							'delivery_method' => 'delivery',
+							'delivery_method' => 'unspecified',
 							'operator' => '',
 							'operator_product_id' => (string)$method->instance_id,
 						);
@@ -2111,7 +2111,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 						'vat'=> $this->get_shipping_tax_rate(),
 						'title'=> $this->get_shipping_name(),
 						'description'=>'',
-						'delivery_method'=>'delivery',
+						'delivery_method'=>'unspecified',
 						'operator'=>'',
 						'operator_product_id'=>(string)$selectedShippingReference['instance_id'],
 					);

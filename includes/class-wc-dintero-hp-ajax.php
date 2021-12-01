@@ -1050,7 +1050,7 @@ class WC_AJAX_HP {
 						'vat_amount' => (int)$method_tax_amount,
 						'vat' => $method_tax_rate,
 						'description' => '',
-						'delivery_method' => 'delivery',
+						'delivery_method' => 'unspecified',
 						'operator' => '',
 						'operator_product_id' => (string)$method->instance_id,
 					);
