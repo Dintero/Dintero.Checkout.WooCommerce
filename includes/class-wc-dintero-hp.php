@@ -243,6 +243,10 @@ final class WC_Dintero_HP {
 					$last_on_hold = $note->id;
 				} else if (strpos( $note->content, 'Transaction cancelled via Dintero') !== false) {
 					$last_cancel = $note->id;
+				} else if (strpos( $note->content, 'Dintero transaction has already been captured, and now has status (PARTIALLY_REFUNDED).') !== false ) {
+					$last_refund_succeeded = $note->id;
+				} else if (strpos( $note->content, 'Dintero transaction has already been captured, and now has status (REFUNDED).') !== false ) {
+					$last_refund_succeeded = $note->id;
 				}
 			}
 			if ($last_cancel > -1) {
@@ -465,7 +469,7 @@ final class WC_Dintero_HP {
 						is_express: 1
 					};
 					var url = \"".home_url().'?dhp-ajax=create_order'."\";
-							    
+
 					jQuery.ajax({
 						type: 'POST',
 						url: url,

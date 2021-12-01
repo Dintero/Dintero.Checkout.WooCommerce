@@ -6,7 +6,7 @@ Requires at least: 4.0
 Tested up to: 5.8
 Requires PHP: 5.6
 WC requires at least: 3.4.0
-WC tested up to: 4.0.0
+WC tested up to: 5.9.0
 Stable tag: trunk
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -42,6 +42,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 
 == Changelog ==
+
+2021.12.01
+
+* Adjust rules for completing when transaction already refunded
 
 2021.11.29
 
