@@ -247,8 +247,6 @@ final class WC_Dintero_HP {
 					$last_refund_succeeded = $note->id;
 				} else if (strpos( $note->content, 'Dintero transaction has already been captured, and now has status (REFUNDED).') !== false ) {
 					$last_refund_succeeded = $note->id;
-				} else if (strpos( $note->content, 'Dintero transaction has already been captured, and now has status (PARTIALLY_CAPTURED_REFUNDED).') !== false ) {
-					$last_refund_succeeded = $note->id;
 				}
 			}
 			if ($last_cancel > -1) {

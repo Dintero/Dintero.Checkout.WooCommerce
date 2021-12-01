@@ -1108,8 +1108,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			};
 
 			if ($transaction_status === 'REFUNDED' ||
-				$transaction_status === 'PARTIALLY_REFUNDED' ||
-				$transaction_status === 'PARTIALLY_CAPTURED_REFUNDED') {
+				$transaction_status === 'PARTIALLY_REFUNDED') {
 				$order->add_order_note(__(
 					sprintf(
 						'Dintero transaction has already been captured, and now has status (%s).',
