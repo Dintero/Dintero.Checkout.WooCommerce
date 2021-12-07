@@ -1125,7 +1125,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 			$transaction_amount = $transaction['amount'];
 
-			// We experience unexplainable differences of one cent.
+			// We experience inexplicable differences of one cent.
 			// To lessen the impact, we will allow difference of one cent,
 			// and will adjust the capture call accordingly
 			if ($order_total_amount === $transaction_amount + 1 ||
