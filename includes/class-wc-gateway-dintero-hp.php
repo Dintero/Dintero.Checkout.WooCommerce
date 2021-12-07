@@ -1365,7 +1365,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 					if ($transaction['amount'] < $amount - 1 ) {
 						$note = sprintf(
-							'Failed to authorize order: Order and transaction amounts do not match. Transaction amount: %s. Order amount: %s. ',
+							'Failed to authorize order: Order and transaction amounts do not match. Transaction amount: %s. Order amount: %s. Handle the order manually in the Dintero Backoffice.',
 							$transaction['amount'],
 							$amount
 						) . $transaction_id;
