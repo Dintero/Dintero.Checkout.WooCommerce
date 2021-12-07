@@ -98,6 +98,84 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 	}
 	
 	/**
+	 * @group callback_after_redirect
+	 */
+	public function test_callback_after_redirect() {
+		$checkout = new WC_Gateway_Dintero_HP();
+		
+		// Mock query parameters
+		$_GET['transaction_id'] = 'P12345678.55wd4cLGiHcyNrfnCmzeqH';
+		$_GET['session_id'] = 'P12345678.55wd3zjzVCkXXoVFv518q7';
+
+		$order = WC_Helper_Order::create_order(1, null, 15, 1, array());
+
+		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
+		$transaction_amount = absint( strval( floatval( $order->get_total() ) * 100 ) ) - 1;
+
+		$transaction = array(
+			'amount' => $transaction_amount,
+			'currency' => 'NOK',
+			'status' => 'AUTHORIZED',
+			'merchant_reference' => ''.$order->get_id()
+		);
+		$adapter_stub->method('get_transaction')->willReturn($transaction);
+		$checkout::$_adapter = $adapter_stub;
+
+		$checkout->callback(true);
+
+		// check that the order has been updated with the new status
+		$updated_order = wc_get_order( $order->get_id() );
+		$this->assertEquals($updated_order->get_status(), 'processing');
+
+		$last_note = wc_get_order_notes(array(
+			'order_id' => $order->get_id(),
+			'limit' => 1,
+			'order' => 'DESC',
+			'type' => 'internal',
+		))[0];
+		$this->assertContains('Transaction authorized via Dintero.', $last_note->content);
+	}
+	
+	/**
+	 * @group callback_after_redirect
+	 */
+	public function test_callback_after_redirect_amount_too_high() {
+		$checkout = new WC_Gateway_Dintero_HP();
+		
+		// Mock query parameters
+		$_GET['transaction_id'] = 'P12345678.55wd4cLGiHcyNrfnCmzeqH';
+		$_GET['session_id'] = 'P12345678.55wd3zjzVCkXXoVFv518q7';
+
+		$order = WC_Helper_Order::create_order(1, null, 15, 1, array());
+
+		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
+		$transaction_amount = absint( strval( floatval( $order->get_total() ) * 100 ) ) - 2;
+
+		$transaction = array(
+			'amount' => $transaction_amount,
+			'currency' => 'NOK',
+			'status' => 'AUTHORIZED',
+			'merchant_reference' => ''.$order->get_id()
+		);
+		$adapter_stub->method('get_transaction')->willReturn($transaction);
+		$checkout::$_adapter = $adapter_stub;
+
+		$checkout->callback(true);
+
+		// check that the order has been updated with the new status
+		$updated_order = wc_get_order( $order->get_id() );
+		$this->assertEquals($updated_order->get_status(), 'on-hold');
+
+		$last_note = wc_get_order_notes(array(
+			'order_id' => $order->get_id(),
+			'limit' => 1,
+			'order' => 'DESC',
+			'type' => 'internal',
+		))[0];
+		$this->assertContains('Order and transaction amounts do not match.', $last_note->content);
+	}
+	
+	/**
 	 * @group capture
 	 */
 	public function test_capture() {

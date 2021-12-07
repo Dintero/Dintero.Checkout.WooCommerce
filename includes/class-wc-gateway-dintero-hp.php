@@ -1361,11 +1361,16 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			if ( ! empty( $order ) && $order instanceof WC_Order ) {
 				$amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
 				if ( array_key_exists( 'status', $transaction ) &&
-					 array_key_exists( 'amount', $transaction ) &&
-					 $transaction['amount'] === $amount ) {
+					 array_key_exists( 'amount', $transaction )) {
 
-					if ( 'AUTHORIZED' === $transaction['status'] ) {
-
+					if ($transaction['amount'] < $amount - 1 ) {
+						$note = sprintf(
+							'Failed to authorize order: Order and transaction amounts do not match. Transaction amount: %s. Order amount: %s. ',
+							$transaction['amount'],
+							$amount
+						) . $transaction_id;
+						$this->on_hold_order( $order, $transaction_id, $note );
+					} else if ( 'AUTHORIZED' === $transaction['status'] ) {
 						$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
 						$this->process_authorization( $order, $transaction_id, $hold_reason );
 					} elseif ( 'CAPTURED' === $transaction['status'] ) {
