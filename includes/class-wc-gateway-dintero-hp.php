@@ -931,7 +931,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 		if ( $current_status === $this->manual_capture_status ||
 			 $current_status === $this->additional_manual_capture_status ) {
 
-			$this->check_capture( $order_id );
+			$this->capture( $order_id );
 		} else {
 			if ( 'cancelled' === $current_status ||
 				 $current_status === $this->additional_cancel_status ) {
@@ -1054,11 +1054,9 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 	}
 
 	/**
-	 * Check if payment capture is possible when the order is changed from on-hold to complete or processing
-	 *
-	 * @param int $order_id Order ID.
+	 * Capture Payment.
 	 */
-	private function check_capture( $order_id ) {
+	private function capture( $order_id ) {
 		$order = wc_get_order( $order_id );
 
 		if ( ! empty( $order ) &&
@@ -1071,25 +1069,10 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				$order->save();
 				return false;
 			}
-			$transaction = self::_adapter()->get_transaction($transaction_id);
-			$this->capture( $order, $transaction );
-		}
-	}
 
-	/**
-	 * Capture Payment.
-	 */
-	private function capture( $order, $transaction = null ) {
-		if ( ! empty( $order ) &&
-			 $order instanceof WC_Order &&
-			 $order->get_transaction_id() ) {
-
-			$order_id = $order->get_id();
 
 			$transaction_id = $order->get_transaction_id();
-			if ( empty( $transaction ) ) {
-				$transaction = self::_adapter()->get_transaction($transaction_id);
-			}
+			$transaction = self::_adapter()->get_transaction($transaction_id);
 
 			if (isset($transaction['error'])) {
 				$order->add_order_note(__('Could not capture transaction: ' . $transaction['message'] . '. Changing status to on-hold.'));
@@ -1140,11 +1123,25 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				$items = $this->get_items_to_capture_embed($order);
 			}
 
+			$transaction_amount = $transaction['amount'];
+
+			// We experience unexplainable differences of one cent.
+			// To lessen the impact, we will allow difference of one cent,
+			// and will adjust the capture call accordingly
+			if ($order_total_amount === $transaction_amount + 1 ||
+				$order_total_amount === $transaction_amount - 1) {
+				$order_total_amount = $transaction_amount;
+				$items = array();
+			}
+
 			$payload = array(
 				'amount'            => $order_total_amount,
 				'capture_reference' => strval( $order_id ),
-				'items'             => $items
 			);
+			if (count($items) > 0) {
+				$payload['items'] = $items;
+			}
+
 			$response_array = self::_adapter()->capture_transaction($transaction_id, $payload);
 
 			if ( array_key_exists( 'status', $response_array ) &&
