@@ -1361,12 +1361,13 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 					 array_key_exists( 'amount', $transaction )) {
 
 					if ($transaction['amount'] < $amount - 1 ) {
-						$note = sprintf(
-							'Order was authorized with a different amount, so manual handling is required. When captured in Dintero Backoffice, the order can be marked as completed. Transaction amount: %s. Order amount: %s.',
+						$hold_reason = sprintf(
+							'Order was authorized with a different amount, so manual handling is required. When captured in Dintero Backoffice, the order can be marked as completed. Transaction amount: %s. Order amount: %s. Transaction ID: %s. ',
 							$transaction['amount'],
-							$amount
-						) . $transaction_id;
-						$this->on_hold_order( $order, $transaction_id, $note );
+							$amount,
+							$transaction_id
+						);
+						$this->on_hold_order( $order, $transaction_id, $hold_reason );
 					} else if ( 'AUTHORIZED' === $transaction['status'] ) {
 						$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
 						$this->process_authorization( $order, $transaction_id, $hold_reason );
