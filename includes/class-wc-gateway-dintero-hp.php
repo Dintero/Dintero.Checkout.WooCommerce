@@ -1115,7 +1115,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				return false;
 			}
 
-			$order_total_amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
+			$capture_amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
 
 			if ($this->is_redirect_payment($transaction)) {
 				$items = $this->get_items_to_capture_redirect($order);
@@ -1128,14 +1128,14 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			// We experience inexplicable differences of 1 cent (or smallest unit of the currency)
 			// To lessen the impact, we will allow difference of one cent (or smallest unit of the currency),
 			// and will adjust the capture call accordingly
-			if ($order_total_amount === $transaction_amount + 1 ||
-				$order_total_amount === $transaction_amount - 1) {
-				$order_total_amount = $transaction_amount;
+			if ($capture_amount === $transaction_amount + 1 ||
+				$capture_amount === $transaction_amount - 1) {
+				$capture_amount = $transaction_amount;
 				$items = array();
 			}
 
 			$payload = array(
-				'amount'            => $order_total_amount,
+				'amount'            => $capture_amount,
 				'capture_reference' => strval( $order_id ),
 			);
 			if (count($items) > 0) {
@@ -1362,7 +1362,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 					if ($transaction['amount'] < $amount - 1 ) {
 						$hold_reason = sprintf(
-							'Order was authorized with a different amount, so manual handling is required. When captured in Dintero Backoffice, the order can be marked as completed. Transaction amount: %s. Order amount: %s. Transaction ID: %s. ',
+							'<p>Order was authorized with a different amount, so manual handling is required. When captured in Dintero Backoffice, the order can be marked as completed. <p>Transaction amount: %s.</p><p>Order amount: %s.</p><p>Transaction ID: %s. </p>',
 							$transaction['amount'],
 							$amount,
 							$transaction_id
@@ -1372,13 +1372,12 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 						$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
 						$this->process_authorization( $order, $transaction_id, $hold_reason );
 					} elseif ( 'CAPTURED' === $transaction['status'] ) {
-
 						$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
 						$this->payment_complete( $order, $transaction_id, $note );
-					}elseif('ON_HOLD' === $transaction['status'] ){
+					} elseif ('ON_HOLD' === $transaction['status'] ){
 						$hold_reason = __( 'The payment is put on on-hold for manual review by payment provider. The review will usually be finished within 5 minutes, and the status will be updated. Transaction ID: ' ) . $transaction_id;
 						$this->on_hold_order( $order, $transaction_id, $hold_reason );
-					}elseif('FAILED' === $transaction['status'] ){
+					} elseif ('FAILED' === $transaction['status'] ){
 						$hold_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;
 						$this->failed_order( $order, $transaction_id, $hold_reason );
 					}
