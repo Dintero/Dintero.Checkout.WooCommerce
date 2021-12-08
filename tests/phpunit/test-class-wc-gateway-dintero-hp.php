@@ -172,7 +172,7 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 			'order' => 'DESC',
 			'type' => 'internal',
 		))[0];
-		$this->assertContains('Order and transaction amounts do not match.', $last_note->content);
+		$this->assertContains('Order was authorized with a different amount, so manual handling is required.', $last_note->content);
 	}
 	
 	/**
