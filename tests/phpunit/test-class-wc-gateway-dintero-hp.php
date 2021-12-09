@@ -98,6 +98,123 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 	}
 	
 	/**
+	 * @group callback_after_redirect
+	 */
+	public function test_callback_after_redirect() {
+		$checkout = new WC_Gateway_Dintero_HP();
+		
+		// Mock query parameters
+		$_GET['transaction_id'] = 'P12345678.55wd4cLGiHcyNrfnCmzeqH';
+		$_GET['session_id'] = 'P12345678.55wd3zjzVCkXXoVFv518q7';
+
+		$order = WC_Helper_Order::create_order(1, null, 15, 1, array());
+
+		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
+		$transaction_amount = absint( strval( floatval( $order->get_total() ) * 100 ) ) - 1;
+
+		$transaction = array(
+			'amount' => $transaction_amount,
+			'currency' => 'NOK',
+			'status' => 'AUTHORIZED',
+			'merchant_reference' => ''.$order->get_id()
+		);
+		$adapter_stub->method('get_transaction')->willReturn($transaction);
+		$checkout::$_adapter = $adapter_stub;
+
+		$checkout->callback(true);
+
+		// check that the order has been updated with the new status
+		$updated_order = wc_get_order( $order->get_id() );
+		$this->assertEquals($updated_order->get_status(), 'processing');
+
+		$last_note = wc_get_order_notes(array(
+			'order_id' => $order->get_id(),
+			'limit' => 1,
+			'order' => 'DESC',
+			'type' => 'internal',
+		))[0];
+		$this->assertContains('Transaction authorized via Dintero.', $last_note->content);
+	}
+	
+	/**
+	 * @group callback_after_redirect
+	 */
+	public function test_callback_after_redirect_amount_too_high() {
+		$checkout = new WC_Gateway_Dintero_HP();
+		
+		// Mock query parameters
+		$_GET['transaction_id'] = 'P12345678.55wd4cLGiHcyNrfnCmzeqH';
+		$_GET['session_id'] = 'P12345678.55wd3zjzVCkXXoVFv518q7';
+
+		$order = WC_Helper_Order::create_order(1, null, 15, 1, array());
+
+		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
+		$transaction_amount = absint( strval( floatval( $order->get_total() ) * 100 ) ) - 2;
+
+		$transaction = array(
+			'amount' => $transaction_amount,
+			'currency' => 'NOK',
+			'status' => 'AUTHORIZED',
+			'merchant_reference' => ''.$order->get_id()
+		);
+		$adapter_stub->method('get_transaction')->willReturn($transaction);
+		$checkout::$_adapter = $adapter_stub;
+
+		$checkout->callback(true);
+
+		// check that the order has been updated with the new status
+		$updated_order = wc_get_order( $order->get_id() );
+		$this->assertEquals($updated_order->get_status(), 'on-hold');
+
+		$last_note = wc_get_order_notes(array(
+			'order_id' => $order->get_id(),
+			'limit' => 1,
+			'order' => 'DESC',
+			'type' => 'internal',
+		))[0];
+		$this->assertContains('Order was authorized with a different amount, so manual handling is required.', $last_note->content);
+	}
+	
+	/**
+	 * @group callback_after_redirect
+	 */
+	public function test_callback_after_redirect_amount_too_high_auto_catpure() {
+		$checkout = new WC_Gateway_Dintero_HP();
+		
+		// Mock query parameters
+		$_GET['transaction_id'] = 'P12345678.55wd4cLGiHcyNrfnCmzeqH';
+		$_GET['session_id'] = 'P12345678.55wd3zjzVCkXXoVFv518q7';
+
+		$order = WC_Helper_Order::create_order(1, null, 15, 1, array());
+
+		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
+		$transaction_amount = absint( strval( floatval( $order->get_total() ) * 100 ) ) - 2;
+
+		$transaction = array(
+			'amount' => $transaction_amount,
+			'currency' => 'NOK',
+			'status' => 'CAPTURED',
+			'merchant_reference' => ''.$order->get_id()
+		);
+		$adapter_stub->method('get_transaction')->willReturn($transaction);
+		$checkout::$_adapter = $adapter_stub;
+
+		$checkout->callback(true);
+
+		// check that the order has been updated with the new status
+		$updated_order = wc_get_order( $order->get_id() );
+		$this->assertEquals($updated_order->get_status(), 'on-hold');
+
+		$last_note = wc_get_order_notes(array(
+			'order_id' => $order->get_id(),
+			'limit' => 1,
+			'order' => 'DESC',
+			'type' => 'internal',
+		))[0];
+		$this->assertContains('Order was captured with a different amount. Figure out what the cause is and mark the order as completed when done.', $last_note->content);
+	}
+	
+	/**
 	 * @group capture
 	 */
 	public function test_capture() {
@@ -316,6 +433,71 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 							))
 					)
 				))
+			->willReturn($captured_transaction);
+
+		$checkout::$_adapter = $adapter_stub;
+		$checkout->check_status($order->get_id(), '', 'completed');
+
+		// check that the order has been updated with the new status
+		$note = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'limit'    => 10,
+				'orderby'  => 'date_created_gmt',
+			)
+		);
+		$this->assertEquals('Payment captured via Dintero. Transaction ID: P12345678.abcdefghijklmnop. Dintero status: CAPTURED', end($note)->content);
+
+	}
+
+	/**
+	 * @group capture
+	 */
+	public function test_capture_when_order_differs_by_one_cent() {
+		$checkout = new WC_Gateway_Dintero_HP();
+		$adapter_stub = $this->createMock(Dintero_HP_Adapter::class);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order = WC_Helper_Order::create_order(1, $product, 15, 1);
+		$order->set_transaction_id('P12345678.abcdefghijklmnop');
+		$order->save();
+
+		$transaction_amount = absint( strval( floatval( $order->get_total() ) * 100 ) ) - 1;
+		$transaction = array(
+			'amount' => $transaction_amount,
+			'merchant_reference' => $order->get_id(),
+			'merchant_reference_2' => '',
+			'status' => 'AUTHORIZED',
+			'items' => array(
+				array(
+					'id' => 'item_1',
+					'line_id' => '1',
+				)
+			)
+		);
+
+		$captured_transaction = array(
+			'amount' => $transaction_amount,
+			'merchant_reference' => '',
+			'merchant_reference_2' => $order->get_id(),
+			'status' => 'CAPTURED',
+		);
+
+		$adapter_stub
+			->expects($this->exactly(1))
+			->method('get_transaction')
+			->willReturn($transaction);
+
+		$adapter_stub
+			->expects($this->exactly(1))
+			->method('capture_transaction')
+			->with(
+				$this->equalTo('P12345678.abcdefghijklmnop'),
+				$this->identicalTo(array(
+					'amount' => $transaction_amount,
+					'capture_reference' => ''.$order->get_id(),
+				)
+			))
 			->willReturn($captured_transaction);
 
 		$checkout::$_adapter = $adapter_stub;
