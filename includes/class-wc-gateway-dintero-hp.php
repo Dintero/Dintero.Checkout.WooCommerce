@@ -1359,25 +1359,31 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				$amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
 				if ( array_key_exists( 'status', $transaction ) &&
 					 array_key_exists( 'amount', $transaction )) {
-
-					if ($transaction['amount'] < $amount - 1 ) {
+					$transaction_status = $transaction['status'];
+					$transaction_amount_too_low = $transaction['amount'] < $amount - 1;
+					if ($transaction_amount_too_low) {
+						$manual_description = 'Order was authorized with a different amount, so manual handling is required. When captured in Dintero Backoffice, the order can be marked as completed.';
+						if ('CAPTURED' === $transaction_status) {
+							$manual_description = 'Order was captured with a different amount. Figure out what the cause is and mark the order as completed when done.';
+						}
 						$hold_reason = sprintf(
-							'<p>Order was authorized with a different amount, so manual handling is required. When captured in Dintero Backoffice, the order can be marked as completed. <p>Transaction amount: %s.</p><p>Order amount: %s.</p><p>Transaction ID: %s. </p>',
+							'<p>%s<p>Transaction amount: %s.</p><p>Order amount: %s.</p><p>Transaction ID: %s. </p>',
+							$manual_description,
 							$transaction['amount'],
 							$amount,
 							$transaction_id
 						);
 						$this->on_hold_order( $order, $transaction_id, $hold_reason );
-					} else if ( 'AUTHORIZED' === $transaction['status'] ) {
+					} else if ( 'AUTHORIZED' === $transaction_status ) {
 						$hold_reason = __( 'Transaction authorized via Dintero. Change order status to the manual capture status or the additional status that are selected in the settings page to capture the funds. Transaction ID: ' ) . $transaction_id;
 						$this->process_authorization( $order, $transaction_id, $hold_reason );
-					} elseif ( 'CAPTURED' === $transaction['status'] ) {
+					} elseif ( 'CAPTURED' === $transaction_status ) {
 						$note = __( 'Payment auto captured via Dintero. Transaction ID: ' ) . $transaction_id;
 						$this->payment_complete( $order, $transaction_id, $note );
-					} elseif ('ON_HOLD' === $transaction['status'] ){
+					} elseif ('ON_HOLD' === $transaction_status ){
 						$hold_reason = __( 'The payment is put on on-hold for manual review by payment provider. The review will usually be finished within 5 minutes, and the status will be updated. Transaction ID: ' ) . $transaction_id;
 						$this->on_hold_order( $order, $transaction_id, $hold_reason );
-					} elseif ('FAILED' === $transaction['status'] ){
+					} elseif ('FAILED' === $transaction_status ){
 						$hold_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;
 						$this->failed_order( $order, $transaction_id, $hold_reason );
 					}
