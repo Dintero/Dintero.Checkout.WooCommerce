@@ -434,6 +434,8 @@ class WC_AJAX_HP {
 					}
 					$order_item->save();
 
+					do_action( 'woocommerce_before_thankyou', $order->get_id());
+
 					/**
 					 * Action hook to adjust item before save.
 					 *
