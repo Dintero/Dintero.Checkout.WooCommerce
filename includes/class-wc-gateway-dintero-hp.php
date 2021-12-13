@@ -21,6 +21,13 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 {
 	/** @var null | Dintero_HP_Adapter */
 	static $_adapter = null;
+	
+	/**
+	 * Log message string
+	 *
+	 * @var $log
+	 */
+	private static $log;
 
 	/**
 	 * Class constructor.
@@ -86,6 +93,18 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			self::$_adapter = new Dintero_HP_Adapter();
 		}
 		return self::$_adapter;
+	}
+
+	/**
+	 * Logs an event.
+	 *
+	 * @param string $data The data string.
+	 */
+	private static function log( $data ) {
+		if ( empty( self::$log ) ) {
+			self::$log = new WC_Logger();
+		}
+		self::$log->add( 'dintero-checkout-express', wp_json_encode( $data ) );
 	}
 
 	/**
@@ -927,6 +946,13 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 	 */
 	public function check_status( $order_id, $previous_status, $current_status ) {
 
+		$log_message = array(
+			'message' => 'check_status',
+			'current_status' => $current_status,
+			'manual_capture_status' => $this->manual_capture_status,
+			'additional_manual_capture_status' => $this->additional_manual_capture_status,
+		);
+		self::log(json_encode($log_message));
 
 		if ( $current_status === $this->manual_capture_status ||
 			 $current_status === $this->additional_manual_capture_status ) {
