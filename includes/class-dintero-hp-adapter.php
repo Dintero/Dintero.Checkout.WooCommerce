@@ -236,7 +236,7 @@ class Dintero_HP_Adapter
 		$payload = Dintero_HP_Request_Builder::instance()->build($request);
 		$response = _wp_http_get_object()->post(
 			$this->_endpoint(sprintf('/transactions/%s/void', $transaction_id)),
-			$payload,
+			$payload
 		);
 		$response_code = wp_remote_retrieve_response_code($response);
 		$response_body_raw = wp_remote_retrieve_body( $response );
