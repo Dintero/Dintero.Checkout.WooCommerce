@@ -184,7 +184,7 @@ class WC_AJAX_HP {
 		return apply_filters( 'woocommerce_get_return_url', $return_url, $order );
 	}
 
-	public function check_transaction(){
+	public static function check_transaction(){
 		$transaction_id = sanitize_text_field($_POST['transaction_id']);
 
 		$transaction = WCDHP()->checkout()->get_transaction( $transaction_id );
@@ -218,7 +218,7 @@ class WC_AJAX_HP {
 
 	}
 
-	public function destroy_session(){
+	public static function destroy_session(){
 		//WC()->session->reload_checkout = true;
 		WC()->session->__unset('dintero_wc_order_id');
 		wp_send_json_success(
@@ -229,7 +229,7 @@ class WC_AJAX_HP {
 		);
 	}
 
-	public function update_shipping_postcode(){
+	public static function update_shipping_postcode(){
 		$formData = sanitize_text_field($_POST['post_code']);
 		$posted_data['postcode'] = sanitize_text_field($_POST['post_code']);
 		$customer_data = array();
@@ -252,7 +252,7 @@ class WC_AJAX_HP {
 		);
 		wp_die();
 	}
-	public function check_order_status(){
+	public static function check_order_status(){
 		if(!isset($_POST['transaction_id'])){
 			return false;
 		}
@@ -282,7 +282,7 @@ class WC_AJAX_HP {
         }
 	}
 
-	public function update_session(){
+	public static function update_session(){
 
 		if ( apply_filters( 'dhp_check_if_needs_payment', true ) ) {
 	        if ( ! WC()->cart->needs_payment() ) {
@@ -304,7 +304,7 @@ class WC_AJAX_HP {
 	}
 
 
-	public function update_shipping_line_id(){
+	public static function update_shipping_line_id(){
 		$shippingLineId = sanitize_text_field($_POST['line_id']);
 		if($shippingLineId){
 			WC()->session->__unset('dintero_shipping_line_id');
@@ -325,7 +325,7 @@ class WC_AJAX_HP {
 	* This function is used for backup callback if order does not get created in first instance
 	*
 	*/
-	public function dhp_create_order() {
+	public static function dhp_create_order() {
 
 		$transaction_id = !empty($_GET['transaction_id']) ? $_GET['transaction_id'] : null;
 		$session_id = !empty($_GET['session_id']) ? $_GET['session_id'] : null;

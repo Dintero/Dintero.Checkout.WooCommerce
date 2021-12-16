@@ -991,7 +991,7 @@ final class WC_Dintero_HP {
 		WC()->session->__unset('dintero_wc_order_id');
 	}
 
-	public function on_action_update_review($postData){
+	public static function on_action_update_review($postData){
         $data = array();
         foreach(explode('&', $postData) as $value)
         {
