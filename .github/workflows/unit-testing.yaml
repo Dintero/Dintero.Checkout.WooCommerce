@@ -35,7 +35,7 @@ jobs:
           php-version: ${{ matrix.php }}
           tools:       composer
           coverage:    xdebug
-      # run CI checksv
+      # run CI checks
       - run: bash bin/run-ci-tests.bash
       - uses: codecov/codecov-action@v1
         with:
