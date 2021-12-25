@@ -6,6 +6,13 @@
  */
 class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 
+	/**
+	 * @return void
+	 */
+	public function setUp() {
+		WC()->initialize_cart();
+	}
+
 	public function test_creating_order_for_redirect() {
 		$checkout = new WC_Gateway_Dintero_HP();
 		// These together should of course be 320.04, but were 320.03 previously
