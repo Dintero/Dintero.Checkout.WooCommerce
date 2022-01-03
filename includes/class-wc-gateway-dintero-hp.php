@@ -1095,7 +1095,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				$order->add_order_note(__(
 					sprintf(
 						'Dintero transaction has already been captured, and now has status (%s).',
-						$transaction_status,
+						$transaction_status
 					)
 				));
 				$order->save_meta_data();
@@ -1106,7 +1106,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 				$order->add_order_note(__(
 					sprintf(
 						'Could not capture transaction: Transaction status is wrong (%s). Changing status to on-hold.',
-						$transaction_status,
+						$transaction_status
 					)
 				));
 				$order->set_status( 'on-hold' );

@@ -4,7 +4,7 @@ Tags: woocommerce, Payment, Checkout, Vipps, Visa, Mastercard, Invoice, Instalme
 Donate link: https://dintero.com
 Requires at least: 4.0
 Tested up to: 5.8
-Requires PHP: 5.6
+Requires PHP: 7.3
 WC requires at least: 3.4.0
 WC tested up to: 5.9.0
 Stable tag: trunk
@@ -43,9 +43,11 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
-2021.12.09-php8
+pending
 
-* Fix issues after updating to PHP8
+* Fix edge-case rounding issue with certain discount codes
+* Fix issues with PHP 8
+* Remove dangling commas in function calls to better support PHP 7.2
 
 2021.12.09
 
