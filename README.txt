@@ -43,6 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2021.12.09-php8
+
+* Fix issues after updating to PHP8
+
 2021.12.09
 
 * Fix expired orders by improving callback handling on redirect payments.
