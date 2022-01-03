@@ -33,6 +33,13 @@ class WC_AJAX_HP {
 	}
 
 	/**
+	* Log message string
+	*
+	* @var $log
+	*/
+	private static $log;
+
+	/**
 	 * Hook in ajax handlers.
 	 */
 	public static function init() {
@@ -50,6 +57,18 @@ class WC_AJAX_HP {
 	 */
 	public static function get_endpoint( $request = '' ) {
 		return esc_url_raw( apply_filters( 'woocommerce_ajax_get_endpoint', add_query_arg( 'dhp-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart', 'order_again', '_wpnonce' ), home_url( '/', 'relative' ) ) ), $request ) );
+	}
+
+	/**
+	* Logs an event.
+	*
+	* @param string $data The data string.
+	*/
+	private static function log( $data ) {
+			if ( empty( self::$log ) ) {
+					self::$log = new WC_Logger();
+			}
+			self::$log->add( 'dintero-checkout-express', wp_json_encode( $data ) );
 	}
 
 	/**
@@ -326,7 +345,7 @@ class WC_AJAX_HP {
 	*
 	*/
 	public function dhp_create_order() {
-
+		try {
 		$transaction_id = !empty($_GET['transaction_id']) ? $_GET['transaction_id'] : null;
 		$session_id = !empty($_GET['session_id']) ? $_GET['session_id'] : null;
 
@@ -429,12 +448,11 @@ class WC_AJAX_HP {
 					if (isset($transaction['shipping_option']['metadata'])) {
 						foreach ($transaction['shipping_option']['metadata'] as $meta_key => $meta_item) {
 							$meta_value = self::isJson($meta_item) ? json_decode($meta_item) : $meta_item;
+							self::log('setting metadata'.json_encode($meta_value));
 							$order_item->add_meta_data($meta_key, $meta_value);
 						}
 					}
 					$order_item->save();
-
-					do_action( 'woocommerce_before_thankyou', $order->get_id());
 
 					/**
 					 * Action hook to adjust item before save.
@@ -442,6 +460,7 @@ class WC_AJAX_HP {
 					 * @since 3.0.0
 					 */
 					do_action('woocommerce_checkout_create_order_shipping_item', $order_item, $key, $item, $order);
+					self::log('foo 2 - after create_order_shipping_item');
 
 					$order->add_item($order_item);
 					$order->set_shipping_total($amount - $vat_amount);
@@ -471,6 +490,7 @@ class WC_AJAX_HP {
 					$order_item->get_data(),
 					$order
 				);
+				self::log('foo 3 - after woocommerce_checkout_create_order_line_item');
 				$order_item->save_meta_data();
 			}
 
@@ -493,6 +513,10 @@ class WC_AJAX_HP {
 
 			// Update Shipping Line Id
 			update_post_meta($order->get_id(),'_wc_dintero_shipping_line_id',sanitize_text_field( $transaction['shipping_option']['line_id']  ) );
+
+			self::log('before thankyou');
+			do_action( 'woocommerce_before_thankyou', $order->get_id());
+			self::log('after thankyou');
 
 			// Set the payment product used for transaction
 			$order->set_payment_method_title('Dintero - ' . $transaction['payment_product']);
@@ -521,6 +545,7 @@ class WC_AJAX_HP {
 				$tax_item->set_shipping_tax_total($real_shipping_tax);
 				$order->set_total($transaction['amount'] / 100);
 			}
+			self::log('foo 4 - before woocommerce_checkout_create_order');
 
 			/**
 			 * Action hook to adjust order before save.
@@ -528,9 +553,13 @@ class WC_AJAX_HP {
 			 *
 			 */
 			do_action( 'woocommerce_checkout_create_order', $order, $data );
+			self::log('foo 5 ');
+			do_action( 'woocommerce_checkout_update_order_meta', $order->get_id(), $data );
 
 			// Save the order.
 			$order_id = $order->save();
+			self::log('after order->save');
+
 			// Hook to update order meta
 			do_action( 'woocommerce_checkout_update_order_meta', $order_id, $data );
 
@@ -608,6 +637,9 @@ class WC_AJAX_HP {
 				$fail_reason = __( 'The payment is not approved. Transaction ID: ' ) . $transaction_id;
 				self::failed_order( $order, $transaction_id, $fail_reason );
 			}
+		}
+		} catch (Exception $e) {
+			self::log('exception' . $e->getMessage());
 		}
 	}
 
