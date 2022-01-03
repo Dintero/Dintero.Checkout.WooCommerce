@@ -13,7 +13,7 @@ Domain Path: /languages
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'DINTERO_HP_VERSION', '2021.01.03' );
+define( 'DINTERO_HP_VERSION', '2022.01.03' );
 
 
 
