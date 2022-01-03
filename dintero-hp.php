@@ -2,7 +2,7 @@
 /**
 Plugin Name: Dintero Checkout
 Description: Dintero Checkout - Express Checkout
-Version:     2021.12.09-php8
+Version:     2022.01.03
 Author:      Dintero
 Author URI:  mailto:integration@dintero.com
 Text Domain: dintero-hp
@@ -13,7 +13,7 @@ Domain Path: /languages
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'DINTERO_HP_VERSION', '2021.12.09-php8' );
+define( 'DINTERO_HP_VERSION', '2021.01.03' );
 
 
 
