@@ -43,7 +43,7 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
-pending
+2022.01.03
 
 * Fix edge-case rounding issue with certain discount codes
 * Fix issues with PHP 8
