@@ -43,6 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2022.01.05
+
+* Rollback rounding fix from 2022.01.03 that caused problems for some stores
+
 2022.01.03
 
 * Fix edge-case rounding issue with certain discount codes
