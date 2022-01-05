@@ -1741,7 +1741,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				}
 
 				$round_precision = min(array(wc_get_price_decimals(), 2));
-				$amount = $cart_item['line_tax'] + round($cart_item['line_total'], $round_precision);
+				$amount = $cart_item['line_tax'] + $cart_item['line_total'];
 				$tax = $cart_item['line_tax'];
 
 				$dintero_item = array(
