@@ -1723,7 +1723,9 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 		foreach (WC()->cart->get_applied_coupons() as $coupon_code) {
 			$discounts->apply_coupon(new WC_Coupon($coupon_code));
 		}
-		foreach ( WC()->cart->get_cart() as $key => $cart_item ) {
+
+		$cart_items = apply_filters( 'dintero_process_cart_before',  WC()->cart->get_cart() );
+		foreach ( $cart_items as $key => $cart_item ) {
 			if ( $cart_item['quantity'] ) {
 				if ( $cart_item['variation_id'] ) {
 					$product = wc_get_product( $cart_item['variation_id'] );
@@ -1758,6 +1760,7 @@ class WC_Dintero_HP_Checkout extends WC_Checkout
 				$this->order_lines[] = $dintero_item;
 			}
 		}
+		$this->order_lines = (array) apply_filters( 'dintero_process_cart_after', (array) $this->order_lines );
 	}
 
 	public function get_order_lines_total_amount( ) {
