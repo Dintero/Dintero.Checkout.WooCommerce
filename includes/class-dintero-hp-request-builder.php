@@ -46,6 +46,7 @@ class Dintero_HP_Request_Builder
 		$args = array(
 			'headers' => $request->get_headers(),
 			'body' => $request->get_body(),
+			'timeout' => 30,
 		);
 		return (array) apply_filters('dhp_request_build_before', $args);
 	}
