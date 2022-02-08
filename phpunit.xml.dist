@@ -1,21 +1,14 @@
 <?xml version="1.0"?>
-<phpunit
-	bootstrap="tests/phpunit/bootstrap.php"
-	backupGlobals="false"
-	colors="true"
-	convertErrorsToExceptions="true"
-	convertNoticesToExceptions="true"
-	convertWarningsToExceptions="true"
-	>
-	<testsuites>
-		<testsuite name="WCDintero">
-			<directory prefix="test-" suffix=".php">./tests/phpunit</directory>
-		</testsuite>
-	</testsuites>
-	<filter>
-		<whitelist>
-			<directory>includes</directory>
-			<directory>templates</directory>
-		</whitelist>
-	</filter>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="tests/phpunit/bootstrap.php" backupGlobals="false" colors="true" convertErrorsToExceptions="true" convertNoticesToExceptions="true" convertWarningsToExceptions="true" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+  <coverage>
+    <include>
+      <directory>includes</directory>
+      <directory>templates</directory>
+    </include>
+  </coverage>
+  <testsuites>
+    <testsuite name="WCDintero">
+      <directory prefix="test-" suffix=".php">./tests/phpunit</directory>
+    </testsuite>
+  </testsuites>
 </phpunit>
