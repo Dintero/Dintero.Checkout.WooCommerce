@@ -1,10 +1,13 @@
 <?php
+
+use PHPUnit\Framework\TestCase;
+
 /**
  * WC_Ajax_Test class.
  *
  * Testing HTTP functions
  */
-class Ajax_Test extends WP_UnitTestCase {
+class Ajax_Test extends TestCase {
 
 	public function test_updating_order_with_new_authorization() {
 		$ajax = new WC_AJAX_HP();
@@ -198,7 +201,7 @@ class Ajax_Test extends WP_UnitTestCase {
 			'order' => 'DESC',
 			'type' => 'internal',
 		))[0];
-		$this->assertContains('Duplicate order of order other_order.', $last_note->content);
+		$this->assertStringContainsString('Duplicate order of order other_order.', $last_note->content);
 	}
 
 	/**
@@ -288,7 +291,7 @@ class Ajax_Test extends WP_UnitTestCase {
 			'order' => 'DESC',
 			'type' => 'internal',
 		))[0];
-		$this->assertContains('Order id was updated after retry', $last_note->content);
+		$this->assertStringContainsString('Order id was updated after retry', $last_note->content);
 	}
 
 	/**

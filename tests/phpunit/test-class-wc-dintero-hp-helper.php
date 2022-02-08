@@ -1,10 +1,13 @@
 <?php
+
+use PHPUnit\Framework\TestCase;
+
 /**
  * Dintero_HP_Helper class.
  *
  * Testing helper functions
  */
-class Dintero_HP_Helper_Test extends WP_UnitTestCase {
+class Dintero_HP_Helper_Test extends TestCase {
 
 	/**
 	 * @group helper

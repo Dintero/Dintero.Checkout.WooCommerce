@@ -4,7 +4,7 @@
   "homepage": "https://dintero.com",
   "config": {
     "platform": {
-      "php": "7.4|^8.0"
+      "php": "8.1.2"
     }
   },
   "require-dev": {
