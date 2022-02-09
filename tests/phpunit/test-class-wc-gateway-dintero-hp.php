@@ -1,15 +1,18 @@
 <?php
+
+use PHPUnit\Framework\TestCase;
+
 /**
  * WC_Gateway_Dintero_HP class.
  *
  * Testing Checkout functions
  */
-class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
+class WC_Gateway_Dintero_HP_Test extends TestCase {
 
 	/**
 	 * @return void
 	 */
-	public function setUp() {
+	protected function setUp(): void {
 		WC()->initialize_cart();
 	}
 
@@ -140,7 +143,7 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 			'order' => 'DESC',
 			'type' => 'internal',
 		))[0];
-		$this->assertContains('Transaction authorized via Dintero.', $last_note->content);
+		$this->assertStringContainsString('Transaction authorized via Dintero.', $last_note->content);
 	}
 	
 	/**
@@ -179,7 +182,7 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 			'order' => 'DESC',
 			'type' => 'internal',
 		))[0];
-		$this->assertContains('Order was authorized with a different amount, so manual handling is required.', $last_note->content);
+		$this->assertStringContainsString('Order was authorized with a different amount, so manual handling is required.', $last_note->content);
 	}
 	
 	/**
@@ -218,7 +221,7 @@ class WC_Gateway_Dintero_HP_Test extends WP_UnitTestCase {
 			'order' => 'DESC',
 			'type' => 'internal',
 		))[0];
-		$this->assertContains('Order was captured with a different amount. Figure out what the cause is and mark the order as completed when done.', $last_note->content);
+		$this->assertStringContainsString('Order was captured with a different amount. Figure out what the cause is and mark the order as completed when done.', $last_note->content);
 	}
 	
 	/**

@@ -1,16 +1,19 @@
 <?php
+
+use PHPUnit\Framework\TestCase;
+
 /**
  * WC_Dintero_HP_Checkout class.
  *
  * Testing Checkout functions
  */
-class WC_Dintero_HP_Checkout_Test extends WP_UnitTestCase
+class WC_Dintero_HP_Checkout_Test extends TestCase
 {
 
 	/**
 	 * @return void
 	 */
-	public function tearDown()
+	protected function tearDown(): void
 	{
 		WC()->cart = null;
 		if ($product = wc_get_product(wc_get_product_id_by_sku('DUMMY SKU'))) {
