@@ -353,6 +353,7 @@ class WC_AJAX_HP {
 		} else {
 			$session = self::_adapter()->get_session($session_id);
 		}
+
 		$session_data = WC()->session->get_session($session['metadata']['woo_customer_id']);
 
 		$transaction_order_id = trim($transaction['merchant_reference']);
@@ -453,6 +454,7 @@ class WC_AJAX_HP {
 					continue;
 				}
 
+				$product->set_price($item['amount'] / 100);
 				$item_id = $order->add_product($product, $item['quantity']);
 
 				$order_item = $order->get_item($item_id);
@@ -497,13 +499,9 @@ class WC_AJAX_HP {
 
 			if(count($coupon_codes) > 0){
 				foreach ($coupon_codes as $coupon_code) {
-					$order->apply_coupon($coupon_code);
+					$order->add_coupon($coupon_code);
 				}
 			}
-
-			$order->calculate_shipping();
-			$order->recalculate_coupons();
-			$order->calculate_totals();
 
 			// fixing shipping tax amount if precision is set to 0
 			/** @var WC_Order_Item_Shipping $shipping_item */
