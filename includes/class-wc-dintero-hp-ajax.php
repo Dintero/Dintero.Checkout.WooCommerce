@@ -457,6 +457,7 @@ class WC_AJAX_HP {
 				$product->set_price($item['amount'] / 100);
 				$item_id = $order->add_product($product, $item['quantity']);
 
+				/** @var WC_Order_Item_Product $order_item */
 				$order_item = $order->get_item($item_id);
 
 				/**
@@ -502,6 +503,8 @@ class WC_AJAX_HP {
 					$order->add_coupon($coupon_code);
 				}
 			}
+
+			$order->calculate_taxes();
 
 			// fixing shipping tax amount if precision is set to 0
 			/** @var WC_Order_Item_Shipping $shipping_item */
