@@ -43,6 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2022.02.17-nordamp
+
+* Set product prices from transaction
+
 2022.02.09
 
 * Increase request timeout
