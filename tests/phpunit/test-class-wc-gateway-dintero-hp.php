@@ -33,7 +33,7 @@ class WC_Gateway_Dintero_HP_Test extends TestCase {
 		$expected = array(
 			'url' => array(
 				'return_url' => 'http://example.org?order-received='.$order->get_id().'&key='.$order->get_order_key(),
-				'callback_url' => 'http://example.org/?wc-api=wc_gateway_dintero_hp',
+				'callback_url' => 'http://example.org/?wc-api=wc_gateway_dintero_hp&delay_callback=10',
 			),
 			'customer' => array(
 				'email' => 'admin@example.org',
@@ -106,13 +106,13 @@ class WC_Gateway_Dintero_HP_Test extends TestCase {
 
 		$checkout->process_payment($order->get_id());
 	}
-	
+
 	/**
 	 * @group callback_after_redirect
 	 */
 	public function test_callback_after_redirect() {
 		$checkout = new WC_Gateway_Dintero_HP();
-		
+
 		// Mock query parameters
 		$_GET['transaction_id'] = 'P12345678.55wd4cLGiHcyNrfnCmzeqH';
 		$_GET['session_id'] = 'P12345678.55wd3zjzVCkXXoVFv518q7';
@@ -145,13 +145,13 @@ class WC_Gateway_Dintero_HP_Test extends TestCase {
 		))[0];
 		$this->assertStringContainsString('Transaction authorized via Dintero.', $last_note->content);
 	}
-	
+
 	/**
 	 * @group callback_after_redirect
 	 */
 	public function test_callback_after_redirect_amount_too_high() {
 		$checkout = new WC_Gateway_Dintero_HP();
-		
+
 		// Mock query parameters
 		$_GET['transaction_id'] = 'P12345678.55wd4cLGiHcyNrfnCmzeqH';
 		$_GET['session_id'] = 'P12345678.55wd3zjzVCkXXoVFv518q7';
@@ -184,13 +184,13 @@ class WC_Gateway_Dintero_HP_Test extends TestCase {
 		))[0];
 		$this->assertStringContainsString('Order was authorized with a different amount, so manual handling is required.', $last_note->content);
 	}
-	
+
 	/**
 	 * @group callback_after_redirect
 	 */
 	public function test_callback_after_redirect_amount_too_high_auto_catpure() {
 		$checkout = new WC_Gateway_Dintero_HP();
-		
+
 		// Mock query parameters
 		$_GET['transaction_id'] = 'P12345678.55wd4cLGiHcyNrfnCmzeqH';
 		$_GET['session_id'] = 'P12345678.55wd3zjzVCkXXoVFv518q7';
@@ -223,7 +223,7 @@ class WC_Gateway_Dintero_HP_Test extends TestCase {
 		))[0];
 		$this->assertStringContainsString('Order was captured with a different amount. Figure out what the cause is and mark the order as completed when done.', $last_note->content);
 	}
-	
+
 	/**
 	 * @group capture
 	 */
