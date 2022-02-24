@@ -525,6 +525,16 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 		return round( $shipping_tax_amount );
 	}
 
+	private function callbackUrlForNonExpress() {
+		$base_url = WC()->api_request_url(strtolower(get_class( $this )));
+		$query = parse_url($base_url, PHP_URL_QUERY);
+
+		if ($query) {
+			return $base_url . '&delay_callback=10';
+		}
+		return $base_url . '?delay_callback=10';
+	}
+
 	/**
 	 * Creating checkout session and requesting payment page URL
 	 * Executed when the checkout button is pressed
@@ -545,7 +555,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 		$return_url   = $this->get_return_url( $order );
 		$callback_url = $isExpress
-			? home_url() . '?dhp-ajax=dhp_update_ord' : WC()->api_request_url(strtolower(get_class( $this )));
+			? home_url() . '?dhp-ajax=dhp_update_ord' : $this->callbackUrlForNonExpress();
 
 		$order_tax_amount   = absint( strval( floatval( $order->get_total_tax() ) * 100 ) );
 		$items = array();
