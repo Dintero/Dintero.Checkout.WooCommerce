@@ -545,7 +545,7 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 
 		$return_url   = $this->get_return_url( $order );
 		$callback_url = $isExpress
-			? home_url() . '?dhp-ajax=dhp_update_ord' : WC()->api_request_url(strtolower(get_class( $this )));
+			? home_url() . '?dhp-ajax=dhp_update_ord' : WC()->api_request_url(strtolower(get_class( $this ))) . '?delay_callback=10';
 
 		$order_tax_amount   = absint( strval( floatval( $order->get_total_tax() ) * 100 ) );
 		$items = array();
