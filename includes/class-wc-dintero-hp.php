@@ -201,7 +201,6 @@ final class WC_Dintero_HP {
 
 			$order = wc_get_order( $post->ID );
 			if ($order->get_payment_method() !== 'dintero-hp') {
-				echo '<mark class="order-status"><span>' . __('Not Dintero') . '</span></mark>';
 				return;
 			}
 			$notes = wc_get_order_notes([

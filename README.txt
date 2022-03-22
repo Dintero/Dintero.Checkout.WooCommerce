@@ -43,9 +43,13 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2022.03.22
+
+* Remove Not Dintero from order status column
+
 2022.02.28
 
-* Add delay before sending callback after successful transaction  
+* Add delay before sending callback after successful transaction
 
 2022.02.09
 
