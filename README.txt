@@ -43,6 +43,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
+2022.04.04
+
+* Only process callback if paid with dintero-hp
+
 2022.03.22
 
 * Remove Not Dintero from order status column

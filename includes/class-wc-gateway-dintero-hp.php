@@ -1366,6 +1366,9 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 			$order                = wc_get_order( $transaction_order_id );
 
 			if ( ! empty( $order ) && $order instanceof WC_Order ) {
+				if ($order->get_payment_method() !== 'dintero-hp') {
+					return;
+				}
 				$amount = absint( strval( floatval( $order->get_total() ) * 100 ) );
 				if ( array_key_exists( 'status', $transaction ) &&
 					 array_key_exists( 'amount', $transaction )) {
