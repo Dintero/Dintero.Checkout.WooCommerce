@@ -43,7 +43,7 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 == Changelog ==
 
-2022.04.04
+2022.04.07
 
 * Only process callback if paid with dintero-hp
 
