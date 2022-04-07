@@ -783,6 +783,11 @@ class WC_Gateway_Dintero_HP extends WC_Payment_Gateway
 		// Get the Dintero order ID.
 		$order = wc_get_order( $order_id );
 
+
+		if ($order->get_payment_method() !== 'dintero-hp') {
+			return;
+		}
+
 		$dintero_order_session_detail = $this->get_dintero_session( WC()->session->get( 'dintero_wc_order_id' ));
 		if ( ! array_key_exists('transaction_id', $dintero_order_session_detail)) {
 			return false;
