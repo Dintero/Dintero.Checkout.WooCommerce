@@ -1,4 +1,4 @@
-=== Dintero Checkout ===
+=== Dintero Checkout (Legacy) ===
 Contributors: moogruppen, dintero
 Tags: woocommerce, Payment, Checkout, Vipps, Visa, Mastercard, Invoice, Instalment, Installment, Swish, Gateway, payment, dintero, Betalingsløsning, Checkout, Betaling, Vipps, Visa, Mastercard, Faktura, Delbetaling, Swish, Betalingsgateway, vipps, Betaling, nettbutikk
 Donate link: https://dintero.com
@@ -13,20 +13,13 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Author: Moogruppen AS
 Author URI: https://moogruppen.no/
 
-Dintero Checkout provides a frictionless checkout experience.
+This plugin has been discontinued. Please install the new Dintero plugin "Dintero Checkout for WooCommerce Payment Methods".
 
 == Description ==
 
-Dintero Checkout provides a frictionless checkout experience, offering card payments, invoice, installments and mobile payment solutions.
+**NOTE:**
 
-With this plugin, you can embed or redirect our checkout in your WooCommerce install, handle captures and refunds and customize to your liking.
-
-**Getting started**
-
-1. Go to [onboarding.dintero.com](https://onboarding.dintero.com/) to sign up for a Dintero account.
-2. Get your payment method application approved by Dintero.
-3. Create your [API keys](https://docs.dintero.com/docs/checkout-client.html)
-4. Install the plugin on your website.
+This plugin has been discontinued and will not receive any updates. Please install the new Dintero Plugin [“Dintero Checkout for WooCommerce Payment Methods”](https://wordpress.org/plugins/dintero-checkout-for-woocommerce/) to access all of Dintero’s payment features and best customer experience.
 
 == Installation ==
 
@@ -42,6 +35,10 @@ When you install Dintero Checkout, you need to head to the settings page to star
 
 
 == Changelog ==
+
+2022.11.22
+
+* This plugin has been discontinued. Please install the new Dintero plugin "Dintero Checkout for WooCommerce Payment Methods".
 
 2022.03.22
 
